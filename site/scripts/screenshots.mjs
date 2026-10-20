@@ -83,7 +83,7 @@ const scenes = {
 		const [ zip, slug ] = sites.source
 			.wp(
 				'eval',
-				"wp_set_current_user( 1 ); $c = wp_get_ability( 'eizport/export' )->execute( array( 'as_plugin' => true, 'types' => array( 'page' => array( 'ids' => array( (int) get_option( 'page_on_front' ) ) ) ), 'options' => array( 'groups' => array( 'basics' ) ), 'filename' => 'z-store' ) ); echo \\Eizport\\Copies\\path( $c['name'] ), \"\\n\", \\Eizport\\BundlePlugin\\slug( 'z-store', \\Eizport\\BundlePlugin\\copy_hash( $c['name'] ) );"
+				"wp_set_current_user( 1 ); $c = wp_get_ability( 'eizport/export' )->execute( array( 'as_plugin' => true, 'types' => array( 'page' => array( 'ids' => array( (int) get_option( 'page_on_front' ) ) ) ), 'options' => array( 'groups' => array( 'basics' ) ), 'filename' => 'eiz-coffee' ) ); echo \\Eizport\\Copies\\path( $c['name'] ), \"\\n\", \\Eizport\\BundlePlugin\\slug( 'eiz-coffee', \\Eizport\\BundlePlugin\\copy_hash( $c['name'] ) );"
 			)
 			.split( '\n' );
 		sites.target.wp( 'plugin', 'install', zip, '--activate', '--force' );

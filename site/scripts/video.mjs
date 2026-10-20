@@ -393,10 +393,10 @@ const scenes = {
 		await pause( page, 0.8 );
 	},
 	async 'playground-cli'( { page, rec, files } ) {
-		copyFileSync( files.zip, join( files.dir, 'z-store.zip' ) );
+		copyFileSync( files.zip, join( files.dir, 'eiz-coffee.zip' ) );
 		if ( await portInUse( CLI_PORT ) ) throw new Error( `Port ${ CLI_PORT } is in use: Playground CLI's default port must be free for the recording.` );
-		await terminal( page, 'npx @wp-playground/cli server --blueprint=z-store.zip' );
-		const cli = spawn( 'npx', [ '-y', '@wp-playground/cli@latest', 'server', '--blueprint=z-store.zip' ], { cwd: files.dir } );
+		await terminal( page, 'npx @wp-playground/cli server --blueprint=eiz-coffee.zip' );
+		const cli = spawn( 'npx', [ '-y', '@wp-playground/cli@latest', 'server', '--blueprint=eiz-coffee.zip' ], { cwd: files.dir } );
 		files.cli = cli;
 		const ready = new Promise( ( resolve, reject ) => {
 			let out = '';

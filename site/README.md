@@ -38,7 +38,7 @@ Add the page to `src/data/sidebar.ts` and create `src/content/docs/<group-slug>/
 Captured by scripts, never by hand, on two WordPress Studio sites made for it (not the development site):
 
 ```bash
-npm run demo-sites                 # creates/refreshes eizport-demo (Z Store) and eizport-demo-target (empty)
+npm run demo-sites                 # creates/refreshes eizport-demo (Eiz Coffee) and eizport-demo-target (empty)
 npm run screenshots                # all screenshots → src/assets/screenshots/*.webp + .wordpress-org/screenshot-N.png
 npm run screenshots -- --changed   # only those whose plugin files changed since they were captured
 npm run video                      # the demo video → public/video/demo.* and video/out/ (for YouTube)

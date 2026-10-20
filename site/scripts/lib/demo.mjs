@@ -5,9 +5,10 @@
  * browser download is needed.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
 const studio = ( path, ...args ) =>
@@ -80,9 +81,9 @@ export const l = ( text ) => labels[ text ] ?? text;
  * Shows the demo sites in a language: WordPress, WooCommerce and the
  * importer language packs (installed when missing), the plugin's .mo (npm run
  * plugin-languages), the admin user's locale, the site language (WPLANG) and
- * the browser's (launch(), inLocale()). `wp` is the WordPress
- * locale ("pt_BR"), `repo` the language's repository (for labels.json);
- * "en_US" goes back to English.
+ * the browser's (launch(), inLocale()), and the demo store (useStore()). `wp`
+ * is the WordPress locale ("pt_BR"), `repo` the language's repository (for
+ * labels.json and demo/store.json); "en_US" goes back to English.
  */
 export function useLocale( wp, repo = '' ) {
 	for ( const site of Object.values( sites ) ) {
@@ -107,6 +108,7 @@ export function useLocale( wp, repo = '' ) {
 		// Dates as a site installed in that language writes them ("13 de outubro de 2026").
 		site.wp( 'eval', `switch_to_locale( '${ wp }' ); update_option( 'date_format', __( 'F j, Y' ) );` );
 	}
+	useStore( wp === 'en_US' ? '' : repo );
 	browserLocale = wp === 'en_US' ? undefined : wp.replace( '_', '-' );
 	// WordPress's admin, the importer and the plugin from the demo sites' language packs, then labels.json.
 	const files = Object.values( sites ).flatMap( ( site ) => {
@@ -116,6 +118,28 @@ export function useLocale( wp, repo = '' ) {
 	} );
 	const extra = join( repo, 'labels.json' );
 	labels = wp === 'en_US' ? {} : Object.assign( {}, ...files.filter( existsSync ).map( ( file ) => ( file.endsWith( '.json' ) ? readJed( file ) : readPo( file ) ) ), existsSync( extra ) ? JSON.parse( readFileSync( extra, 'utf8' ) ) : {} );
+}
+
+/**
+ * The demo store in a language: its repository's demo/store.json (currency,
+ * units, products, categories, the menu and the home) on the source site. The
+ * English store is kept aside first and put back on the way to English (`repo` '').
+ */
+function useStore( repo ) {
+	const site = sites.source;
+	if ( ! site ) {
+		return;
+	}
+	const script = fileURLToPath( new URL( 'demo-store.php', import.meta.url ) );
+	const backup = join( site.path, 'wp-content/eizport-demo-store-en.json' );
+	const store = repo ? resolve( repo, 'demo/store.json' ) : '';
+	if ( existsSync( backup ) ) {
+		site.wp( 'eval-file', script, backup );
+		rmSync( backup );
+	}
+	if ( store && existsSync( store ) ) {
+		writeFileSync( backup, site.wp( 'eval-file', script, store ) );
+	}
 }
 
 export const viewports = {

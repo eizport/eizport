@@ -71,7 +71,7 @@ export const screenshots: Screenshot[] = [
 	{
 		id: 'bundle-plugin',
 		feature: 'Export as plugin: the plugin installed on the other site checks what it needs and imports its bundle with one click',
-		screen: 'Tools → Import Z Store (the plugin made with "As plugin"), on the other site',
+		screen: 'Tools → Import Eiz Coffee (the plugin made with "As plugin"), on the other site',
 		state: 'Imported, with "Deactivate and delete this plugin"',
 		viewport: 'desktop',
 		sources: [ 'includes/bundle-plugin.php', 'templates/bundle-plugin.php', 'assets/importer.css', 'assets/bundle-plugin.js', 'includes/import.php' ],
