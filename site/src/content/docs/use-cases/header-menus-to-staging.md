@@ -30,4 +30,4 @@ On staging, the menu items point to staging's pages (their new IDs) and the menu
 
 ## Next time
 
-After more changes, export again and import with *Update pages, posts and products that already exist (same slug)* checked ([more](../../getting-started/importing/#updating-items-that-already-exist)): the pages are updated, and the menu takes the file's items instead of getting a second copy of them.
+After more changes, export again and import with *Update pages, posts and products that already exist (same slug)* checked (see [updating items that already exist](../../getting-started/importing/#updating-items-that-already-exist)): the pages are updated, and the menu takes the file's items instead of getting a second copy of them.
