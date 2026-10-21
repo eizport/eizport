@@ -78,6 +78,8 @@ copy=$(wp "$DEV_SITE" eval '
 		"options"  => array( "groups" => array( "basics", "reading", "woocommerce" ), "front_pages" => true ),
 		// The header menu: the navigations (the header block shows the newest one).
 		"menus"    => array( "navigation" => get_posts( array( "post_type" => "wp_navigation", "numberposts" => -1, "fields" => "ids" ) ) ),
+		// The store styles: colors, fonts and the Site Editor CSS.
+		"appearance" => array( "global_styles", "global_css" ),
 		"filename" => "eizport-demo-seed",
 	) );
 	echo is_wp_error( $out ) ? "ERROR " . $out->get_error_message() : $out["name"];
@@ -110,16 +112,16 @@ set_option "$SOURCE" woocommerce_permalinks '{"product_base":"product","category
 # The development site's content predates the plugin's name: the demo shows
 # the name it has now, in the text and on the images.
 wp "$SOURCE" search-replace 'Exporter Importer Z' 'Eizport' "$(wp "$SOURCE" db prefix)posts" --quiet
-# The store's look: the theme's customized templates, template parts (the
-# header with the logo) and global styles aren't exportable types either.
+# The store's look: the theme's customized templates and template parts (the
+# header with the logo) aren't exportable types; its styles come with the export.
 wp "$DEV_SITE" eval '
-$posts = get_posts( array( "post_type" => array( "wp_template", "wp_template_part", "wp_global_styles" ), "post_status" => "publish", "numberposts" => -1, "tax_query" => array( array( "taxonomy" => "wp_theme", "field" => "slug", "terms" => get_stylesheet() ) ) ) );
+$posts = get_posts( array( "post_type" => array( "wp_template", "wp_template_part" ), "post_status" => "publish", "numberposts" => -1, "tax_query" => array( array( "taxonomy" => "wp_theme", "field" => "slug", "terms" => get_stylesheet() ) ) ) );
 echo wp_json_encode( array_map( function ( $post ) {
 	return array( "post_type" => $post->post_type, "post_name" => $post->post_name, "post_title" => $post->post_title, "post_content" => $post->post_content, "area" => wp_get_object_terms( $post->ID, "wp_template_part_area", array( "fields" => "slugs" ) ) );
 }, $posts ) );' > "$SOURCE/theme-posts.json"
 wp "$SOURCE" eval '
 kses_remove_filters();
-foreach ( get_posts( array( "post_type" => array( "wp_template", "wp_template_part", "wp_global_styles" ), "post_status" => "any", "numberposts" => -1, "fields" => "ids" ) ) as $old ) {
+foreach ( get_posts( array( "post_type" => array( "wp_template", "wp_template_part" ), "post_status" => "any", "numberposts" => -1, "fields" => "ids" ) ) as $old ) {
 	wp_delete_post( $old, true );
 }
 foreach ( json_decode( file_get_contents( ABSPATH . "theme-posts.json" ), true ) as $post ) {

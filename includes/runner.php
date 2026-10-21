@@ -40,6 +40,7 @@ function export( $specs, $settings ) {
 	$media_used = $settings['media_used'] ?? null;
 	$reviews    = $settings['reviews'] ?? null;
 	$menus      = $settings['menus'] ?? null;
+	$appearance = (array) ( $settings['appearance'] ?? array() );
 	$bundle     = ! array_key_exists( 'bundle', $settings ) || ! empty( $settings['bundle'] ) || ! empty( $settings['blueprint'] );
 	$filename   = (string) ( $settings['filename'] ?? '' );
 	$settings   = \Eizport\Export\bundle_settings( array_merge( $settings, array( 'bundle' => $bundle ) ) );
@@ -50,6 +51,9 @@ function export( $specs, $settings ) {
 	$start = array( 'content' => 'all' );
 	if ( null !== $menus ) {
 		$start['eizport_menus'] = $menus;
+	}
+	if ( $appearance ) {
+		$start['eizport_appearance'] = $appearance;
 	}
 	$args   = \Eizport\Selection\apply_specs( $start, $specs );
 	$target = Files\temp_file( 'eizport-export' );

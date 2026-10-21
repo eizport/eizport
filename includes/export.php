@@ -419,6 +419,7 @@ function file_output( $args ) {
 			'plugins'      => $args['plugins'] ?? array(),
 			'keep_copy'    => ! empty( $args['keep_copy'] ),
 			'option_names' => $args['options'] ?? array(),
+			'appearance'   => \Eizport\Appearance\chosen( $args ),
 			'linked'       => ! empty( $args['linked'] ),
 			'zip'          => ! empty( $args['zip'] ),
 			'as_plugin'    => $as_plugin,

@@ -10,10 +10,10 @@ The **Options** row exports site settings in an `options.json` inside the bundle
 ## Three ways to choose
 
 - **One by one** — every option the site has (search, pages), each with its size and an *IDs mapped on import* badge when it holds a post ID.
-- **By group** — filter the panel by a group and export it: **Basics** (suggested), Reading, General, Permalinks, Discussion, Media, Privacy, Theme customizations, WooCommerce pages. A group is resolved when the file is made, so it follows the active theme.
+- **By group** — filter the panel by a group and export it: **Basics** (suggested), Reading, General, Permalinks, Discussion, Media, Privacy, Site logo and site icon, WooCommerce pages. The theme's Customizer settings, custom CSS, the Site Editor's styles and the widgets have [rows of their own](../appearance/). A group is resolved when the file is made, so it follows the active theme.
 - **All** — every option that may be exported.
 
-On the new screen, checking an option in the panel adds it at once (the *Selection* filter shows the ones chosen); groups and *all* come from saved defaults or the classic screen. With nothing chosen yet, the panel opens on **Basics**: title, tagline, language, time zone, date formats, homepage and posts page, posts per page, permalinks, theme customizations and site icon.
+On the new screen, checking an option in the panel adds it at once (the *Selection* filter shows the ones chosen); groups and *all* come from saved defaults or the classic screen. With nothing chosen yet, the panel opens on **Basics**: title, tagline, language, time zone, date formats, homepage and posts page, posts per page, permalinks, site logo and site icon.
 
 ## Linked settings
 

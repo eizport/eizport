@@ -57,7 +57,7 @@ if ( ! is_wp_error( $copy ) ) {
 
 ## eizport/get-export-options
 
-No input. Returns `types` (each with `type`, `label`, `count`, `hierarchical`, `statuses` and `taxonomies` with their terms), `option_groups` (`group`, `label`, `options`), `front_pages` (`front`, `posts` IDs), `themes`, `plugins`, `copy_lifetime` (seconds), `filename` (today's default name), `linked` (the linked settings mode), `bundle_zip`, `review_count` (approved product reviews; 0 without WooCommerce) and `menus`: `classic` (`id`, `name`, `slug`, `items`, `locations` — the labels of the theme locations it sits in) and `navigation` (`id`, `title`, `links`) — see [Menus](../../exporting/menus/).
+No input. Returns `types` (each with `type`, `label`, `count`, `hierarchical`, `statuses` and `taxonomies` with their terms), `option_groups` (`group`, `label`, `options`), `front_pages` (`front`, `posts` IDs), `themes`, `plugins`, `copy_lifetime` (seconds), `filename` (today's default name), `linked` (the linked settings mode), `bundle_zip`, `review_count` (approved product reviews; 0 without WooCommerce) `appearance` (`theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets` → how many the site has, 0 for none; see [Appearance](../../exporting/appearance/)) and `menus`: `classic` (`id`, `name`, `slug`, `items`, `locations` — the labels of the theme locations it sits in) and `navigation` (`id`, `title`, `links`) — see [Menus](../../exporting/menus/).
 
 ## eizport/get-items
 
@@ -79,7 +79,7 @@ Input: `search`, `group` (a key of `option_groups`), `names` (only these), `page
 
 ## eizport/get-suggestions
 
-Input: `types` (as `eizport/export` takes them), `whole` (post types chosen whole, the same as `{}` in `types`) and `menus.classic` (menus chosen). Returns `items` (post type → IDs the items' content uses, through [`eizport_suggested_items`](../hooks/#eizport_suggested_items), and the pages and posts the menus chosen link to), `reviews` (approved reviews of the products chosen), `options` (settings pointing to the items, unless *Linked settings* is *Never* or *On export*) and `menus` (`classic`: the menus in theme locations; `navigation`: the navigations the items' content or the theme's templates use). Nothing is added to an export by itself.
+Input: `types` (as `eizport/export` takes them), `whole` (post types chosen whole, the same as `{}` in `types`) and `menus.classic` (menus chosen). Returns `items` (post type → IDs the items' content uses, through [`eizport_suggested_items`](../hooks/#eizport_suggested_items), and the pages and posts the menus chosen link to), `reviews` (approved reviews of the products chosen), `options` (settings pointing to the items, unless *Linked settings* is *Never* or *On export*), `appearance` (the look's keys the site has) and `menus` (`classic`: the menus in theme locations; `navigation`: the navigations the items' content or the theme's templates use). Nothing is added to an export by itself.
 
 ## eizport/get-reviews
 
@@ -100,6 +100,7 @@ Input: `search`, `include` (only these), `page`, `per_page`. Returns `items` (`i
 | `as_plugin` | boolean: a plugin `.zip` that imports its bundle ([as plugin](../../exporting/as-plugin/)); not with `blueprint` | `false` |
 | `update_existing` | boolean: ask the import to update the items that already exist (same type and slug); saved in the bundle | `false` |
 | `reviews` | object: `ids` (comment IDs; `[]` for none) or `all` — WooCommerce product reviews | all of the products' reviews |
+| `appearance` | string[]: `theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets` — the site's [look](../../exporting/appearance/), with the media it uses; needs `bundle` | none |
 | `menus` | object: `classic` (menu term IDs, with their items and theme locations), `navigation` (`wp_navigation` IDs), or `all` — [menus](../../exporting/menus/) | none (*all content* has them) |
 | `filename` | string, without extension | `<site>.WordPress.<date>` |
 

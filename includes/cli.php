@@ -85,6 +85,11 @@ function export_input( $assoc_args ) {
 			'names'  => array_values( array_diff( $chosen, $groups ) ),
 		);
 	}
+	// The look: all of it, or some of theme_mods, custom_css, global_styles, global_css, widgets.
+	$look = (string) ( $assoc_args['appearance'] ?? '' );
+	if ( '' !== $look ) {
+		$input['appearance'] = 'all' === $look ? \Eizport\Appearance\KEYS : array_values( array_intersect( \Eizport\Appearance\KEYS, array_map( 'trim', explode( ',', $look ) ) ) );
+	}
 	// The menus flag: all of them, or classic menu and navigation IDs.
 	$menus = (string) ( $assoc_args['menus'] ?? '' );
 	if ( 'all' === $menus ) {
@@ -129,6 +134,11 @@ function export_input( $assoc_args ) {
  * : Navigation menus: `all`, or `classic:ID+ID` (menu term IDs, with their
  * items and theme locations) and `navigation:ID+ID` (wp_navigation IDs),
  * comma-separated. Default: none (all content already has them).
+ *
+ * [--appearance=<parts>]
+ * : The site's look: `all`, or some of theme_mods (Customizer), custom_css
+ * (Customizer's Additional CSS), global_styles and global_css (Site Editor,
+ * block themes) and widgets, comma-separated.
  *
  * [--[no-]media]
  * : Put the media files inside. Default: yes.

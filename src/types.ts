@@ -36,6 +36,8 @@ export interface ExportOptions {
 	review_count: number;
 	/** Bundles are plain .zip files (Settings → Export). */
 	bundle_zip: boolean;
+	/** The look's rows: key (theme_mods, custom_css, global_styles, global_css, widgets) => count, 0 when the site has none. */
+	appearance: Record< string, number >;
 	/** Navigation menus: classic ones and block navigations. */
 	menus: {
 		classic: ClassicMenu[];
@@ -72,6 +74,8 @@ export interface Suggestions {
 	options: string[];
 	/** Classic menus in theme locations; navigations the items or the theme use. */
 	menus?: { classic: number[]; navigation: number[] };
+	/** The look's keys the site has. */
+	appearance?: string[];
 }
 
 /** A post's role on the site: an option pointing to it (eizport_linked_options). */
@@ -149,6 +153,8 @@ export interface FileSettings {
 	menu_ids: string[];
 	/** Every menu. */
 	menu_all: boolean;
+	/** The look chosen: theme_mods, custom_css, global_styles, global_css, widgets. */
+	appearance: string[];
 	themes: string[];
 	plugins: string[];
 }

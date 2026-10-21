@@ -40,6 +40,7 @@ import { mark } from '../../src/mark';
 import usePhoneView from '../../src/use-phone-view';
 import {
 	DEFAULT_STATE,
+	LOOK_ROWS,
 	MENUS_ROW,
 	OPTIONS_ROW,
 	REVIEWS_ROW,
@@ -128,6 +129,17 @@ function describe(
 	const parts: string[] = [];
 	const suggestions = suggestedFor( row );
 	const choice: TypeChoice | undefined = state.types[ row ];
+	// The look's rows are one thing each: in or out.
+	if ( LOOK_ROWS[ row ] ) {
+		const included = chosenFor( state, row ).length > 0;
+		let summary: string = __( 'Not included', 'eizport' );
+		if ( included ) {
+			summary = __( 'Included', 'eizport' );
+		} else if ( suggestions.length ) {
+			summary = __( 'Suggested', 'eizport' );
+		}
+		return { checked: included, summary, exportsAll: included };
+	}
 	if ( row === OPTIONS_ROW && state.settings.option_all ) {
 		parts.push( __( 'All options', 'eizport' ) );
 	} else if ( row === REVIEWS_ROW && state.settings.review_all ) {
@@ -342,6 +354,28 @@ function Stage() {
 				...describe( state, MENUS_ROW, options ),
 			} );
 		}
+		// The look, a row each: only what the site has.
+		const lookLabels: Record< string, string > = {
+			theme_mods: __( 'Customizer theme mods', 'eizport' ),
+			custom_css: __( 'Customizer custom CSS', 'eizport' ),
+			global_styles: __( 'Editor global styles', 'eizport' ),
+			global_css: __( 'Editor global CSS', 'eizport' ),
+			widgets: __( 'Widgets', 'eizport' ),
+		};
+		Object.entries( LOOK_ROWS ).forEach( ( [ row, key ] ) => {
+			const count = options?.appearance?.[ key ] || 0;
+			if ( count ) {
+				list.push( {
+					type: row,
+					label: lookLabels[ key ],
+					count,
+					hierarchical: false,
+					statuses: [],
+					taxonomies: [],
+					...describe( state, row, options ),
+				} );
+			}
+		} );
 		if ( options ) {
 			// Options (settings), one by one, are exported with the content, in the same list.
 			list.push( {
@@ -403,6 +437,8 @@ function Stage() {
 						? __( 'Close items', 'eizport' )
 						: __( 'Choose items', 'eizport' ),
 				isPrimary: true,
+				// The look's rows have no side panel.
+				isEligible: ( item ) => ! LOOK_ROWS[ item.type ],
 				callback: ( [ item ] ) =>
 					navigate( {
 						href:

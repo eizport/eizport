@@ -95,7 +95,7 @@ function register() {
 		'eizport/get-export-options',
 		array(
 			'label'               => __( 'Get export options', 'eizport' ),
-			'description'         => __( 'Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the navigation menus (classic, with their theme locations, and block navigations); the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export.', 'eizport' ),
+			'description'         => __( 'Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the navigation menus (classic, with their theme locations, and block navigations); the site\'s look (Customizer theme mods and custom CSS, Site Editor global styles and CSS, widgets); the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export.', 'eizport' ),
 			'category'            => CATEGORY,
 			// No input. Not "properties => array()": PHP sends [] where JSON Schema needs {}.
 			'input_schema'        => array(
@@ -204,16 +204,20 @@ function register() {
 			'output_schema'       => array(
 				'type'       => 'object',
 				'properties' => array(
-					'items'   => array( 'type' => 'object' ),
-					'reviews' => array(
+					'items'      => array( 'type' => 'object' ),
+					'reviews'    => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'integer' ),
 					),
-					'options' => array(
+					'options'    => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'string' ),
 					),
-					'menus'   => array(
+					'appearance' => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'string' ),
+					),
+					'menus'      => array(
 						'type'       => 'object',
 						'properties' => array(
 							'classic'    => array(
@@ -528,7 +532,7 @@ function register() {
 
 	$defaults_schema = array(
 		'type'        => 'object',
-		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews", "__menus"), review_ids, review_all, menu_ids ("c:<menu term ID>", "n:<navigation ID>"), menu_all, themes, plugins).', 'eizport' ),
+		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews", "__menus"), review_ids, review_all, menu_ids ("c:<menu term ID>", "n:<navigation ID>"), menu_all, appearance (theme_mods, custom_css, global_styles, global_css, widgets), themes, plugins).', 'eizport' ),
 	);
 
 	wp_register_ability(
@@ -842,6 +846,14 @@ function export_input_schema() {
 				),
 				'additionalProperties' => false,
 			),
+			'appearance'      => array(
+				'type'        => 'array',
+				'items'       => array(
+					'type' => 'string',
+					'enum' => \Eizport\Appearance\KEYS,
+				),
+				'description' => __( 'The site\'s look, in the bundle\'s options file: "theme_mods" (the Customizer\'s theme mods: logo, header and background images, colors), "custom_css" (the Customizer\'s Additional CSS), "global_styles" and "global_css" (the Site Editor\'s styles and Additional CSS, block themes) and "widgets" (classic and block widgets, with their sidebars). The media they use come along. Default: none. eizport/get-export-options says what the site has.', 'eizport' ),
+			),
 			'menus'           => array(
 				'type'                 => 'object',
 				'description'          => __( 'Navigation menus to export: "classic" (menu term IDs, with their items and theme locations) and "navigation" (wp_navigation post IDs, the menus of navigation blocks), or "all". Default: none (all content already has them). eizport/get-export-options lists them; eizport/get-suggestions says which the items chosen use.', 'eizport' ),
@@ -1103,6 +1115,8 @@ function get_export_options( $input = array() ) { // phpcs:ignore Generic.CodeAn
 		'bundle_zip'    => \Eizport\Settings\get()['bundle_zip'],
 		// Navigation menus, for the Menus row.
 		'menus'         => \Eizport\Menus\all(),
+		// The look's rows (theme mods, custom CSS, global styles and CSS, widgets): key => count, 0 when the site has none.
+		'appearance'    => \Eizport\Appearance\available(),
 	);
 }
 
@@ -1204,6 +1218,7 @@ function export( $input = array() ) {
 			// Product reviews: null exports them all, as WordPress does.
 			'reviews'         => isset( $input['reviews'] ) && empty( $input['reviews']['all'] ) ? array_map( 'intval', (array) ( $input['reviews']['ids'] ?? array() ) ) : null,
 			'menus'           => menus_input( $input['menus'] ?? null ),
+			'appearance'      => array_values( array_intersect( \Eizport\Appearance\KEYS, (array) ( $input['appearance'] ?? array() ) ) ),
 			'blueprint'       => $blueprint,
 			'as_plugin'       => ! $blueprint && ! empty( $input['as_plugin'] ),
 			'update_existing' => ! empty( $input['update_existing'] ),
@@ -1400,6 +1415,8 @@ function get_suggestions( $input = array() ) {
 	// The menus the items use (theme locations, navigation blocks), and what the menus chosen point to.
 	$out['menus'] = \Eizport\Menus\suggested( array() === $out['chosen'] ? array() : array_merge( ...array_values( $out['chosen'] ) ) );
 	unset( $out['chosen'] );
+	// What the site has of its look: every row that has something is suggested.
+	$out['appearance'] = array_keys( array_filter( \Eizport\Appearance\available() ) );
 	foreach ( \Eizport\Menus\targets( (array) ( $input['menus']['classic'] ?? array() ) ) as $type => $ids ) {
 		if ( isset( Selection\content_types()[ $type ] ) ) {
 			$out['items'][ $type ] = array_values( array_unique( array_merge( $out['items'][ $type ] ?? array(), $ids ) ) );

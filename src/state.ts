@@ -25,6 +25,7 @@ export const DEFAULT_STATE: ExportState = {
 		review_all: false,
 		menu_ids: [],
 		menu_all: false,
+		appearance: [],
 		themes: [],
 		plugins: [],
 	},
@@ -98,8 +99,20 @@ export const REVIEWS_ROW = '__reviews';
 /** The Menus row: classic menus ("c:<ID>") and block navigations ("n:<ID>"). */
 export const MENUS_ROW = '__menus';
 
+/**
+ * The look's rows (no side panel: each is one thing, in or out), by the key
+ * eizport/export takes.
+ */
+export const LOOK_ROWS: Record< string, string > = {
+	__theme_mods: 'theme_mods',
+	__custom_css: 'custom_css',
+	__global_styles: 'global_styles',
+	__global_css: 'global_css',
+	__widgets: 'widgets',
+};
+
 /** Rows that aren't a post type. */
-const OWN_ROWS = [ OPTIONS_ROW, REVIEWS_ROW, MENUS_ROW ];
+const OWN_ROWS = [ OPTIONS_ROW, REVIEWS_ROW, MENUS_ROW, ...Object.keys( LOOK_ROWS ) ];
 
 /**
  * A menu's ID in the Menus row.
@@ -176,6 +189,11 @@ export function suggestedFor( row: string ): Id[] {
 	if ( row === REVIEWS_ROW ) {
 		return suggestions.reviews;
 	}
+	if ( LOOK_ROWS[ row ] ) {
+		return ( suggestions.appearance || [] ).includes( LOOK_ROWS[ row ] )
+			? [ LOOK_ROWS[ row ] ]
+			: [];
+	}
 	if ( row === MENUS_ROW ) {
 		return [
 			...( suggestions.menus?.classic || [] ).map( ( id ) =>
@@ -216,6 +234,11 @@ export function explicitFor( state: ExportState, row: string ): Id[] {
 	}
 	if ( row === MENUS_ROW ) {
 		return state.settings.menu_ids;
+	}
+	if ( LOOK_ROWS[ row ] ) {
+		return state.settings.appearance.includes( LOOK_ROWS[ row ] )
+			? [ LOOK_ROWS[ row ] ]
+			: [];
 	}
 	return state.types[ row ]?.ids || [];
 }
@@ -284,6 +307,20 @@ function withRow(
 				...settings,
 				menu_ids: explicit.map( String ),
 				menu_all: false,
+			},
+		};
+	}
+	if ( LOOK_ROWS[ row ] ) {
+		const others = current.settings.appearance.filter(
+			( key ) => key !== LOOK_ROWS[ row ]
+		);
+		return {
+			...current,
+			settings: {
+				...settings,
+				appearance: explicit.length
+					? [ ...others, LOOK_ROWS[ row ] ]
+					: others,
 			},
 		};
 	}
@@ -364,6 +401,9 @@ export function exportAll( row: string ) {
 				settings: { ...next.settings, menu_all: true },
 			};
 		}
+		if ( LOOK_ROWS[ row ] ) {
+			return withRow( current, row, [ LOOK_ROWS[ row ] ], false );
+		}
 		return { ...next, types: { ...next.types, [ row ]: {} } };
 	} );
 }
@@ -418,6 +458,10 @@ export function exportInput( state: ExportState ): Record< string, unknown > {
 		menus: settings.menu_all
 			? { all: true }
 			: menusOf( chosenFor( state, MENUS_ROW ) ),
+		// The look, row by row (theme mods, custom CSS, global styles and CSS, widgets).
+		appearance: Object.keys( LOOK_ROWS ).flatMap( ( row ) =>
+			chosenFor( state, row ).map( String )
+		),
 	};
 	const types = resolvedTypes( state );
 	if ( Object.keys( types ).length ) {
@@ -453,7 +497,21 @@ export function needsBundle( state: ExportState ): boolean {
 		state.settings.format === 'playground' ||
 		state.settings.as_plugin ||
 		state.settings.media ||
-		hasOptions( state )
+		hasOptions( state ) ||
+		hasLook( state )
+	);
+}
+
+/**
+ * Whether the export includes some of the look (it travels in the bundle's
+ * options file).
+ *
+ * @param state State.
+ * @return Whether any look row is chosen.
+ */
+export function hasLook( state: ExportState ): boolean {
+	return Object.keys( LOOK_ROWS ).some(
+		( row ) => chosenFor( state, row ).length > 0
 	);
 }
 

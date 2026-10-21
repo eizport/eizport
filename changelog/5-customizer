@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Export the site's look on rows of its own — Customizer theme mods and custom CSS, the Site Editor's global styles and global CSS, and widgets (classic and block) — with the media they use, mapped to the imported media on the other site.

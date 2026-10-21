@@ -17,6 +17,7 @@ wp eizport export --types=page --menus=classic:18 --filename=header
 | --- | --- |
 | `--types=<types>` | Content types, comma-separated: `type:ID+ID` for some items, the type alone for all of it. None: all content |
 | `--options=<options>` | Option groups (like `basics`) and option names, comma-separated |
+| `--appearance=<parts>` | The site's [look](../../exporting/appearance/): `all`, or some of `theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets`, comma-separated |
 | `--menus=<menus>` | [Menus](../../exporting/menus/): `all`, or `classic:ID+ID` (menu term IDs) and `navigation:ID+ID` (`wp_navigation` IDs), comma-separated. None: no menus (all content already has them) |
 | `--[no-]media` | Media files inside; default: yes |
 | `--zip` | A `.zip` bundle instead of `.wxrz` |

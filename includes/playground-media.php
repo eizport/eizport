@@ -107,7 +107,8 @@ add_action(
 			eizport_apply_options(
 				$data,
 				is_object( $importer ) ? (array) $importer->processed_posts : array(),
-				is_object( $importer ) ? (array) $importer->processed_terms : array()
+				is_object( $importer ) ? (array) $importer->processed_terms : array(),
+				is_object( $importer ) ? (array) $importer->url_remap : array()
 			);
 		}
 	}

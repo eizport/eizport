@@ -43,9 +43,10 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	 * @param array $data  The options file's data.
 	 * @param array $posts Old post ID => new ID (WP_Import::$processed_posts).
 	 * @param array $terms Old term ID => new ID (WP_Import::$processed_terms).
+	 * @param array $urls  Old URL => new (WP_Import::$url_remap): media URLs in theme mods and widgets.
 	 * @return array Option name => value.
 	 */
-	function eizport_options_to_apply( $data, $posts, $terms ) {
+	function eizport_options_to_apply( $data, $posts, $terms, $urls = array() ) {
 		$options  = isset( $data['options'] ) && is_array( $data['options'] ) ? $data['options'] : array();
 		$post_ids = isset( $data['post_ids'] ) && is_array( $data['post_ids'] ) ? $data['post_ids'] : array();
 		$apply    = array();
@@ -72,6 +73,27 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 						unset( $value['custom_logo'] );
 					}
 				}
+				// The header image's attachment, and the media URLs (the header's data is an object in core).
+				if ( isset( $value['header_image_data'] ) ) {
+					$header = (array) $value['header_image_data'];
+					if ( isset( $header['attachment_id'] ) ) {
+						$old                     = (int) $header['attachment_id'];
+						$header['attachment_id'] = $posts[ $old ] ?? $old;
+					}
+					foreach ( array( 'url', 'thumbnail_url' ) as $key ) {
+						if ( isset( $header[ $key ] ) ) {
+							$header[ $key ] = eizport_remap_urls( (string) $header[ $key ], $urls );
+						}
+					}
+					$value['header_image_data'] = (object) $header;
+				}
+				foreach ( array( 'header_image', 'background_image' ) as $key ) {
+					if ( isset( $value[ $key ] ) && is_string( $value[ $key ] ) ) {
+						$value[ $key ] = eizport_remap_urls( $value[ $key ], $urls );
+					}
+				}
+				// The custom CSS comes as its own entry: this site's post, not the other's.
+				unset( $value['custom_css_post_id'] );
 				if ( isset( $value['nav_menu_locations'] ) && is_array( $value['nav_menu_locations'] ) ) {
 					foreach ( $value['nav_menu_locations'] as $location => $menu ) {
 						if ( isset( $terms[ (int) $menu ] ) ) {
@@ -80,6 +102,32 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 							unset( $value['nav_menu_locations'][ $location ] );
 						}
 					}
+				}
+				// Merged into this site's theme mods: what the file doesn't hold stays (menu locations too).
+				$current = (array) get_option( $name, array() );
+				if ( isset( $value['nav_menu_locations'], $current['nav_menu_locations'] ) && is_array( $current['nav_menu_locations'] ) ) {
+					$value['nav_menu_locations'] = array_merge( $current['nav_menu_locations'], $value['nav_menu_locations'] );
+				}
+				$value = array_merge( $current, $value );
+			}
+			// Widgets: the menu of a Navigation Menu widget, the media of media widgets, the URLs in block widgets.
+			if ( 0 === strpos( $name, 'widget_' ) && is_array( $value ) ) {
+				foreach ( $value as $number => $widget ) {
+					if ( ! is_array( $widget ) ) {
+						continue;
+					}
+					if ( 'widget_nav_menu' === $name && isset( $widget['nav_menu'] ) ) {
+						$widget['nav_menu'] = $terms[ (int) $widget['nav_menu'] ] ?? (int) $widget['nav_menu'];
+					}
+					if ( isset( $widget['attachment_id'] ) ) {
+						$widget['attachment_id'] = $posts[ (int) $widget['attachment_id'] ] ?? (int) $widget['attachment_id'];
+					}
+					foreach ( array( 'url', 'content' ) as $key ) {
+						if ( isset( $widget[ $key ] ) && is_string( $widget[ $key ] ) ) {
+							$widget[ $key ] = eizport_remap_urls( $widget[ $key ], $urls );
+						}
+					}
+					$value[ $number ] = $widget;
 				}
 			}
 			$apply[ $name ] = $value;
@@ -99,14 +147,96 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	 * @param array $data  The options file's data.
 	 * @param array $posts Old post ID => new ID.
 	 * @param array $terms Old term ID => new ID.
-	 * @return string[] Names of the options set.
+	 * @param array $urls  Old URL => new (WP_Import::$url_remap).
+	 * @return string[] Names of the options set, and custom_css, global_styles, global_css when set.
 	 */
-	function eizport_apply_options( $data, $posts, $terms ) {
-		$apply = eizport_options_to_apply( $data, $posts, $terms );
+	function eizport_apply_options( $data, $posts, $terms, $urls = array() ) {
+		$apply = eizport_options_to_apply( $data, $posts, $terms, $urls );
 		foreach ( $apply as $name => $value ) {
 			update_option( $name, $value );
 		}
 
-		return array_keys( $apply );
+		return array_merge( array_keys( $apply ), eizport_apply_look( $data, $urls ) );
+	}
+
+	/**
+	 * Old URLs replaced by the new ones, longest first (as the importer does).
+	 *
+	 * @param string $text Text.
+	 * @param array  $urls Old URL => new.
+	 * @return string
+	 */
+	function eizport_remap_urls( $text, $urls ) {
+		if ( ! $urls || '' === $text ) {
+			return $text;
+		}
+		uksort(
+			$urls,
+			function ( $a, $b ) {
+				return strlen( $b ) - strlen( $a );
+			}
+		);
+
+		return str_replace( array_keys( $urls ), array_values( $urls ), $text );
+	}
+
+	/**
+	 * Sets the look entries of an options file on the active theme: the
+	 * Customizer's custom CSS, and the Site Editor's global styles and
+	 * global CSS (a block theme only; each leaves the other's part as it is).
+	 *
+	 * @param array $data The options file's data.
+	 * @param array $urls Old URL => new.
+	 * @return string[] What was set: custom_css, global_styles, global_css.
+	 */
+	function eizport_apply_look( $data, $urls = array() ) {
+		$set = array();
+		if ( isset( $data['custom_css']['css'] ) && is_string( $data['custom_css']['css'] ) ) {
+			$result = wp_update_custom_css_post( eizport_remap_urls( $data['custom_css']['css'], $urls ), array( 'stylesheet' => get_stylesheet() ) );
+			if ( ! is_wp_error( $result ) ) {
+				$set[] = 'custom_css';
+			}
+		}
+
+		$styles = isset( $data['global_styles']['content'] ) && is_array( $data['global_styles']['content'] ) ? $data['global_styles']['content'] : null;
+		$css    = isset( $data['global_css']['css'] ) && is_string( $data['global_css']['css'] ) ? $data['global_css']['css'] : null;
+		if ( ( null === $styles && null === $css ) || ! wp_is_block_theme() || ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+			return $set;
+		}
+		$post    = WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( wp_get_theme(), true );
+		$current = isset( $post['post_content'] ) ? json_decode( (string) $post['post_content'], true ) : null;
+		$current = is_array( $current ) ? $current : array(
+			'version'                     => 2,
+			'isGlobalStylesUserThemeJSON' => true,
+		);
+		$keep    = $current['styles']['css'] ?? null;
+		if ( null !== $styles ) {
+			$styles  = json_decode( eizport_remap_urls( (string) wp_json_encode( $styles, JSON_UNESCAPED_SLASHES ), $urls ), true );
+			$current = array_merge( is_array( $styles ) ? $styles : array(), array( 'isGlobalStylesUserThemeJSON' => true ) );
+			// The styles leave this site's own CSS as it was.
+			unset( $current['styles']['css'] );
+			if ( null !== $keep ) {
+				$current['styles']['css'] = $keep;
+			}
+			$set[] = 'global_styles';
+		}
+		if ( null !== $css ) {
+			$current['styles']['css'] = eizport_remap_urls( $css, $urls );
+			$set[]                    = 'global_css';
+		}
+		if ( empty( $post['ID'] ) ) {
+			return array();
+		}
+		// Core adds the theme to a new styles post only for a user who may (tax_input): a CLI import has none.
+		wp_set_object_terms( (int) $post['ID'], get_stylesheet(), 'wp_theme' );
+		wp_update_post(
+			array(
+				'ID'           => (int) $post['ID'],
+				'post_content' => wp_slash( (string) wp_json_encode( $current, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ),
+			)
+		);
+		WP_Theme_JSON_Resolver::clean_cached_data();
+
+		return $set;
 	}
 }
