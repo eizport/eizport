@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Export navigation menus on their own row: classic menus with their items and theme locations, and block navigations, whose navigation blocks are pointed to the imported ones.
+Export navigation menus on their own row — classic menus with their items and theme locations, and block navigations — and bring them back on import, pointing to the imported pages.
