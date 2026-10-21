@@ -9,6 +9,34 @@ permissions:
   contents: read
 
 jobs:
+  changelog:
+    name: Changelog entry
+    # A PR that changes what ships adds a changelog/ file (see .github/CONTRIBUTING.md);
+    # release branches compile and delete them, so they're exempt.
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: An entry when the plugin changes, and every entry well formed
+        run: |
+          base="origin/${GITHUB_BASE_REF}"
+          changed=$(git diff --name-only "$base"...HEAD)
+          echo "$changed"
+          for f in changelog/*; do
+            [ -f "$f" ] && [ "$(basename "$f")" != .gitkeep ] || continue
+            sed -n 1p "$f" | grep -Eq '^Significance: (patch|minor|major)$' &&
+              sed -n 2p "$f" | grep -Eq '^Type: (add|fix|update|dev)$' &&
+              [ -z "$(sed -n 3p "$f")" ] && [ -n "$(sed -n '4,$p' "$f" | tr -d '[:space:]')" ] ||
+              { echo "::error file=$f::Expected Significance, Type, a blank line and the entry."; exit 1; }
+          done
+          if grep -Eq '^(includes/|src/|routes/|templates/|eizport\.php$|uninstall\.php$|readme\.txt$)' <<< "$changed" &&
+             ! git diff --name-only --diff-filter=A "$base"...HEAD | grep -q '^changelog/'; then
+            echo "::error::This PR changes the plugin: add a changelog/ entry (see .github/CONTRIBUTING.md)."
+            exit 1
+          fi
+
   versions:
     name: Versions agree
     runs-on: ubuntu-latest

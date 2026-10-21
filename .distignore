@@ -12,6 +12,7 @@
 /phpcs.xml.dist
 /phpunit.xml.dist
 /tests
+/changelog
 /vendor
 /.phpunit.result.cache
 /node_modules

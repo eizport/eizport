@@ -16,6 +16,10 @@
  *   Tagged, with X.Y.Z's notes; Stable tag, "latest" and "stable" untouched.
  * - X.Y.Z: the release, from release/X.Y. Everything above.
  *
+ * The Changelog comes from changelog/ (one file per change, see
+ * .github/CONTRIBUTING.md): a pre-release adds the entries to readme.txt, the
+ * release adds them and deletes the files. The Upgrade Notice is written by hand.
+ *
  * Not shipped (bin/ is export-ignored). The POT is kept current by
  * composer check; translations come from translate.wordpress.org.
  *
@@ -155,6 +159,138 @@ function eizport_release_entry( string $readme, string $section, string $version
 }
 
 /**
+ * The changelog entries waiting in changelog/: one file per change, written
+ * on its branch ("Significance: patch|minor|major", "Type: add|fix|update|dev",
+ * a blank line, the entry).
+ *
+ * @param string $dir Plugin folder.
+ * @return array<int, array{ file: string, significance: string, type: string, text: string }>
+ */
+function eizport_release_changelog_entries( string $dir ): array {
+	$entries = array();
+	foreach ( glob( $dir . '/changelog/*' ) ?: array() as $file ) {
+		if ( ! is_file( $file ) ) {
+			continue;
+		}
+		$name = basename( $file );
+		if ( ! preg_match( '/^Significance:\s*(patch|minor|major)\s*\nType:\s*(add|fix|update|dev)\s*\n\s*\n(.+)$/s', str_replace( "\r", '', (string) file_get_contents( $file ) ), $m ) ) {
+			WP_CLI::error( "changelog/$name: expected \"Significance: patch|minor|major\", \"Type: add|fix|update|dev\", a blank line and the entry." );
+		}
+		$text = trim( (string) preg_replace( '/\s+/', ' ', $m[3] ) );
+		if ( '' === $text ) {
+			WP_CLI::error( "changelog/$name has no entry." );
+		}
+		$entries[] = array(
+			'file'         => $file,
+			'significance' => $m[1],
+			'type'         => $m[2],
+			'text'         => $text,
+		);
+	}
+
+	return $entries;
+}
+
+/**
+ * readme.txt with the entries added to the version's Changelog: Added,
+ * Changed, Fixed (dev entries stay out of the readme). Lines already there
+ * — written by hand, or by an earlier pre-release — are kept and not repeated.
+ *
+ * @param string                                       $readme  readme.txt.
+ * @param string                                       $version The version's Changelog heading (X.Y.Z).
+ * @param array<int, array{ type: string, text: string }> $entries Changelog entries.
+ * @return string
+ */
+function eizport_release_compile_changelog( string $readme, string $version, array $entries ): string {
+	$prefixes = array(
+		'add'    => 'Added',
+		'update' => 'Changed',
+		'fix'    => 'Fixed',
+	);
+	$current  = eizport_release_entry( $readme, 'Changelog', $version );
+	$lines    = array();
+	foreach ( $prefixes as $type => $prefix ) {
+		foreach ( $entries as $entry ) {
+			$line = "* $prefix: " . $entry['text'];
+			if ( $type === $entry['type'] && false === strpos( $current, $line ) && ! in_array( $line, $lines, true ) ) {
+				$lines[] = $line;
+			}
+		}
+	}
+	if ( ! $lines ) {
+		return $readme;
+	}
+	$heading = '= ' . $version . ' =';
+	$rows    = explode( "\n", $readme );
+	$section = array_search( '== Changelog ==', array_map( 'trim', $rows ), true );
+	if ( false === $section ) {
+		WP_CLI::error( 'readme.txt has no "== Changelog ==" section.' );
+	}
+	// The version's heading inside the section, if it's there.
+	$at = false;
+	for ( $i = $section + 1, $n = count( $rows ); $i < $n && 0 !== strpos( $rows[ $i ], '== ' ); $i++ ) {
+		if ( trim( $rows[ $i ] ) === $heading ) {
+			$at = $i;
+			break;
+		}
+	}
+	if ( false === $at ) {
+		// A new entry, on top of the section.
+		$first = $section + 1;
+		while ( $first < count( $rows ) && '' === trim( $rows[ $first ] ) ) {
+			++$first;
+		}
+		array_splice( $rows, $section + 1, $first - $section - 1, array_merge( array( '', $heading ), $lines, array( '' ) ) );
+		return implode( "\n", $rows );
+	}
+	// After the entry's last non-empty line.
+	$last = $at;
+	for ( $i = $at + 1, $n = count( $rows ); $i < $n && 0 !== strpos( $rows[ $i ], '= ' ) && 0 !== strpos( $rows[ $i ], '== ' ); $i++ ) {
+		if ( '' !== trim( $rows[ $i ] ) ) {
+			$last = $i;
+		}
+	}
+	array_splice( $rows, $last + 1, 0, $lines );
+
+	return implode( "\n", $rows );
+}
+
+/**
+ * The bump the entries need: the highest Significance.
+ *
+ * @param array<int, array{ significance: string }> $entries Changelog entries.
+ * @return string patch, minor, major, or '' without entries.
+ */
+function eizport_release_needed_bump( array $entries ): string {
+	$rank = array( '' => 0, 'patch' => 1, 'minor' => 2, 'major' => 3 );
+	$max  = '';
+	foreach ( $entries as $entry ) {
+		if ( $rank[ $entry['significance'] ] > $rank[ $max ] ) {
+			$max = $entry['significance'];
+		}
+	}
+
+	return $max;
+}
+
+/**
+ * The bump from one final version to the next.
+ *
+ * @param string $from Last final (X.Y.Z).
+ * @param string $to   Next final (X.Y.Z).
+ * @return string patch, minor or major.
+ */
+function eizport_release_bump_kind( string $from, string $to ): string {
+	$a = array_map( 'intval', explode( '.', $from ) );
+	$b = array_map( 'intval', explode( '.', $to ) );
+	if ( $a[0] !== $b[0] ) {
+		return 'major';
+	}
+
+	return $a[1] !== $b[1] ? 'minor' : 'patch';
+}
+
+/**
  * Releases Eizport.
  */
 class Eizport_Release_Command {
@@ -246,6 +382,22 @@ class Eizport_Release_Command {
 			$text = (string) preg_replace( '/^Stable tag:.*$/m', 'Stable tag: ' . $version, $text, 1 );
 		}
 
+		// changelog/ entries become the version's Changelog; a final release also deletes them.
+		$entries = $dev ? array() : eizport_release_changelog_entries( $dir );
+		if ( $entries ) {
+			$stable = '';
+			if ( preg_match( '/^Stable tag:\s*(\d+\.\d+\.\d+)\s*$/m', (string) file_get_contents( $readme ), $s ) ) {
+				$stable = $s[1];
+			}
+			$needed = eizport_release_needed_bump( $entries );
+			$rank   = array( 'patch' => 1, 'minor' => 2, 'major' => 3 );
+			if ( '' !== $stable && $rank[ $needed ] > $rank[ eizport_release_bump_kind( $stable, $final ) ] ) {
+				WP_CLI::warning( "The changelog entries need a $needed release; $stable → $final is less." );
+			}
+			$text = eizport_release_compile_changelog( $text, $final, $entries );
+			WP_CLI::log( '  → ' . count( $entries ) . ' changelog entries into readme.txt' );
+		}
+
 		// Notes are written before releasing, in both sections; nothing is touched until they are.
 		$missing = $dev ? array() : array_filter(
 			array( 'Changelog', 'Upgrade Notice' ),
@@ -258,6 +410,11 @@ class Eizport_Release_Command {
 		}
 		file_put_contents( $main, $source );
 		file_put_contents( $readme, $text );
+		if ( ! $pre ) {
+			foreach ( $entries as $entry ) {
+				unlink( $entry['file'] );
+			}
+		}
 
 		if ( $checks ) {
 			$this->checks( $dir );
