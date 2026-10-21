@@ -76,6 +76,8 @@ copy=$(wp "$DEV_SITE" eval '
 	$out = wp_get_ability( "eizport/export" )->execute( array(
 		"types"    => array( "post" => (object) array(), "page" => (object) array(), "product" => (object) array(), "attachment" => (object) array() ),
 		"options"  => array( "groups" => array( "basics", "reading", "woocommerce" ), "front_pages" => true ),
+		// The header menu: the navigations (the header block shows the newest one).
+		"menus"    => array( "navigation" => get_posts( array( "post_type" => "wp_navigation", "numberposts" => -1, "fields" => "ids" ) ) ),
 		"filename" => "eizport-demo-seed",
 	) );
 	echo is_wp_error( $out ) ? "ERROR " . $out->get_error_message() : $out["name"];
@@ -108,12 +110,6 @@ set_option "$SOURCE" woocommerce_permalinks '{"product_base":"product","category
 # The development site's content predates the plugin's name: the demo shows
 # the name it has now, in the text and on the images.
 wp "$SOURCE" search-replace 'Exporter Importer Z' 'Eizport' "$(wp "$SOURCE" db prefix)posts" --quiet
-# The header menu: navigations aren't an exportable type, so the development
-# site's newest one is copied (custom links, rewritten below with the rest).
-wp "$DEV_SITE" eval 'echo get_post( get_posts( array( "post_type" => "wp_navigation", "numberposts" => 1, "fields" => "ids" ) )[0] )->post_content;' > "$SOURCE/navigation.html"
-wp "$SOURCE" post create "$SOURCE/navigation.html" --post_type=wp_navigation --post_status=publish --post_title=Header --quiet
-rm -f "$SOURCE/navigation.html"
-
 # The store's look: the theme's customized templates, template parts (the
 # header with the logo) and global styles aren't exportable types either.
 wp "$DEV_SITE" eval '
