@@ -2,7 +2,7 @@
 
 A short, narrated, end-to-end demo (about 2 minutes) for the site's hero,
 YouTube and Apoia.se. `npm run video` records it for real on the demo Studio
-sites (`npm run demo-sites`): **Z Store** (the source), **New Site** (empty,
+sites (`npm run demo-sites`): **Eiz Coffee** (the source), **New Site** (empty,
 the target) and **Client Site** (WooCommerce only: the "as plugin" .zip
 installs Eizport and the importer there). Nothing is mocked: the screens, the
 files, the imports and Playground are the plugin's own. Waits (exporting,
@@ -49,7 +49,7 @@ what a scene *does* means changing the scene with the same `id` in
 
 ## 2. choose — Pick what moves
 
-- On screen: Z Store → Tools → Export. Pages → Choose items → check Home (it wears the Homepage badge) → Export 1 item. Options opens filtered to Basics → Export Basics.
+- On screen: Eiz Coffee → Tools → Export. Pages → Choose items → check Home (it wears the Homepage badge) → Export 1 item. Options opens filtered to Basics → Export Basics.
 - Caption: Pick exactly what moves: the homepage, and the settings that go with it.
 - Hold: 2.5
 
@@ -73,19 +73,19 @@ what a scene *does* means changing the scene with the same `id` in
 
 ## 6. as-plugin — Or as a plugin
 
-- On screen: Z Store → Export → Details → **As plugin** → Export → Download. Client Site → Plugins → Add Plugin → Upload Plugin → the .zip → Install Now → Activate Plugin → "open the import screen". **Install Now** installs and activates Eizport on the same screen → Continue → **Install Now** installs and activates the WordPress Importer → **Run import** → "Imported".
+- On screen: Eiz Coffee → Export → Details → **As plugin** → Export → Download. Client Site → Plugins → Add Plugin → Upload Plugin → the .zip → Install Now → Activate Plugin → "open the import screen". **Install Now** installs and activates Eizport on the same screen → Continue → **Install Now** installs and activates the WordPress Importer → **Run import** → "Imported".
 - Caption: Or send it as a plugin: installed on the other site, it brings what it needs and imports itself.
 - Hold: 2.5
 
 ## 7. playground-link — Playground, from a local site
 
-- On screen: Z Store → Export → Format Playground → Export. Settings → Eizport → Copies → Open in Playground: playground.wordpress.net loads the copy straight from localhost and the site runs in the browser.
+- On screen: Eiz Coffee → Export → Format Playground → Export. Settings → Eizport → Copies → Open in Playground: playground.wordpress.net loads the copy straight from localhost and the site runs in the browser.
 - Caption: Or the whole site as a WordPress Playground .zip — a copy made on localhost opens on playground.wordpress.net.
 - Hold: 3
 
 ## 8. playground-cli — Or offline
 
-- On screen: a terminal runs `npx @wp-playground/cli server --blueprint=z-store.zip` (the default port, 9400: it must be free while recording); the same site opens on 127.0.0.1:9400.
+- On screen: a terminal runs `npx @wp-playground/cli server --blueprint=eiz-coffee.zip` (the default port, 9400: it must be free while recording); the same site opens on 127.0.0.1:9400.
 - Caption: Or run it offline with one command.
 - Hold: 2.5
 

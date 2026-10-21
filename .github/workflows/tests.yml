@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [trunk]
+    branches: [trunk, 'release/**']
   pull_request:
 
 permissions:
@@ -20,7 +20,13 @@ jobs:
           constant=$(sed -n "s/^const VERSION = '\(.*\)';$/\1/p" eizport.php)
           stable=$(sed -n 's/^Stable tag: *//p' readme.txt)
           echo "header=$header constant=$constant stable=$stable"
-          [ -n "$header" ] && [ "$header" = "$constant" ] && [ "$header" = "$stable" ]
+          [ -n "$header" ] && [ "$header" = "$constant" ]
+          # A final: Stable tag is the version. A dev or pre-release (trunk's
+          # 1.1.0-dev, 1.1.0-rc.1): Stable tag is a final before its series.
+          case "$header" in
+            *-*) [[ "$stable" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [ "$(printf '%s\n' "$stable" "${header%%-*}" | sort -V | head -n1)" = "$stable" ] && [ "$stable" != "${header%%-*}" ] ;;
+            *) [ "$header" = "$stable" ] ;;
+          esac
 
   php:
     name: Lint, PHPCS, PHPUnit and Plugin Check (wp-env)

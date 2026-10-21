@@ -1,8 +1,10 @@
 name: Release
 
-# Runs on the X.Y.Z (or X.Y.Z-pre) tag that bin/release.php
-# pushes (`eizport release`). A pre-release is still the latest release, so
-# the download link below keeps working.
+# Runs on the X.Y.Z (or X.Y.Z-rc.N) tag that bin/release.php
+# pushes (`eizport release`) from a release/X.Y branch. A pre-release (a tag
+# with "-") is a GitHub prerelease only: not the latest release, no
+# eizport.zip, no WordPress.org deploy, and readme.txt's Stable tag stays on
+# the last final.
 # Builds the zip from `git archive` (.gitattributes export-ignore decides what
 # ships) plus the JS build (build/ is not in git), publishes it on the GitHub
 # release twice — versioned, and as eizport.zip so
@@ -38,7 +40,9 @@ jobs:
           constant=$(sed -n "s/^const VERSION = '\(.*\)';$/\1/p" eizport.php)
           stable=$(sed -n 's/^Stable tag: *//p' readme.txt)
           echo "tag=$tag header=$header constant=$constant stable=$stable"
-          [ "$header" = "$tag" ] && [ "$constant" = "$tag" ] && [ "$stable" = "$tag" ]
+          [ "$header" = "$tag" ] && [ "$constant" = "$tag" ]
+          # A final moves Stable tag; a pre-release leaves it on the last final.
+          case "$tag" in *-*) ;; *) [ "$stable" = "$tag" ] ;; esac
 
       - name: Build the plugin zip
         id: zip
@@ -51,16 +55,21 @@ jobs:
           find /tmp/out -name '*.map' -delete
           cd /tmp/out
           zip -qr "eizport.${tag}.zip" eizport
-          cp "eizport.${tag}.zip" eizport.zip
-          unzip -l eizport.zip | tail -n +4 | head -n -2 | awk '{print $4}'
-          echo "files=/tmp/out/eizport.${tag}.zip,/tmp/out/eizport.zip" >> "$GITHUB_OUTPUT"
+          unzip -l "eizport.${tag}.zip" | tail -n +4 | head -n -2 | awk '{print $4}'
+          # eizport.zip is what releases/latest/download/eizport.zip serves: finals only.
+          case "$tag" in
+            *-*) echo "files=/tmp/out/eizport.${tag}.zip" >> "$GITHUB_OUTPUT" ;;
+            *) cp "eizport.${tag}.zip" eizport.zip
+               echo "files=/tmp/out/eizport.${tag}.zip,/tmp/out/eizport.zip" >> "$GITHUB_OUTPUT" ;;
+          esac
 
       - name: Release notes from readme.txt
         run: |
           # The version's entry in the readme's Changelog. It replaces the
           # release's text on every run (generated notes would pile up when a
-          # tag is moved and the workflow runs again).
-          awk -v v="= ${GITHUB_REF_NAME} =" '/^== Changelog ==/ { c = 1; next } c && $0 == v { p = 1; next } p && /^(= |== )/ { exit } p { print }' readme.txt > /tmp/notes.md
+          # tag is moved and the workflow runs again). A pre-release uses its
+          # final's entry: 1.1.0-rc.1 → = 1.1.0 =.
+          awk -v v="= ${GITHUB_REF_NAME%%-*} =" '/^== Changelog ==/ { c = 1; next } c && $0 == v { p = 1; next } p && /^(= |== )/ { exit } p { print }' readme.txt > /tmp/notes.md
           cat /tmp/notes.md
           [ -s /tmp/notes.md ]
 
@@ -69,14 +78,14 @@ jobs:
         with:
           files: ${{ steps.zip.outputs.files }}
           body_path: /tmp/notes.md
-          # Even a pre-release: it is what releases/latest/download/eizport.zip serves.
-          prerelease: false
-          make_latest: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          make_latest: ${{ !contains(github.ref_name, '-') }}
 
   wporg:
     # Off until the plugin is approved: set the repository variable
     # WPORG_DEPLOY to "true" and the secrets SVN_USERNAME / SVN_PASSWORD.
-    if: vars.WPORG_DEPLOY == 'true'
+    # Finals only: WordPress.org takes numeric versions.
+    if: vars.WPORG_DEPLOY == 'true' && !contains(github.ref_name, '-')
     needs: release
     runs-on: ubuntu-latest
     steps:
