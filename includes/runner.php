@@ -39,6 +39,7 @@ function export( $specs, $settings ) {
 
 	$media_used = $settings['media_used'] ?? null;
 	$reviews    = $settings['reviews'] ?? null;
+	$menus      = $settings['menus'] ?? null;
 	$bundle     = ! array_key_exists( 'bundle', $settings ) || ! empty( $settings['bundle'] ) || ! empty( $settings['blueprint'] );
 	$filename   = (string) ( $settings['filename'] ?? '' );
 	$settings   = \Eizport\Export\bundle_settings( array_merge( $settings, array( 'bundle' => $bundle ) ) );
@@ -46,7 +47,11 @@ function export( $specs, $settings ) {
 		$name                 = preg_replace( '/\.xml$/i', '', sanitize_file_name( $filename ) );
 		$settings['filename'] = '' === $name ? \Eizport\Export\default_filename() : $name;
 	}
-	$args   = \Eizport\Selection\apply_specs( array( 'content' => 'all' ), $specs );
+	$start = array( 'content' => 'all' );
+	if ( null !== $menus ) {
+		$start['eizport_menus'] = $menus;
+	}
+	$args   = \Eizport\Selection\apply_specs( $start, $specs );
 	$target = Files\temp_file( 'eizport-export' );
 
 	$args = array_merge( $args, $settings, array( 'eizport_target' => $target ) );

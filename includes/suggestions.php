@@ -46,7 +46,7 @@ function chosen_ids( $specs ) {
  * The suggestions for what is chosen.
  *
  * @param array $specs Post type => spec (see chosen_ids()).
- * @return array{items: array<string, int[]>, reviews: int[], options: string[]}
+ * @return array{items: array<string, int[]>, reviews: int[], options: string[], chosen: array<string, int[]>}
  */
 function suggest( $specs ) {
 	$chosen = chosen_ids( $specs );
@@ -94,6 +94,7 @@ function suggest( $specs ) {
 		'items'   => $items,
 		'reviews' => reviews( $chosen ),
 		'options' => $options,
+		'chosen'  => $chosen,
 	);
 }
 

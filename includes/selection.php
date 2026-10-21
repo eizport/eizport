@@ -622,6 +622,12 @@ function valid_ids( $type, $ids ) {
  */
 function apply_specs( $args, $specs ) {
 	if ( ! $specs ) {
+		// Only menus: export_wp() is asked for menu items, where() picks the rest.
+		if ( ! empty( $args['eizport_menus'] ) && \Eizport\Menus\post_ids( $args ) ) {
+			$args['content']       = 'nav_menu_item';
+			$args['eizport_types'] = array();
+		}
+
 		return $args;
 	}
 
@@ -971,7 +977,8 @@ function type_condition( $type, $spec ) {
 function where( $args ) {
 	global $wpdb;
 
-	if ( empty( $args['eizport_types'] ) || ! is_array( $args['eizport_types'] ) ) {
+	// No types (all content), unless only menus are chosen (an empty list, see apply_specs()).
+	if ( ! isset( $args['eizport_types'] ) || ! is_array( $args['eizport_types'] ) || ( ! $args['eizport_types'] && ! \Eizport\Menus\post_ids( $args ) ) ) {
 		return '';
 	}
 
@@ -990,8 +997,13 @@ function where( $args ) {
 			$also = array_merge( $also, media_used( array_merge( (array) $ids, $children ) ) );
 		}
 	}
+	// The menus chosen: classic menus' items and block navigations.
+	$also = array_merge( $also, \Eizport\Menus\post_ids( $args ) );
 	if ( $also ) {
 		$parts[] = "{$wpdb->posts}.ID IN (" . implode( ',', array_unique( $also ) ) . ')';
+	}
+	if ( ! $parts ) {
+		return '';
 	}
 
 	return "{$wpdb->posts}.post_status != 'auto-draft' AND (" . implode( ' OR ', $parts ) . ')';

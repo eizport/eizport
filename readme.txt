@@ -19,7 +19,8 @@ Eizport gives Tools → Export a new screen, built like WordPress's newest admin
 
 Built with DataViews and DataForm, it runs on the plugin's abilities:
 
-* **One list:** the content types, Attachments and Options. Check what to export; nothing checked exports all content.
+* **One list:** the content types, Attachments, Menus and Options. Check what to export; nothing checked exports all content.
+* **Menus:** classic menus with their items and theme locations, and block navigations, on their own row (the menus in theme locations and the navigations the theme uses are suggested; the pages a menu links to too). On import, menu items point to the imported pages, each menu goes back to its location, and navigation blocks point to the imported navigations.
 * **Items in a side panel:** each type's items with search, filters and a checkbox per item; what you check joins the export at once, and a Selection filter shows the ones chosen. Items show their roles (Homepage, Posts page, Shop page…).
 * **Options:** one by one in a side panel (Basics suggested). Settings that point to the items chosen (homepage, posts page, privacy policy page, site icon, WooCommerce pages) are suggested in the Options row and go with the export once it's checked.
 * **The file in a panel above the list,** summed up in a line until opened: format (WXR XML, or WXRZ once media files or settings go with it, or a Playground .zip), file name, media files, Playground themes and plugins.

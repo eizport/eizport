@@ -23,6 +23,8 @@ export const DEFAULT_STATE: ExportState = {
 		update_existing: false,
 		review_ids: [],
 		review_all: false,
+		menu_ids: [],
+		menu_all: false,
 		themes: [],
 		plugins: [],
 	},
@@ -93,6 +95,41 @@ export const OPTIONS_ROW = '__options';
 /** The Product reviews row (WooCommerce's product reviews). */
 export const REVIEWS_ROW = '__reviews';
 
+/** The Menus row: classic menus ("c:<ID>") and block navigations ("n:<ID>"). */
+export const MENUS_ROW = '__menus';
+
+/** Rows that aren't a post type. */
+const OWN_ROWS = [ OPTIONS_ROW, REVIEWS_ROW, MENUS_ROW ];
+
+/**
+ * A menu's ID in the Menus row.
+ *
+ * @param kind "classic" or "navigation".
+ * @param id   Term or post ID.
+ * @return Row ID, like "c:18".
+ */
+export function menuKey( kind: 'classic' | 'navigation', id: number ): string {
+	return `${ kind === 'classic' ? 'c' : 'n' }:${ id }`;
+}
+
+/**
+ * The menus of some Menus row IDs, as eizport/export takes them.
+ *
+ * @param keys Row IDs ("c:18", "n:4").
+ * @return Classic menu and navigation IDs.
+ */
+export function menusOf( keys: Id[] ): {
+	classic: number[];
+	navigation: number[];
+} {
+	const of = ( prefix: string ) =>
+		keys
+			.map( String )
+			.filter( ( key ) => key.startsWith( prefix ) )
+			.map( ( key ) => Number( key.slice( 2 ) ) );
+	return { classic: of( 'c:' ), navigation: of( 'n:' ) };
+}
+
 /** What the items chosen suggest (eizport/get-suggestions). */
 let suggestions: Suggestions = { items: {}, reviews: [], options: [] };
 const suggestionListeners = new Set< () => void >();
@@ -127,9 +164,9 @@ type Id = number | string;
 
 /**
  * What a row's items suggest: products for Products, settings for Options,
- * reviews for Product reviews.
+ * reviews for Product reviews, the theme's and the items' menus for Menus.
  *
- * @param row Row: a post type, OPTIONS_ROW or REVIEWS_ROW.
+ * @param row Row: a post type, OPTIONS_ROW, REVIEWS_ROW or MENUS_ROW.
  * @return IDs (option names for Options).
  */
 export function suggestedFor( row: string ): Id[] {
@@ -138,6 +175,16 @@ export function suggestedFor( row: string ): Id[] {
 	}
 	if ( row === REVIEWS_ROW ) {
 		return suggestions.reviews;
+	}
+	if ( row === MENUS_ROW ) {
+		return [
+			...( suggestions.menus?.classic || [] ).map( ( id ) =>
+				menuKey( 'classic', id )
+			),
+			...( suggestions.menus?.navigation || [] ).map( ( id ) =>
+				menuKey( 'navigation', id )
+			),
+		];
 	}
 	return suggestions.items[ row ] || [];
 }
@@ -166,6 +213,9 @@ export function explicitFor( state: ExportState, row: string ): Id[] {
 	}
 	if ( row === REVIEWS_ROW ) {
 		return state.settings.review_ids;
+	}
+	if ( row === MENUS_ROW ) {
+		return state.settings.menu_ids;
 	}
 	return state.types[ row ]?.ids || [];
 }
@@ -224,6 +274,16 @@ function withRow(
 				...settings,
 				review_ids: explicit.map( Number ),
 				review_all: false,
+			},
+		};
+	}
+	if ( row === MENUS_ROW ) {
+		return {
+			...current,
+			settings: {
+				...settings,
+				menu_ids: explicit.map( String ),
+				menu_all: false,
 			},
 		};
 	}
@@ -298,6 +358,12 @@ export function exportAll( row: string ) {
 				settings: { ...next.settings, review_all: true },
 			};
 		}
+		if ( row === MENUS_ROW ) {
+			return {
+				...next,
+				settings: { ...next.settings, menu_all: true },
+			};
+		}
 		return { ...next, types: { ...next.types, [ row ]: {} } };
 	} );
 }
@@ -311,7 +377,7 @@ export function exportAll( row: string ) {
 export function resolvedTypes( state: ExportState ): Record< string, TypeChoice > {
 	const types: Record< string, TypeChoice > = { ...state.types };
 	state.settings.include_suggested
-		.filter( ( row ) => row !== OPTIONS_ROW && row !== REVIEWS_ROW )
+		.filter( ( row ) => ! OWN_ROWS.includes( row ) )
 		.forEach( ( row ) => {
 			const choice = types[ row ];
 			// A type exported whole (or filtered) already has its suggestions.
@@ -348,6 +414,10 @@ export function exportInput( state: ExportState ): Record< string, unknown > {
 			  },
 		// Product reviews only when their row is checked.
 		reviews: settings.review_all ? { all: true } : { ids: reviews },
+		// Menus too: classic ones (with their items and locations) and navigations.
+		menus: settings.menu_all
+			? { all: true }
+			: menusOf( chosenFor( state, MENUS_ROW ) ),
 	};
 	const types = resolvedTypes( state );
 	if ( Object.keys( types ).length ) {
@@ -398,6 +468,18 @@ export function hasOptions( state: ExportState ): boolean {
 		state.settings.option_all ||
 		state.settings.option_groups.length > 0 ||
 		chosenFor( state, OPTIONS_ROW ).length > 0
+	);
+}
+
+/**
+ * Whether the export includes menus.
+ *
+ * @param state State.
+ * @return Whether any menu is chosen.
+ */
+export function hasMenus( state: ExportState ): boolean {
+	return (
+		state.settings.menu_all || chosenFor( state, MENUS_ROW ).length > 0
 	);
 }
 

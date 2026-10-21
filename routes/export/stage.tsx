@@ -40,16 +40,20 @@ import { mark } from '../../src/mark';
 import usePhoneView from '../../src/use-phone-view';
 import {
 	DEFAULT_STATE,
+	MENUS_ROW,
 	OPTIONS_ROW,
 	REVIEWS_ROW,
 	bringSuggested,
+	chosenFor,
 	explicitFor,
 	exportAll,
 	exportInput,
 	groupName,
 	hasChoices,
+	hasMenus,
 	includesSuggested,
 	leaveOut,
+	menusOf,
 	resolvedTypes,
 	sameState,
 	setExportState,
@@ -128,6 +132,8 @@ function describe(
 		parts.push( __( 'All options', 'eizport' ) );
 	} else if ( row === REVIEWS_ROW && state.settings.review_all ) {
 		parts.push( __( 'All', 'eizport' ) );
+	} else if ( row === MENUS_ROW && state.settings.menu_all ) {
+		parts.push( __( 'All', 'eizport' ) );
 	} else if ( choice && ! choice.ids ) {
 		parts.push(
 			Object.keys( choice.filters || {} ).length
@@ -157,6 +163,8 @@ function describe(
 		exportsAll = state.settings.option_all;
 	} else if ( row === REVIEWS_ROW ) {
 		exportsAll = state.settings.review_all;
+	} else if ( row === MENUS_ROW ) {
+		exportsAll = state.settings.menu_all;
 	}
 	if ( parts.length ) {
 		return { checked: true, summary: parts.join( ' + ' ), exportsAll };
@@ -275,6 +283,10 @@ function Stage() {
 	const suggestions = useSuggestions();
 	const types = useMemo( () => resolvedTypes( state ), [ state, suggestions ] );
 	const typesKey = JSON.stringify( types );
+	// The classic menus chosen: the pages their items point to are suggested.
+	const menusKey = JSON.stringify(
+		menusOf( chosenFor( state, MENUS_ROW ) ).classic
+	);
 
 	// What the items chosen suggest (settings, products a block shows, reviews).
 	useEffect( () => {
@@ -290,12 +302,13 @@ function Stage() {
 				whole: Object.keys( chosen ).filter(
 					( type ) => ! chosen[ type ].ids && ! chosen[ type ].filters
 				),
+				menus: { classic: JSON.parse( menusKey ) },
 			} )
 				.then( setSuggestions )
 				.catch( () => undefined );
 		}, 300 );
 		return () => clearTimeout( timer );
-	}, [ typesKey ] );
+	}, [ typesKey, menusKey ] );
 
 	const rows: Row[] = useMemo( () => {
 		const list: Row[] = [];
@@ -314,6 +327,21 @@ function Stage() {
 				} );
 			}
 		} );
+		const menuCount =
+			( options?.menus?.classic.length || 0 ) +
+			( options?.menus?.navigation.length || 0 );
+		if ( menuCount ) {
+			// Navigation menus: classic ones (with their locations) and block navigations.
+			list.push( {
+				type: MENUS_ROW,
+				label: __( 'Menus', 'eizport' ),
+				count: menuCount,
+				hierarchical: false,
+				statuses: [],
+				taxonomies: [],
+				...describe( state, MENUS_ROW, options ),
+			} );
+		}
 		if ( options ) {
 			// Options (settings), one by one, are exported with the content, in the same list.
 			list.push( {
@@ -458,6 +486,11 @@ function Stage() {
 								'eizport'
 							),
 							Object.keys( types ).length
+					  )
+					: hasMenus( state )
+					? __(
+							'No content type checked: only the menus are exported. Check types to export content too.',
+							'eizport'
 					  )
 					: __(
 							'No content type checked: all content is exported. Check types to export only those.',

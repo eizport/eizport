@@ -419,9 +419,12 @@ function update_existing( $on ) {
 		return $id;
 	};
 	add_filter( 'wp_import_existing_post', $find, 20, 2 );
+	// Classic menus the site has take the file's items instead of keeping theirs (import-menus.php).
+	add_filter( 'eizport_menus_update_existing', '__return_true' );
 
 	return function () use ( $find ) {
 		remove_filter( 'wp_import_existing_post', $find, 20 );
+		remove_filter( 'eizport_menus_update_existing', '__return_true' );
 	};
 }
 

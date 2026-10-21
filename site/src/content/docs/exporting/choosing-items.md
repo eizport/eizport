@@ -20,6 +20,8 @@ What you choose can suggest more, shown as **N suggested** in the other rows —
 | A page a setting points to (homepage, posts page, shop…) | Those settings, in **Options** ([linked settings](../options/#linked-settings)) |
 | A page whose blocks show products (*Hand-picked Products*, *Product Collection* with hand-picked products, *Single Product*, *Featured Product*, `[products ids="…"]`) | Those products, in **Products** |
 | Products with reviews | Their approved reviews, in **Product reviews** |
+| Anything | The classic menus in the theme's locations and the navigations the items or the theme's templates use, in **Menus** ([menus](../menus/)) |
+| A menu | The pages, posts and products it links to, in their rows |
 
 Checking a row with suggestions brings them, and it still says *2 suggested* — with what else you chose: *2 suggested + Basics + 1 item*. Unchecking one of them in the row's panel turns the rest into plain items. **Export all of it** takes the whole type instead. Plugins add their own suggestions with [`eizport_suggested_items`](../../developers/hooks/#eizport_suggested_items).
 

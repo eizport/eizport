@@ -85,6 +85,19 @@ function export_input( $assoc_args ) {
 			'names'  => array_values( array_diff( $chosen, $groups ) ),
 		);
 	}
+	// The menus flag: all of them, or classic menu and navigation IDs.
+	$menus = (string) ( $assoc_args['menus'] ?? '' );
+	if ( 'all' === $menus ) {
+		$input['menus'] = array( 'all' => true );
+	} elseif ( '' !== $menus ) {
+		$input['menus'] = array();
+		foreach ( array_filter( array_map( 'trim', explode( ',', $menus ) ) ) as $part ) {
+			list( $kind, $ids ) = array_pad( explode( ':', $part, 2 ), 2, '' );
+			if ( in_array( $kind, array( 'classic', 'navigation' ), true ) ) {
+				$input['menus'][ $kind ] = array_values( array_filter( array_map( 'absint', explode( '+', $ids ) ) ) );
+			}
+		}
+	}
 	foreach ( array( 'zip', 'as-plugin', 'update-existing' ) as $name ) {
 		if ( $flag( $name ) ) {
 			$input[ str_replace( '-', '_', $name ) ] = true;
@@ -111,6 +124,11 @@ function export_input( $assoc_args ) {
  *
  * [--options=<options>]
  * : Option groups (like basics) and option names, comma-separated.
+ *
+ * [--menus=<menus>]
+ * : Navigation menus: `all`, or `classic:ID+ID` (menu term IDs, with their
+ * items and theme locations) and `navigation:ID+ID` (wp_navigation IDs),
+ * comma-separated. Default: none (all content already has them).
  *
  * [--[no-]media]
  * : Put the media files inside. Default: yes.
