@@ -8,10 +8,12 @@ jobs:
   build:
     uses: WordPress/action-wp-playground-pr-preview/.github/workflows/preview-build.yml@v3
     with:
-      artifacts: plugin-zip=/tmp/out/eizport.zip
+      # Relative to the checkout: the action prefixes the working directory.
+      artifacts: plugin-zip=pr-preview/eizport.zip
       build-command: |
         npm ci && npm run build --if-present
         mkdir -p /tmp/out
         git archive HEAD --prefix=eizport/ | tar xf - -C /tmp/out/
         if [ -d build ]; then cp -r build /tmp/out/eizport/build; fi
-        (cd /tmp/out && zip -qr eizport.zip eizport)
+        mkdir -p pr-preview
+        (cd /tmp/out && zip -qr "$GITHUB_WORKSPACE/pr-preview/eizport.zip" eizport)
