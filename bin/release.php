@@ -168,7 +168,7 @@ function eizport_release_entry( string $readme, string $section, string $version
  */
 function eizport_release_changelog_entries( string $dir ): array {
 	$entries = array();
-	foreach ( glob( $dir . '/changelog/*' ) ?: array() as $file ) {
+	foreach ( (array) glob( $dir . '/changelog/*' ) as $file ) {
 		if ( ! is_file( $file ) ) {
 			continue;
 		}
@@ -192,12 +192,12 @@ function eizport_release_changelog_entries( string $dir ): array {
 }
 
 /**
- * readme.txt with the entries added to the version's Changelog: Added,
+ * The readme with the entries added to the version's Changelog: Added,
  * Changed, Fixed (dev entries stay out of the readme). Lines already there
  * — written by hand, or by an earlier pre-release — are kept and not repeated.
  *
- * @param string                                       $readme  readme.txt.
- * @param string                                       $version The version's Changelog heading (X.Y.Z).
+ * @param string                                          $readme  readme.txt.
+ * @param string                                          $version The version's Changelog heading (X.Y.Z).
  * @param array<int, array{ type: string, text: string }> $entries Changelog entries.
  * @return string
  */
@@ -226,18 +226,21 @@ function eizport_release_compile_changelog( string $readme, string $version, arr
 	if ( false === $section ) {
 		WP_CLI::error( 'readme.txt has no "== Changelog ==" section.' );
 	}
-	// The version's heading inside the section, if it's there.
-	$at = false;
-	for ( $i = $section + 1, $n = count( $rows ); $i < $n && 0 !== strpos( $rows[ $i ], '== ' ); $i++ ) {
-		if ( trim( $rows[ $i ] ) === $heading ) {
-			$at = $i;
+	$total = count( $rows );
+	// The section's end: the next "== " heading.
+	$end = $total;
+	foreach ( array_slice( $rows, $section + 1, null, true ) as $i => $row ) {
+		if ( 0 === strpos( $row, '== ' ) ) {
+			$end = $i;
 			break;
 		}
 	}
+	// The version's heading inside the section, if it's there.
+	$at = array_search( $heading, array_map( 'trim', array_slice( $rows, $section + 1, $end - $section - 1, true ) ), true );
 	if ( false === $at ) {
 		// A new entry, on top of the section.
 		$first = $section + 1;
-		while ( $first < count( $rows ) && '' === trim( $rows[ $first ] ) ) {
+		while ( $first < $total && '' === trim( $rows[ $first ] ) ) {
 			++$first;
 		}
 		array_splice( $rows, $section + 1, $first - $section - 1, array_merge( array( '', $heading ), $lines, array( '' ) ) );
@@ -245,8 +248,11 @@ function eizport_release_compile_changelog( string $readme, string $version, arr
 	}
 	// After the entry's last non-empty line.
 	$last = $at;
-	for ( $i = $at + 1, $n = count( $rows ); $i < $n && 0 !== strpos( $rows[ $i ], '= ' ) && 0 !== strpos( $rows[ $i ], '== ' ); $i++ ) {
-		if ( '' !== trim( $rows[ $i ] ) ) {
+	foreach ( array_slice( $rows, $at + 1, $end - $at - 1, true ) as $i => $row ) {
+		if ( 0 === strpos( $row, '= ' ) ) {
+			break;
+		}
+		if ( '' !== trim( $row ) ) {
 			$last = $i;
 		}
 	}
@@ -262,7 +268,12 @@ function eizport_release_compile_changelog( string $readme, string $version, arr
  * @return string patch, minor, major, or '' without entries.
  */
 function eizport_release_needed_bump( array $entries ): string {
-	$rank = array( '' => 0, 'patch' => 1, 'minor' => 2, 'major' => 3 );
+	$rank = array(
+		''      => 0,
+		'patch' => 1,
+		'minor' => 2,
+		'major' => 3,
+	);
 	$max  = '';
 	foreach ( $entries as $entry ) {
 		if ( $rank[ $entry['significance'] ] > $rank[ $max ] ) {
@@ -390,7 +401,11 @@ class Eizport_Release_Command {
 				$stable = $s[1];
 			}
 			$needed = eizport_release_needed_bump( $entries );
-			$rank   = array( 'patch' => 1, 'minor' => 2, 'major' => 3 );
+			$rank   = array(
+				'patch' => 1,
+				'minor' => 2,
+				'major' => 3,
+			);
 			if ( '' !== $stable && $rank[ $needed ] > $rank[ eizport_release_bump_kind( $stable, $final ) ] ) {
 				WP_CLI::warning( "The changelog entries need a $needed release; $stable → $final is less." );
 			}
