@@ -9,12 +9,22 @@
  * the zip, publishes the GitHub release and, once enabled, deploys to the
  * WordPress.org SVN.
  *
+ * Three kinds of version (the flow is in .github/CONTRIBUTING.md):
+ * - X.Y.Z-dev: trunk's next version. Header and constant only; no notes,
+ *   no tag, Stable tag untouched ("Start X.Y.Z-dev").
+ * - X.Y.Z-rc.N (or -beta.N): a GitHub-only pre-release from release/X.Y.
+ *   Tagged, with X.Y.Z's notes; Stable tag, "latest" and "stable" untouched.
+ * - X.Y.Z: the release, from release/X.Y. Everything above.
+ *
  * Not shipped (bin/ is export-ignored). The POT is kept current by
  * composer check; translations come from translate.wordpress.org.
  *
  * Usage, from the WordPress Studio site root:
  *   studio wp --require=wp-content/plugins/eizport/bin/release.php eizport release patch
  *   … eizport release minor|major|1.2.3
+ *   … eizport release 1.2.0-dev          (trunk, after cutting release/1.1)
+ *   … eizport release 1.1.0-rc.1         (release/1.1, GitHub only)
+ *   … eizport release patch              (from 1.1.0-dev or 1.1.0-rc.1: 1.1.0)
  *   … eizport release patch --no-commit|--no-tag|--no-push
  *   … eizport release patch --no-checks   (skip composer check, build and Plugin Check)
  *
@@ -106,8 +116,12 @@ function eizport_release_bump( string $current, string $bump ): string {
 		}
 		return $bump;
 	}
+	// From a dev or pre-release version, patch is the final of its series: 1.1.0-dev → 1.1.0.
+	if ( 'patch' === $bump && preg_match( '/^(\d+\.\d+\.\d+)-/', $current, $m ) ) {
+		return $m[1];
+	}
 	if ( ! preg_match( '/^(\d+)\.(\d+)\.(\d+)$/', $current, $m ) ) {
-		WP_CLI::error( "Current version $current is not X.Y.Z: give the next version (like 1.2.3)." );
+		WP_CLI::error( "Current version $current is not X.Y.Z: give the next version (like 1.2.3), or patch for its final." );
 	}
 	switch ( $bump ) {
 		case 'major':
@@ -151,7 +165,7 @@ class Eizport_Release_Command {
 	 * ## OPTIONS
 	 *
 	 * <bump>
-	 * : patch, minor, major, or an explicit X.Y.Z.
+	 * : patch, minor, major, or an explicit X.Y.Z, X.Y.Z-dev or X.Y.Z-rc.N.
 	 *
 	 * [--commit]
 	 * : Commit the release. Default true; --no-commit stops after bumping (implies --no-tag).
@@ -206,17 +220,21 @@ class Eizport_Release_Command {
 		}
 		$current = $m[1];
 		$version = eizport_release_bump( $current, (string) ( $args[0] ?? '' ) );
-		WP_CLI::log( "Eizport $current → $version" );
+		// The final this version leads to (1.1.0 for 1.1.0-rc.1): its notes are the release's text.
+		$final = (string) preg_replace( '/-.*$/', '', $version );
+		$dev   = (bool) preg_match( '/-dev$/', $version );
+		$pre   = ! $dev && $final !== $version;
+		WP_CLI::log( "Eizport $current → $version" . ( $dev ? ' (dev: no tag)' : ( $pre ? ' (pre-release: GitHub only)' : '' ) ) );
 
 		list( $has_remote ) = eizport_release_try_run( 'git remote get-url origin', $dir );
-		if ( 0 === $has_remote ) {
+		if ( 0 === $has_remote && ! $dev ) {
 			eizport_release_run( 'git fetch origin --tags --quiet', $dir, true );
 			if ( 0 === eizport_release_try_run( 'git ls-remote --exit-code origin refs/tags/' . escapeshellarg( $version ), $dir )[0] ) {
 				WP_CLI::error( "Tag $version already exists on origin." );
 			}
 		}
 
-		// Every copy of the version: header, the namespaced constant, Stable tag.
+		// Every copy of the version: header, the namespaced constant, and Stable tag for a final only.
 		WP_CLI::log( '  → bumping the version' );
 		$source = preg_replace( '/^( \* Version:\s*)\S+$/m', '${1}' . $version, $source, 1 );
 		$source = preg_replace( "/^const VERSION = '[^']*';$/m", "const VERSION = '$version';", (string) $source, 1, $count );
@@ -224,17 +242,19 @@ class Eizport_Release_Command {
 			WP_CLI::error( "No \"const VERSION = '…';\" line in eizport.php." );
 		}
 		$text = (string) file_get_contents( $readme );
-		$text = preg_replace( '/^Stable tag:.*$/m', 'Stable tag: ' . $version, $text, 1 );
+		if ( ! $dev && ! $pre ) {
+			$text = (string) preg_replace( '/^Stable tag:.*$/m', 'Stable tag: ' . $version, $text, 1 );
+		}
 
 		// Notes are written before releasing, in both sections; nothing is touched until they are.
-		$missing = array_filter(
+		$missing = $dev ? array() : array_filter(
 			array( 'Changelog', 'Upgrade Notice' ),
-			function ( $section ) use ( $text, $version ) {
-				return '' === eizport_release_entry( (string) $text, $section, $version );
+			function ( $section ) use ( $text, $final ) {
+				return '' === eizport_release_entry( $text, $section, $final );
 			}
 		);
 		if ( $missing ) {
-			WP_CLI::error( "readme.txt has no \"= $version =\" entry with notes under: " . implode( ', ', $missing ) . '.' );
+			WP_CLI::error( "readme.txt has no \"= $final =\" entry with notes under: " . implode( ', ', $missing ) . '.' );
 		}
 		file_put_contents( $main, $source );
 		file_put_contents( $readme, $text );
@@ -248,30 +268,39 @@ class Eizport_Release_Command {
 			return;
 		}
 		eizport_release_run( 'git add -A', $dir, true );
-		eizport_release_run( 'git commit --quiet -m ' . escapeshellarg( "chore: release $version" ), $dir, true );
+		eizport_release_run( 'git commit --quiet -m ' . escapeshellarg( $dev ? "Start $version" : "chore: release $version" ), $dir, true );
+		$branch = trim( eizport_release_run( 'git rev-parse --abbrev-ref HEAD', $dir, true ) );
+		if ( $dev ) {
+			// A dev version is never tagged: trunk just says what comes next.
+			if ( ! $push || 0 !== $has_remote ) {
+				WP_CLI::success( "Started $version locally (not pushed). Push with: git push origin $branch" );
+				return;
+			}
+			eizport_release_run( 'git push origin ' . escapeshellarg( $branch ) . ' --quiet', $dir, true );
+			WP_CLI::success( "Started $version." );
+			return;
+		}
 		if ( ! $tag ) {
 			WP_CLI::success( "Committed $version (--no-tag)." );
 			return;
 		}
 		eizport_release_run( 'git tag ' . escapeshellarg( $version ), $dir, true );
-		// "latest" moves to each release (the workflow runs on X.Y.Z tags only).
-		eizport_release_run( 'git tag --force ' . EIZPORT_RELEASE_LATEST_TAG, $dir, true );
-		// "stable" moves to each final release — and to pre-releases until there is one.
-		$finals = preg_grep( '/^\d+\.\d+\.\d+$/', explode( "\n", eizport_release_run( 'git tag --list', $dir, true ) ) );
-		$stable = ! preg_match( '/-/', $version ) || array() === $finals;
-		if ( $stable ) {
-			eizport_release_run( 'git tag --force ' . EIZPORT_RELEASE_STABLE_TAG, $dir, true );
+		// "latest" and "stable" move with final releases only: a pre-release is GitHub-only and never the download.
+		$moved = $pre ? array() : array( EIZPORT_RELEASE_LATEST_TAG, EIZPORT_RELEASE_STABLE_TAG );
+		foreach ( $moved as $name ) {
+			eizport_release_run( 'git tag --force ' . $name, $dir, true );
 		}
-		$tags = EIZPORT_RELEASE_LATEST_TAG . ( $stable ? ' and ' . EIZPORT_RELEASE_STABLE_TAG : '' );
+		$tags = $moved ? ' (also tagged ' . implode( ' and ', $moved ) . ')' : ' (pre-release)';
 		if ( ! $push || 0 !== $has_remote ) {
-			WP_CLI::success( "Released $version locally (not pushed), tagged $version, $tags. Push with: git push origin $version && git push --force origin " . EIZPORT_RELEASE_LATEST_TAG . ( $stable ? ' ' . EIZPORT_RELEASE_STABLE_TAG : '' ) );
+			WP_CLI::success( "Released $version locally (not pushed)$tags. Push with: git push origin $branch $version" . ( $moved ? ' && git push --force origin ' . implode( ' ', $moved ) : '' ) );
 			return;
 		}
-		$branch = trim( eizport_release_run( 'git rev-parse --abbrev-ref HEAD', $dir, true ) );
 		eizport_release_run( 'git push origin ' . escapeshellarg( $branch ) . ' --quiet', $dir, true );
 		eizport_release_run( 'git push origin ' . escapeshellarg( $version ) . ' --quiet', $dir, true );
-		eizport_release_run( 'git push --force origin ' . EIZPORT_RELEASE_LATEST_TAG . ( $stable ? ' ' . EIZPORT_RELEASE_STABLE_TAG : '' ) . ' --quiet', $dir, true );
-		WP_CLI::success( "Released $version (also tagged $tags): the version tag runs the Release workflow." );
+		if ( $moved ) {
+			eizport_release_run( 'git push --force origin ' . implode( ' ', $moved ) . ' --quiet', $dir, true );
+		}
+		WP_CLI::success( "Released $version$tags: the version tag runs the Release workflow." );
 	}
 
 	/**
