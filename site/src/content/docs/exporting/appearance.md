@@ -37,7 +37,7 @@ The images the items chosen use are exported with them, even when the Attachment
   - **Replace all of this site's CSS** — only the file's rules remain (`replace_all`).
 - **Theme mods** chosen go to the active theme and are **merged** into its own: what the file doesn't hold stays (the other settings, the menus' locations). The logo and the header image point to the imported attachments, the header and background images' addresses to the imported files.
 - **Style groups** chosen replace the same groups on the other site's styles (a block theme); its other groups stay.
-- **Widgets** chosen go at the **end of the same sidebar**, next to the other site's own widgets (to *Inactive widgets* when its theme has no such sidebar), each with a free number. Importing the same file again with *Update existing* updates them in place instead of adding them twice. A Navigation Menu widget points to the imported menu (export it on the [Menus](../menus/) row), an image widget to the imported image, and the addresses in block widgets to the imported files.
+- **Widgets** chosen go at the **end of the same sidebar**, next to the other site's own widgets (to *Inactive widgets* when its theme has no such sidebar), each with a free number. Importing the same file again with *Update existing* updates them in place instead of adding them twice. A Navigation Menu widget points to the imported menu (export it on the [Menus](../menus/) row), an image widget to the imported image, and the images and addresses in block widgets to the imported ones.
 
 ## From WP-CLI and the ability
 
@@ -52,6 +52,5 @@ A row alone takes all of it; a CSS rule's key (`r:…`) comes from [`eizport/get
 ## Limits
 
 - The look goes to the **active theme** of the other site. Exported from one theme and imported with another, theme mods only mean something if that theme uses the same settings.
-- Inside block widgets, an image keeps its ID from this site (its address is updated); see the [issues](https://github.com/eizport/eizport/issues) about IDs in blocks.
 - Fonts installed with the Font Library aren't exported: styles that use them fall back to the other site's fonts.
 - The theme mods no longer come with the Options row's *Basics* group: check **Customizer theme mods**. A block theme's site logo is an option, in *Basics*.

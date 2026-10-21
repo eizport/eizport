@@ -38,5 +38,5 @@ The [`eizport/export`](../../developers/abilities/#eizportexport) ability takes 
 
 - **All content** (no type chosen) already carries every menu, as WordPress's own export does; choosing menus there adds their theme locations.
 - With no type checked and menus chosen, only the menus are exported.
-- Inside a navigation, each link keeps the page ID and address it had on this site; when the pages get other IDs on the other site, the links still lead to the right address only if it's the same (see the [issues](https://github.com/eizport/eizport/issues) about block IDs and links to the source site). Classic menu items don't have this problem: the importer points them to the imported pages.
+- Inside a navigation, each link to a page or post points to the imported one; its address is the one it had on this site until the links to the source site are remapped (see the [issues](https://github.com/eizport/eizport/issues)). Classic menu items always point to the imported pages.
 - The classic screen (*Tools → Export → Classic*) has no Menus row.

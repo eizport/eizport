@@ -84,6 +84,25 @@ add_action( 'eizport_updated_from_import', function ( int $id, array $post ) {
 }, 10, 2 );
 ```
 
+## eizport_block_id_attributes
+
+Blocks whose attributes hold post IDs, mapped to the imported items when an import ends (core's Image, Gallery, Cover, Media & Text, File, Video, Audio and navigation links are there already). Add a plugin's block by its full name.
+
+```php
+add_filter( 'eizport_block_id_attributes', function ( array $blocks ) {
+	$blocks['my-plugin/card'] = array( 'imageId', 'postIds' ); // A number or an array of numbers.
+	return $blocks;
+} );
+```
+
+## eizport_menus_update_existing
+
+Whether an import replaces the items of the classic menus the site already has (`true`) or leaves them as they are (`false`, the default). *Update existing* turns it on for its import.
+
+```php
+add_filter( 'eizport_menus_update_existing', '__return_true' );
+```
+
 ## eizport_suggested_items
 
 Posts an item suggests exporting too, like the products a block in its content shows. The Export screen shows them as *N suggested* in their type's row ([choosing items](../../exporting/choosing-items/#suggestions)); nothing is added by itself. The WooCommerce compatibility uses it for products.
