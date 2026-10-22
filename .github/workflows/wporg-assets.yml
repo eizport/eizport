@@ -1,0 +1,39 @@
+name: WordPress.org assets
+
+# Updates only the plugin page's assets on WordPress.org (banners, icons,
+# screenshots, blueprints/ for the Live Preview), without a release: by hand,
+# from Actions → WordPress.org assets → Run workflow. Also a check that the
+# SVN_USERNAME / SVN_PASSWORD secrets work before a release deploys with them.
+#
+# The files come from the "latest" tag (the released version), so the readme
+# the action also sends to SVN is the released one — trunk's describes what
+# isn't out yet — with .wordpress-org/blueprints/ from trunk: the Live
+# Preview installs the directory's version, whichever it is. Nothing but the
+# readme and the assets goes to SVN (IGNORE_OTHER_FILES).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: latest
+          fetch-depth: 0
+
+      - name: The Live Preview's blueprint from trunk
+        run: git checkout origin/trunk -- .wordpress-org/blueprints
+
+      - name: WordPress.org plugin assets
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: eizport
+          ASSETS_DIR: .wordpress-org
+          IGNORE_OTHER_FILES: true
