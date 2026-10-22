@@ -447,6 +447,26 @@ export function resolvedTypes( state: ExportState ): Record< string, TypeChoice 
 	return types;
 }
 
+/** Items an update doesn't reach: the importer matches them its own way. */
+export const NOT_UPDATED = [ 'attachment', 'nav_menu_item', 'wp_navigation' ];
+
+/**
+ * Whether the export holds items "Update existing" reaches: all content with
+ * nothing checked, else a checked content type other than attachments and
+ * menu items (not only menus, options or the look).
+ *
+ * @param state State.
+ * @return Whether.
+ */
+export function updateReachesItems( state: ExportState ): boolean {
+	if ( ! Object.keys( state.types ).length && ! hasMenus( state ) ) {
+		return true;
+	}
+	return Object.keys( resolvedTypes( state ) ).some(
+		( type ) => ! NOT_UPDATED.includes( type ) && ! OWN_ROWS.includes( type )
+	);
+}
+
 /**
  * The ability input for the state.
  *
@@ -496,7 +516,11 @@ export function exportInput( state: ExportState ): Record< string, unknown > {
 	if ( settings.format !== 'playground' && settings.as_plugin ) {
 		input.as_plugin = true;
 	}
-	if ( settings.format !== 'playground' && settings.update_existing ) {
+	if (
+		settings.format !== 'playground' &&
+		settings.update_existing &&
+		updateReachesItems( state )
+	) {
 		input.update_existing = true;
 	}
 	if ( settings.format === 'playground' ) {

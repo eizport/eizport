@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-A bundle plugin's screen is one screen, with or without Eizport: Eizport is one more line in Before importing (Install Now, Activate or Update now, done right there), and what needs it waits — What it holds dimmed, Update existing and Run import disabled. The screen is no longer an item under Tools: Run import, on the plugin's row on the Plugins screen, opens it. Tools → Import lists it too, set apart from the other importers, and shows the list while it waits.
+A bundle plugin's screen is one screen, with or without Eizport: Eizport is one more line in Before importing (Install Now, Activate or Update now, done right there), and what needs it waits — What it holds dimmed, Update existing and Run import disabled. The screen is no longer an item under Tools: Run import, on the plugin's row on the Plugins screen, opens it. Tools → Import lists it too, set apart from the other importers, and shows the list while it waits. "Update existing" names the content types the export holds — on the Export screen, the importer's step 1 and a bundle plugin's screen — and isn't offered with none.

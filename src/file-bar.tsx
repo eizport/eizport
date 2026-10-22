@@ -28,7 +28,14 @@ import {
 import { Stack } from '@wordpress/ui';
 
 import { getItems } from './abilities';
-import { needsBundle, setExportState, useExportState } from './state';
+import {
+	NOT_UPDATED,
+	needsBundle,
+	resolvedTypes,
+	updateReachesItems,
+	setExportState,
+	useExportState,
+} from './state';
 import type { ExportOptions, FileSettings } from './types';
 
 /**
@@ -372,27 +379,79 @@ function AsPluginEdit( { data, field, onChange }: EditProps ) {
 }
 
 /**
- * "Update existing": the bundle asks its importer to update what's there; off
- * and disabled with the Playground .zip.
+ * The names of the content types an update reaches, of those chosen
+ * (suggestions included), as a list in the admin's language.
+ *
+ * @param options What the site offers.
+ * @return "Pages and Posts", "all content types" with nothing checked, or ''
+ *         when only rows without content are (the menus, the options, the look).
+ */
+function useUpdatedTypes( options?: ExportOptions ): string {
+	const state = useExportState();
+	if ( ! updateReachesItems( state ) ) {
+		return '';
+	}
+	// Nothing checked: all content goes, so all of it can be updated.
+	if ( ! Object.keys( state.types ).length ) {
+		return __( 'all content types', 'eizport' );
+	}
+	const chosen = resolvedTypes( state );
+	const names = ( options?.types ?? [] )
+		.filter(
+			( type ) => chosen[ type.type ] && ! NOT_UPDATED.includes( type.type )
+		)
+		.map( ( type ) => type.label );
+	if ( names.length < 2 ) {
+		return names.join( '' );
+	}
+	return sprintf(
+		/* translators: 1: content types but the last, separated by commas, 2: the last one. */
+		__( '%1$s and %2$s', 'eizport' ),
+		names.slice( 0, -1 ).join( __( ', ', 'eizport' ) ),
+		names[ names.length - 1 ]
+	);
+}
+
+/**
+ * "Update existing": the bundle asks its importer to update what's there;
+ * off and disabled with the Playground .zip, and with no content type chosen.
  *
  * @param props          Field edit props.
  * @param props.data     File settings.
  * @param props.field    The field.
  * @param props.onChange Sets settings.
+ * @param props.options  What the site offers.
  * @return Control.
  */
-function UpdateExistingEdit( { data, field, onChange }: EditProps ) {
+function UpdateExistingEdit( {
+	data,
+	field,
+	onChange,
+	options,
+}: EditProps & { options?: ExportOptions } ) {
 	// Playground starts from a new site: nothing to update.
 	const isPlayground = data.format === 'playground';
+	const types = useUpdatedTypes( options );
 	return (
 		<ToggleWithHelp
 			label={ field.label }
-			help={ __(
-				'On import, pages, posts and products that already exist on the other site (same slug) are updated with this content instead of getting copies — the homepage stays the homepage, a second delivery updates the first. The importer can still turn it off.',
-				'eizport'
-			) }
-			checked={ ! isPlayground && data.update_existing }
-			disabled={ isPlayground }
+			help={
+				types
+					? sprintf(
+							/* translators: %s: content types, e.g. "Pages and Posts". */
+							__(
+								'On import, the items that already exist on the other site (same type and slug) are updated with this content instead of getting copies: %s. The homepage stays the homepage, a second delivery updates the first. The importer can still turn it off.',
+								'eizport'
+							),
+							types
+					  )
+					: __(
+							'Nothing to update: no content type is chosen, only rows without content.',
+							'eizport'
+					  )
+			}
+			checked={ ! isPlayground && !! types && data.update_existing }
+			disabled={ isPlayground || ! types }
 			onChange={ ( checked ) => onChange( { update_existing: checked } ) }
 		/>
 	);
@@ -468,7 +527,9 @@ function useFields(
 				label: __( 'Update existing', 'eizport' ),
 				type: 'boolean',
 				// The toggle, and its help on an ⓘ.
-				Edit: UpdateExistingEdit,
+				Edit: ( props: EditProps ) => (
+					<UpdateExistingEdit { ...props } options={ options } />
+				),
 			},
 			{
 				id: 'css_mode',
@@ -793,12 +854,15 @@ function playgroundCount( settings: FileSettings ): number {
  *
  * @param settings File settings.
  * @param format   The format's label.
+ * @param options  What the site offers.
+ * @param updates  Whether "Update existing" reaches any item of the export.
  * @return Summary, like "WXRZ · default filename · media files".
  */
 function fileSummary(
 	settings: FileSettings,
 	format: string,
-	options?: ExportOptions
+	options?: ExportOptions,
+	updates = true
 ): string {
 	return [
 		format,
@@ -816,7 +880,7 @@ function fileSummary(
 		...( settings.format !== 'playground' && settings.as_plugin
 			? [ __( 'as plugin', 'eizport' ) ]
 			: [] ),
-		...( settings.format !== 'playground' && settings.update_existing
+		...( settings.format !== 'playground' && settings.update_existing && updates
 			? [ __( 'updates existing', 'eizport' ) ]
 			: [] ),
 		...( hasCss( settings ) && settings.css_mode === 'start'
@@ -901,7 +965,12 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 					{ __( 'Details', 'eizport' ) }
 				</span>
 				<span className="eizport-file-panel__summary">
-					{ fileSummary( settings, format, options ) }
+					{ fileSummary(
+						settings,
+						format,
+						options,
+						updateReachesItems( state )
+					) }
 				</span>
 			</button>
 		<Stack

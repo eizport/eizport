@@ -34,7 +34,7 @@ Above the list, a **Details** line sums up the file — like *WXRZ · default fi
 | **File name** | Empty: WordPress's usual `<site>.WordPress.<date>`, shown as the placeholder |
 | **Media files** | Put the exported attachments' files inside the bundle; its ⓘ explains it |
 | **As plugin** | Make the bundle a plugin that imports itself ([as plugin](../as-plugin/)); its ⓘ explains it. Off and disabled with Playground |
-| **Update existing** | The import updates the pages, posts and products that already exist (same slug) instead of adding copies ([more](../../getting-started/importing/#updating-items-that-already-exist)); its ⓘ explains it. Off and disabled with Playground, which starts from a new site |
+| **Update existing** | The import updates the items of the chosen content types that already exist (same type and slug) instead of adding copies, named in its ⓘ (all with nothing checked); disabled when only rows without content are checked ([more](../../getting-started/importing/#updating-items-that-already-exist)); its ⓘ explains it. Off and disabled with Playground, which starts from a new site |
 | **Playground options** | Where the Playground .zip opens and the themes and plugins it installs (enabled with the Playground format); a count on the button says how many are set ([Playground .zip](../../formats/playground-zip/#playground-options)) |
 
 ## Header actions

@@ -104,7 +104,7 @@ function template_translations() {
 		'WordPress Importer'                   => __( 'WordPress Importer', 'eizport' ),
 		/* translators: 1: file name, 2: size, 3: date. */
 		'The bundle: %1$s, %2$s, made %3$s.'   => __( 'The bundle: %1$s, %2$s, made %3$s.', 'eizport' ),
-		'Update pages, posts and products that already exist (same slug) instead of adding copies' => __( 'Update pages, posts and products that already exist (same slug) instead of adding copies', 'eizport' ),
+		'Update the items that already exist (same type and slug) instead of adding copies' => __( 'Update the items that already exist (same type and slug) instead of adding copies', 'eizport' ),
 		'Installing…'                          => __( 'Installing…', 'eizport' ),
 		'Activating…'                          => __( 'Activating…', 'eizport' ),
 		'Updating…'                            => __( 'Updating…', 'eizport' ),
@@ -681,12 +681,15 @@ function render( $plugin_file ) {
 						<?php endif; ?>
 					</li>
 				</ul>
-				<p>
-					<label>
-						<input type="checkbox" form="eizport-bundle-import-form" name="<?php echo esc_attr( Import\UPDATE_FIELD ); ?>" value="1" <?php checked( 'yes' === strtolower( trim( (string) get_file_data( (string) $plugin_file, array( 'update' => 'Eizport Update' ) )['update'] ) ) ); ?> />
-						<?php esc_html_e( 'Update pages, posts and products that already exist (same slug) instead of adding copies', 'eizport' ); ?>
-					</label>
-				</p>
+				<?php $update_label = Import\update_existing_label( array_keys( (array) ( $holds['types'] ?? array() ) ) ); ?>
+				<?php if ( '' !== $update_label ) : ?>
+					<p>
+						<label>
+							<input type="checkbox" form="eizport-bundle-import-form" name="<?php echo esc_attr( Import\UPDATE_FIELD ); ?>" value="1" <?php checked( 'yes' === strtolower( trim( (string) get_file_data( (string) $plugin_file, array( 'update' => 'Eizport Update' ) )['update'] ) ) ); ?> />
+							<?php echo esc_html( $update_label ); ?>
+						</label>
+					</p>
+				<?php endif; ?>
 				<?php if ( $imported ) : ?>
 					<p class="description"><?php esc_html_e( 'Importing again finds the same items and doesn’t duplicate them, but settings are set again.', 'eizport' ); ?></p>
 				<?php endif; ?>

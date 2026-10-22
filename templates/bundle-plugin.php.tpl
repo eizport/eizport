@@ -129,7 +129,7 @@ defined( 'ABSPATH' ) || exit;
 		echo esc_html( sprintf( __( 'The bundle: %1$s, %2$s, made %3$s.', 'EIZPORT_TEXT_DOMAIN' ), (string) preg_replace( '/-[a-z0-9]{16}(?=[.\/]|$)/', '', wp_basename( $bundle ) . ( is_dir( $bundle ) ? '/' : '' ) ), size_format( is_file( $bundle ) ? (int) filesize( $bundle ) : 0 ), wp_date( get_option( 'date_format' ), (int) filemtime( $bundle ) ) ) );
 		echo '</li></ul>';
 		$update = 'yes' === strtolower( trim( (string) get_file_data( $file, array( 'update' => 'Eizport Update' ) )['update'] ) );
-		echo '<p><label><input type="checkbox" disabled' . ( $update ? ' checked' : '' ) . ' /> ' . esc_html( __( 'Update pages, posts and products that already exist (same slug) instead of adding copies', 'EIZPORT_TEXT_DOMAIN' ) ) . '</label></p>';
+		echo '<p><label><input type="checkbox" disabled' . ( $update ? ' checked' : '' ) . ' /> ' . esc_html( __( 'Update the items that already exist (same type and slug) instead of adding copies', 'EIZPORT_TEXT_DOMAIN' ) ) . '</label></p>';
 		echo '</div></div></div>';
 	};
 

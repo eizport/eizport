@@ -287,4 +287,21 @@ class UpdateExistingTest extends Test_Case {
 		$this->assertTrue( Import\bundle_updates_existing( $dir ) );
 		$this->assertFalse( Import\bundle_updates_existing( '' ) );
 	}
+
+	public function test_the_label_names_the_types_the_bundle_holds() {
+		$this->assertSame(
+			'Update the items that already exist (same type and slug) instead of adding copies: Pages and Posts',
+			\Eizport\Import\update_existing_label( array( 'page', 'post', 'attachment' ) )
+		);
+		$this->assertStringNotContainsString( 'eizport_no_such_type', \Eizport\Import\update_existing_label( array( 'page', 'eizport_no_such_type' ) ), 'A type this site does not have is left out.' );
+		$this->assertSame( '', \Eizport\Import\update_existing_label( array( 'attachment', 'nav_menu_item' ) ), 'Nothing the update reaches: no box.' );
+		$this->assertSame( '', \Eizport\Import\update_existing_label( array() ) );
+	}
+
+	public function test_wxr_types_reads_the_items_post_types() {
+		$wxr = $this->temp_file( "<rss>\n<item>\n<wp:post_type><![CDATA[page]]></wp:post_type>\n</item>\n<item>\n<wp:post_type><![CDATA[attachment]]></wp:post_type>\n</item>\n<item>\n<wp:post_type><![CDATA[page]]></wp:post_type>\n</item>\n</rss>\n" );
+
+		$this->assertSame( array( 'page', 'attachment' ), \Eizport\Import\wxr_types( $wxr ) );
+		$this->assertSame( array(), \Eizport\Import\wxr_types( '/no/such/file.xml' ) );
+	}
 }

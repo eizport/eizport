@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T11:42:35+00:00\n"
+"POT-Creation-Date: 2026-10-22T11:59:51+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -44,7 +44,23 @@ msgstr ""
 msgid "A plugin .zip holding the bundle: installed on the other site, it imports itself from its screen under Tools."
 msgstr ""
 
-msgid "On import, pages, posts and products that already exist on the other site (same slug) are updated with this content instead of getting copies — the homepage stays the homepage, a second delivery updates the first. The importer can still turn it off."
+msgid "all content types"
+msgstr ""
+
+#. translators: 1: content types but the last, separated by commas, 2: the last one.
+#, js-format
+msgid "%1$s and %2$s"
+msgstr ""
+
+msgid ", "
+msgstr ""
+
+#. translators: %s: content types, e.g. "Pages and Posts".
+#, js-format
+msgid "On import, the items that already exist on the other site (same type and slug) are updated with this content instead of getting copies: %s. The homepage stays the homepage, a second delivery updates the first. The importer can still turn it off."
+msgstr ""
+
+msgid "Nothing to update: no content type is chosen, only rows without content."
 msgstr ""
 
 msgid "WXR ZIP"
@@ -591,7 +607,7 @@ msgstr ""
 #: eizport.php
 #: includes/abilities.php:50
 #: includes/admin-app.php:158
-#: includes/bundle-plugin.php:786
+#: includes/bundle-plugin.php:789
 #: includes/settings.php:219
 #: includes/settings.php:220
 msgid "Eizport"
@@ -1227,7 +1243,7 @@ msgstr ""
 
 #: includes/bundle-plugin.php:104
 #: includes/bundle-plugin.php:659
-#: includes/bundle-plugin.php:787
+#: includes/bundle-plugin.php:790
 msgid "WordPress Importer"
 msgstr ""
 
@@ -1239,9 +1255,7 @@ msgid "The bundle: %1$s, %2$s, made %3$s."
 msgstr ""
 
 #: includes/bundle-plugin.php:107
-#: includes/bundle-plugin.php:687
-#: includes/import.php:814
-msgid "Update pages, posts and products that already exist (same slug) instead of adding copies"
+msgid "Update the items that already exist (same type and slug) instead of adding copies"
 msgstr ""
 
 #: includes/bundle-plugin.php:108
@@ -1297,7 +1311,7 @@ msgid "The bundle could not be taken out of the plugin."
 msgstr ""
 
 #: includes/bundle-plugin.php:350
-#: includes/bundle-plugin.php:813
+#: includes/bundle-plugin.php:816
 msgid "This is not an installed plugin."
 msgstr ""
 
@@ -1361,7 +1375,7 @@ msgid "Visit the site"
 msgstr ""
 
 #: includes/bundle-plugin.php:549
-#: includes/import.php:1032
+#: includes/import.php:1085
 msgid "Importer messages"
 msgstr ""
 
@@ -1405,15 +1419,15 @@ msgstr ""
 msgid "The bundle: %1$s, %2$s, made %3$s with Eizport %4$s."
 msgstr ""
 
-#: includes/bundle-plugin.php:691
+#: includes/bundle-plugin.php:694
 msgid "Importing again finds the same items and doesn’t duplicate them, but settings are set again."
 msgstr ""
 
-#: includes/bundle-plugin.php:825
+#: includes/bundle-plugin.php:828
 msgid "Sorry, you are not allowed to import."
 msgstr ""
 
-#: includes/bundle-plugin.php:882
+#: includes/bundle-plugin.php:885
 msgid "Sorry, you are not allowed to delete plugins."
 msgstr ""
 
@@ -1705,80 +1719,86 @@ msgstr ""
 msgid "The decompressed .wxrz file could not be saved."
 msgstr ""
 
-#: includes/import.php:649
+#. translators: %s: content types, e.g. "Pages and Posts".
+#: includes/import.php:389
+#, php-format
+msgid "Update the items that already exist (same type and slug) instead of adding copies: %s"
+msgstr ""
+
+#: includes/import.php:696
 msgid "The WordPress Importer plugin is not installed."
 msgstr ""
 
-#: includes/import.php:665
+#: includes/import.php:712
 msgid "The WordPress Importer could not be loaded."
 msgstr ""
 
-#: includes/import.php:813
+#: includes/import.php:866
 msgid "Existing items"
 msgstr ""
 
-#: includes/import.php:835
+#: includes/import.php:888
 msgid "Additional CSS"
 msgstr ""
 
-#: includes/import.php:837
+#: includes/import.php:890
 msgid "The file's CSS rules"
 msgstr ""
 
-#: includes/import.php:844
+#: includes/import.php:897
 msgid "Add at the end of this site's CSS"
 msgstr ""
 
-#: includes/import.php:848
+#: includes/import.php:901
 msgid "Add at the start of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name of the CSS block, the file's name, like "delivery".
-#: includes/import.php:856
+#: includes/import.php:909
 #, php-format
 msgid "Replace the \"%s\" block this site already has"
 msgstr ""
 
-#: includes/import.php:862
+#: includes/import.php:915
 msgid "Replace all of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name the CSS rules are marked with: the file's name, like "delivery".
-#: includes/import.php:869
+#: includes/import.php:922
 #, php-format
 msgid "Between \"head\" and \"tail\" comments with the file's name (%s)"
 msgstr ""
 
-#: includes/import.php:938
+#: includes/import.php:991
 msgid ".wxrz bundles, the .zip of a bundle exported as plugin and gzipped WXR files are accepted too: their attachment files come from the bundle."
 msgstr ""
 
-#: includes/import.php:997
-#: includes/import.php:1041
+#: includes/import.php:1050
+#: includes/import.php:1094
 msgid "All importers"
 msgstr ""
 
-#: includes/import.php:1026
+#: includes/import.php:1079
 msgid "Choose file"
 msgstr ""
 
-#: includes/import.php:1027
+#: includes/import.php:1080
 msgid "Change file"
 msgstr ""
 
-#: includes/import.php:1029
+#: includes/import.php:1082
 msgid "Choose who the imported items belong to and whether their attachments come along."
 msgstr ""
 
-#: includes/import.php:1030
+#: includes/import.php:1083
 msgid "What was imported, and the importer’s messages."
 msgstr ""
 
-#: includes/import.php:1035
+#: includes/import.php:1088
 msgid "The file could not be imported."
 msgstr ""
 
-#: includes/import.php:1036
+#: includes/import.php:1089
 msgid "Choose another file"
 msgstr ""
 
