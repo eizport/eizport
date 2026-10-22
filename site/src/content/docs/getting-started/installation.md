@@ -26,7 +26,7 @@ Open the [live demo in WordPress Playground](https://playground.wordpress.net/?b
 
 ## To import
 
-Importing needs the **WordPress Importer**. On **Tools → Import**, click **Install Now** under *WordPress*, then **Run Importer**. The plugin's links lead there while the importer isn't installed. Exporting works without it.
+Importing needs the **WordPress Importer**. On **Tools → Import**, click **Install Now** under *WordPress*, then **Run Importer**. Exporting works without it.
 
 ## Requirements in detail
 

@@ -85,6 +85,24 @@ class SettingsTest extends Test_Case {
 		$links = Settings\action_links( array( 'x' ) );
 		$this->assertStringContainsString( 'plugins.php?page=eizport-settings-wp-admin', $links[0] );
 		$this->assertStringContainsString( '>Settings<', $links[0] );
+
+		// Only Settings: importing starts from Tools → Import, with the importer active or not.
+		$hook     = 'plugin_action_links_' . plugin_basename( dirname( __DIR__, 2 ) . '/eizport.php' );
+		$importer = \Eizport\Import\IMPORTER_PLUGIN;
+		$active   = function ( $plugins ) use ( $importer ) {
+			return array_merge( (array) $plugins, array( $importer ) );
+		};
+		$inactive = function ( $plugins ) use ( $importer ) {
+			return array_values( array_diff( (array) $plugins, array( $importer ) ) );
+		};
+		foreach ( array( $active, $inactive ) as $state ) {
+			add_filter( 'option_active_plugins', $state );
+			$row = apply_filters( $hook, array() ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- core's plugin_action_links_{$plugin_file}. // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- core's plugin_action_links_{$plugin_file}.
+			remove_filter( 'option_active_plugins', $state );
+			$this->assertCount( 1, $row );
+			$this->assertStringContainsString( '>Settings<', $row[0] );
+		}
+		wp_set_current_user( 0 );
 	}
 
 	public function test_update_merges_and_sanitizes() {

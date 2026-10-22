@@ -70,7 +70,6 @@ function bootstrap() {
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_steps_script' );
 	// Before the footer scripts are printed (priority 10).
 	add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\check_fetch_attachments', 5 );
-	add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/eizport.php' ), __NAMESPACE__ . '\action_links' );
 }
 
 /**
@@ -93,23 +92,6 @@ function importer_active() {
  */
 function importer_url() {
 	return importer_active() ? admin_url( 'admin.php?import=' . IMPORTER_ID ) : admin_url( 'import.php' );
-}
-
-/**
- * Adds "Import .wxrz" to the plugin's row on the Plugins screen.
- *
- * @param string[] $links Action links.
- * @return string[]
- */
-function action_links( $links ) {
-	if ( current_user_can( 'import' ) ) {
-		$label = importer_active()
-			? __( 'Import .wxrz', 'eizport' )
-			: __( 'Install the WordPress Importer', 'eizport' );
-		array_unshift( $links, sprintf( '<a href="%s">%s</a>', esc_url( importer_url() ), esc_html( $label ) ) );
-	}
-
-	return $links;
 }
 
 /**

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T09:03:24+00:00\n"
+"POT-Creation-Date: 2026-10-22T09:33:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -1309,7 +1309,7 @@ msgid "Visit the site"
 msgstr ""
 
 #: includes/bundle-plugin.php:528
-#: includes/import.php:959
+#: includes/import.php:941
 msgid "Importer messages"
 msgstr ""
 
@@ -1370,7 +1370,7 @@ msgid "The bundle: %1$s, %2$s, made %3$s."
 msgstr ""
 
 #: includes/bundle-plugin.php:652
-#: includes/import.php:749
+#: includes/import.php:731
 msgid "Update pages, posts and products that already exist (same slug) instead of adding copies"
 msgstr ""
 
@@ -1614,8 +1614,8 @@ msgid "Language:"
 msgstr ""
 
 #: includes/folder.php:39
-#: includes/import.php:205
-#: includes/import.php:240
+#: includes/import.php:187
+#: includes/import.php:222
 msgid "The file could not be read."
 msgstr ""
 
@@ -1640,93 +1640,85 @@ msgstr ""
 msgid "A temporary file could not be written."
 msgstr ""
 
-#: includes/import.php:107
-msgid "Import .wxrz"
-msgstr ""
-
-#: includes/import.php:108
-msgid "Install the WordPress Importer"
-msgstr ""
-
-#: includes/import.php:136
-#: includes/import.php:213
+#: includes/import.php:118
+#: includes/import.php:195
 msgid "The decompressed .wxrz file could not be saved."
 msgstr ""
 
-#: includes/import.php:584
+#: includes/import.php:566
 msgid "The WordPress Importer plugin is not installed."
 msgstr ""
 
-#: includes/import.php:600
+#: includes/import.php:582
 msgid "The WordPress Importer could not be loaded."
 msgstr ""
 
-#: includes/import.php:748
+#: includes/import.php:730
 msgid "Existing items"
 msgstr ""
 
-#: includes/import.php:770
+#: includes/import.php:752
 msgid "Additional CSS"
 msgstr ""
 
-#: includes/import.php:772
+#: includes/import.php:754
 msgid "The file's CSS rules"
 msgstr ""
 
-#: includes/import.php:779
+#: includes/import.php:761
 msgid "Add at the end of this site's CSS"
 msgstr ""
 
-#: includes/import.php:783
+#: includes/import.php:765
 msgid "Add at the start of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name of the CSS block, the file's name, like "delivery".
-#: includes/import.php:791
+#: includes/import.php:773
 #, php-format
 msgid "Replace the \"%s\" block this site already has"
 msgstr ""
 
-#: includes/import.php:797
+#: includes/import.php:779
 msgid "Replace all of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name the CSS rules are marked with: the file's name, like "delivery".
-#: includes/import.php:804
+#: includes/import.php:786
 #, php-format
 msgid "Between \"head\" and \"tail\" comments with the file's name (%s)"
 msgstr ""
 
-#: includes/import.php:872
+#: includes/import.php:854
 msgid ".wxrz bundles, the .zip of a bundle exported as plugin and gzipped WXR files are accepted too: their attachment files come from the bundle."
 msgstr ""
 
-#: includes/import.php:924
-#: includes/import.php:968
+#: includes/import.php:906
+#: includes/import.php:950
 msgid "All importers"
 msgstr ""
 
-#: includes/import.php:953
+#: includes/import.php:935
 msgid "Choose file"
 msgstr ""
 
-#: includes/import.php:954
+#: includes/import.php:936
 msgid "Change file"
 msgstr ""
 
-#: includes/import.php:956
+#: includes/import.php:938
 msgid "Choose who the imported items belong to and whether their attachments come along."
 msgstr ""
 
-#: includes/import.php:957
+#: includes/import.php:939
 msgid "What was imported, and the importer’s messages."
 msgstr ""
 
-#: includes/import.php:962
+#: includes/import.php:944
 msgid "The file could not be imported."
 msgstr ""
 
-#: includes/import.php:963
+#: includes/import.php:945
 msgid "Choose another file"
 msgstr ""
 

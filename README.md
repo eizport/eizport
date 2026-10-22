@@ -124,7 +124,7 @@ Eizport doesn't run a service of its own and sends nothing to its authors. A few
 ## Installation ##
 
 1. Install and activate Eizport. Exporting works right away, from **Tools → Export**.
-2. To import, install the **WordPress Importer**: on **Tools → Import**, click "Install Now" under WordPress (the plugin's links lead there while it isn't installed), then "Run Importer".
+2. To import, install the **WordPress Importer**: on **Tools → Import**, click "Install Now" under WordPress, then "Run Importer".
 
 ## Frequently Asked Questions ##
 
