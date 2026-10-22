@@ -70,6 +70,9 @@ function import_command( $args, $assoc_args = array() ) {
 	if ( array_key_exists( 'css-markers', $assoc_args ) ) {
 		$import['css_markers'] = (bool) \WP_CLI\Utils\get_flag_value( $assoc_args, 'css-markers' );
 	}
+	if ( \Eizport\Import\importer_untested() ) {
+		WP_CLI::warning( \Eizport\Import\importer_untested_message() );
+	}
 	$result = \Eizport\Import\import_file( $args[0], $import );
 	if ( is_wp_error( $result ) ) {
 		WP_CLI::error( $result );

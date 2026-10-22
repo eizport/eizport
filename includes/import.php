@@ -30,6 +30,14 @@ const IMPORTER_ID     = 'wordpress'; // phpcs:ignore WordPress.WP.CapitalPDangit
 const IMPORTER_PLUGIN = 'wordpress-importer/wordpress-importer.php';
 
 /**
+ * The WordPress Importer versions Eizport works with: the oldest it needs,
+ * and the newest it was tested with (raised on each release, like "Tested
+ * up to"). Eizport leans on the importer's internals.
+ */
+const IMPORTER_REQUIRES = '0.9.6';
+const IMPORTER_TESTED   = '0.9.7';
+
+/**
  * Step 1's "Update items that already exist" field.
  */
 const UPDATE_FIELD = 'eizport_update_existing';
@@ -85,6 +93,71 @@ function importer_active() {
 }
 
 /**
+ * The installed WordPress Importer's version, or '' when it isn't installed.
+ *
+ * @return string
+ */
+function importer_version() {
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	$plugins = get_plugins();
+
+	return (string) ( $plugins[ IMPORTER_PLUGIN ]['Version'] ?? '' );
+}
+
+/**
+ * An error when the installed WordPress Importer is older than Eizport needs.
+ *
+ * @return \WP_Error|null
+ */
+function importer_too_old() {
+	$version = importer_version();
+	if ( '' === $version || version_compare( $version, IMPORTER_REQUIRES, '>=' ) ) {
+		return null;
+	}
+
+	return new \WP_Error(
+		'eizport_importer_old',
+		/* translators: 1: the oldest WordPress Importer version Eizport needs, 2: this site's version. */
+		sprintf( __( 'Eizport needs the WordPress Importer %1$s or newer; this site has %2$s. Update it, then import again.', 'eizport' ), IMPORTER_REQUIRES, $version )
+	);
+}
+
+/**
+ * Whether the installed WordPress Importer is newer than the one Eizport was
+ * tested with: the import still runs, with a warning.
+ *
+ * @return bool
+ */
+function importer_untested() {
+	$version = importer_version();
+
+	return '' !== $version && version_compare( $version, IMPORTER_TESTED, '>' );
+}
+
+/**
+ * The warning shown when the WordPress Importer is newer than the tested one.
+ *
+ * @return string
+ */
+function importer_untested_message() {
+	/* translators: 1: this site's WordPress Importer version, 2: the newest version Eizport was tested with. */
+	return sprintf( __( 'This site has the WordPress Importer %1$s; Eizport was tested up to %2$s. The import runs; check the result.', 'eizport' ), importer_version(), IMPORTER_TESTED );
+}
+
+/**
+ * On the WordPress Importer's screen: a notice when its version is older
+ * than Eizport needs, or newer than the tested one.
+ */
+function importer_version_notice() {
+	$old = importer_too_old();
+	if ( $old ) {
+		wp_admin_notice( esc_html( $old->get_error_message() ), array( 'type' => 'error' ) );
+	} elseif ( importer_untested() ) {
+		wp_admin_notice( esc_html( importer_untested_message() ), array( 'type' => 'warning' ) );
+	}
+}
+
+/**
  * Where to import: the WordPress Importer screen, or, while it isn't
  * active, Tools → Import, where WordPress offers to install and run it.
  *
@@ -104,6 +177,12 @@ function importer_url() {
  */
 function decompress_upload( $file ) {
 	if ( ! empty( $file['error'] ) || ! is_importer_upload( $file ) || ! ( Wxrz\is_gzip( $file['tmp_name'] ) || Bundle\is_zip_bundle( $file['tmp_name'] ) || \Eizport\BundlePlugin\is_plugin_zip( $file['tmp_name'] ) ) ) {
+		return $file;
+	}
+
+	$old = importer_too_old();
+	if ( $old ) {
+		$file['error'] = $old->get_error_message();
 		return $file;
 	}
 
@@ -217,6 +296,10 @@ function import_file( $file, $args = array() ) {
 	$importer = new_importer();
 	if ( is_wp_error( $importer ) ) {
 		return $importer;
+	}
+	$old = importer_too_old();
+	if ( $old ) {
+		return $old;
 	}
 	if ( ! is_dir( $file ) && ( ! is_file( $file ) || ! is_readable( $file ) ) ) {
 		return new \WP_Error( 'eizport_wxrz_unreadable', __( 'The file could not be read.', 'eizport' ) );
@@ -842,6 +925,7 @@ function xml_name( $name ) {
  * makes the importer look like the plugin's Export screen (style()).
  */
 function mention_wxrz() {
+	add_action( 'admin_notices', __NAMESPACE__ . '\\importer_version_notice' );
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only picks the step.
 	if ( isset( $_GET['step'] ) && 1 === absint( $_GET['step'] ) ) {
 		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\update_existing_field', 5 );

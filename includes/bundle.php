@@ -34,7 +34,9 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 const MANIFEST       = 'manifest.json';
-const FORMAT_VERSION = 1;
+const FORMAT_VERSION = 2;
+// The oldest Eizport that reads this format: it rises only when the format does.
+const REQUIRES       = '1.1.0';
 const DIR_META       = '_eizport_bundle_dir';
 const CONTENT_FOLDER = 'post_content';
 
@@ -437,6 +439,7 @@ function print_archive( $wxr, $wxr_name, $media = true, $options = null ) {
 	$manifest = array(
 		'format'    => Wxrz\EXTENSION,
 		'version'   => FORMAT_VERSION,
+		'requires'  => REQUIRES,
 		'generator' => 'Eizport ' . \Eizport\VERSION,
 		'site'      => home_url( '/' ),
 		'created'   => gmdate( 'c' ),
@@ -739,8 +742,12 @@ function read_manifest( $tar ) {
 	);
 
 	$manifest = is_string( $json ) ? json_decode( $json, true ) : null;
-	$valid    = is_array( $manifest )
-		&& FORMAT_VERSION === ( $manifest['version'] ?? null )
+	$newer    = is_array( $manifest ) ? newer_than_this( $manifest ) : null;
+	if ( $newer ) {
+		return $newer;
+	}
+	$valid = is_array( $manifest )
+		&& is_int( $manifest['version'] ?? null ) && $manifest['version'] >= 1
 		&& ! empty( $manifest['wxr'][0] ) && is_string( $manifest['wxr'][0] )
 		&& isset( $manifest['files'] ) && is_array( $manifest['files'] );
 
@@ -749,6 +756,48 @@ function read_manifest( $tar ) {
 	}
 
 	return $manifest;
+}
+
+/**
+ * The Eizport version that made a bundle, from its manifest's generator
+ * ("Eizport 1.1.0" → "1.1.0"), or '' when it doesn't say.
+ *
+ * @param array $manifest Manifest.
+ * @return string
+ */
+function made_with( $manifest ) {
+	return preg_match( '/^Eizport (\S+)$/', (string) ( $manifest['generator'] ?? '' ), $match ) ? $match[1] : '';
+}
+
+/**
+ * An error when a bundle needs a newer Eizport than this one: a format
+ * this version doesn't know, or a "requires" above it. Bundles made before
+ * 1.1.0 (format 1) have no "requires" and read as they are.
+ *
+ * @param array $manifest Manifest.
+ * @return WP_Error|null
+ */
+function newer_than_this( $manifest ) {
+	$format   = $manifest['version'] ?? null;
+	$requires = is_string( $manifest['requires'] ?? null ) ? $manifest['requires'] : '';
+	$unknown  = is_int( $format ) && $format > FORMAT_VERSION;
+	// A development copy (1.1.0-dev) reads its own version's format.
+	$this_one = preg_replace( '/-.*$/', '', \Eizport\VERSION );
+	if ( ! $unknown && ( '' === $requires || version_compare( $requires, $this_one, '<=' ) ) ) {
+		return null;
+	}
+
+	$made = made_with( $manifest );
+	return new WP_Error(
+		'eizport_bundle_newer',
+		sprintf(
+			/* translators: 1: Eizport version that made the bundle, 2: the oldest Eizport that reads it, 3: this site's Eizport version. */
+			__( 'This bundle was made with Eizport %1$s and needs Eizport %2$s or newer; this site has %3$s. Update Eizport, then import again.', 'eizport' ),
+			'' !== $made ? $made : __( 'a newer version', 'eizport' ),
+			'' !== $requires ? $requires : ( '' !== $made ? $made : __( 'a newer version', 'eizport' ) ),
+			\Eizport\VERSION
+		)
+	);
 }
 
 /**
