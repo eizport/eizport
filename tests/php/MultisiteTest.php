@@ -58,6 +58,9 @@ class MultisiteTest extends Test_Case {
 
 	public function test_defaults_saved_before_move_to_the_site() {
 		global $wpdb;
+		if ( ! is_main_site() ) {
+			$this->markTestSkipped( 'Old defaults move to the main site only.' );
+		}
 		$user = get_current_user_id();
 		$this->stored_settings( array( 'defaults_scope' => 'user' ) );
 		delete_user_option( $user, Defaults\KEY );

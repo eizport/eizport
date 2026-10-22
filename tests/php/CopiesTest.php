@@ -143,7 +143,9 @@ class CopiesTest extends Test_Case {
 
 	public function test_crawlers_are_kept_away() {
 		$robots = Copies\robots_txt( "User-agent: *\nDisallow: /wp-admin/\n" );
-		$this->assertStringContainsString( "User-agent: *\nDisallow: /wp-content/uploads/eizport/\nDisallow: /*?eizport_playground=\nDisallow: /wp-admin/", $robots );
+		// The site's own uploads path (/wp-content/uploads/, or /b/wp-content/uploads/sites/2/ on a subsite).
+		$folder = wp_parse_url( wp_get_upload_dir()['baseurl'], PHP_URL_PATH ) . '/eizport/';
+		$this->assertStringContainsString( "User-agent: *\nDisallow: {$folder}\nDisallow: /*?eizport_playground=\nDisallow: /wp-admin/", $robots );
 		$this->assertMatchesRegularExpression( '#\nUser-agent: \*\nDisallow: /\S*/eizport/\nDisallow: /\*\?eizport_playground=#', Copies\robots_txt( "User-agent: Googlebot\nDisallow:\n" ), 'Its own group when there is none.' );
 
 		\Eizport\Files\tmp_folder();

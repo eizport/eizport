@@ -18,6 +18,14 @@ if ( ! is_file( $eizport_wp_load ) ) {
 	exit( 1 );
 }
 
+// On a network, WP_TEST_URL picks the site the tests run in (http://host/b/ for a subsite).
+if ( getenv( 'WP_TEST_URL' ) ) {
+	$eizport_url            = (string) parse_url( (string) getenv( 'WP_TEST_URL' ), PHP_URL_HOST ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- WordPress isn't loaded yet.
+	$_SERVER['HTTP_HOST']   = $eizport_url . ( parse_url( (string) getenv( 'WP_TEST_URL' ), PHP_URL_PORT ) ? ':' . parse_url( (string) getenv( 'WP_TEST_URL' ), PHP_URL_PORT ) : '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+	$_SERVER['REQUEST_URI'] = (string) parse_url( (string) getenv( 'WP_TEST_URL' ), PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+	$_SERVER['SERVER_NAME'] = $eizport_url;
+}
+
 define( 'WP_USE_THEMES', false ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- core constant.
 require_once $eizport_wp_load;
 
