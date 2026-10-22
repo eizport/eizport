@@ -121,6 +121,33 @@ add_filter( 'eizport_suggested_items', function ( array $suggested, WP_Post $pos
 
 Only posts of types that can be exported are suggested.
 
+## eizport_content_types
+
+The post types the Export screen offers as rows: post type => value of core's *content* radio. A plugin takes out its own types that travel another way (the Advanced Custom Fields compatibility removes ACF's field groups, post types and taxonomies).
+
+## eizport_look_items
+
+The items of a row next to the look's (`$items`, `$row`): a plugin fills its own row, each item with `key`, `label`, `details` and `preview` (`type` and `value`). Used by the Advanced Custom Fields compatibility for the `advanced-custom-fields` row.
+
+## eizport_look_data
+
+The options file's data for such a row (`$out`, `$row`, `$keys`: the item keys chosen): the row's entry goes in `$out`.
+
+## eizport_look_suggested
+
+The keys such a row suggests for the posts chosen (`$keys`, `$row`, `$chosen`: post type => IDs).
+
+## eizport_advanced_custom_fields_id_types
+
+The ACF field types whose values are IDs an import maps: type => `post`, `term` or `user`. Add a plugin's own field type:
+
+```php
+add_filter( 'eizport_advanced_custom_fields_id_types', function ( array $types ) {
+	$types['my_product_picker'] = 'post';
+	return $types;
+} );
+```
+
 ## eizport_register_compat
 
 Action, on `plugins_loaded` (priority 20), where compatibilities hook the filters above. See [compatibilities](../compatibilities/).

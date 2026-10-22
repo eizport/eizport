@@ -533,7 +533,7 @@ function register() {
 
 	$defaults_schema = array(
 		'type'        => 'object',
-		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews", "__menus"), review_ids, review_all, menu_ids ("c:<menu term ID>", "n:<navigation ID>"), menu_all, appearance (theme_mods, custom_css, global_styles, global_css, widgets), themes, plugins).', 'eizport' ),
+		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews", "__menus"), review_ids, review_all, menu_ids ("c:<menu term ID>", "n:<navigation ID>"), menu_all, appearance (theme_mods, custom_css, global_styles, global_css, widgets, advanced-custom-fields), themes, plugins).', 'eizport' ),
 	);
 
 	wp_register_ability(
@@ -859,7 +859,7 @@ function export_input_schema() {
 			),
 			'appearance'      => array(
 				'type'        => array( 'object', 'array' ),
-				'description' => __( 'The site\'s look, in the bundle\'s options file, row => "all" or the keys of the items chosen (eizport/get-export-options lists them): "theme_mods" (the Customizer\'s theme mods: logo, header and background images, colors), "custom_css" (the Customizer\'s Additional CSS, rule by rule), "global_styles" (the Site Editor\'s styles, group by group) and "global_css" (its Additional CSS, rule by rule) — block themes — and "widgets" (classic and block widgets). A list of rows means each of them whole. The media they use come along. Default: none.', 'eizport' ),
+				'description' => __( 'The site\'s look, in the bundle\'s options file, row => "all" or the keys of the items chosen (eizport/get-export-options lists them): "theme_mods" (the Customizer\'s theme mods: logo, header and background images, colors), "custom_css" (the Customizer\'s Additional CSS, rule by rule), "global_styles" (the Site Editor\'s styles, group by group) and "global_css" (its Additional CSS, rule by rule) — block themes — "widgets" (classic and block widgets) and "advanced-custom-fields" (with Advanced Custom Fields active: its post types, taxonomies and field groups, in ACF\'s export format). A list of rows means each of them whole. The media they use come along. Default: none.', 'eizport' ),
 			),
 			'css_mode'        => array(
 				'type'        => 'string',
@@ -1465,11 +1465,23 @@ function get_suggestions( $input = array() ) {
 	$out = \Eizport\Suggestions\suggest( $specs );
 	// The menus the items use (theme locations, navigation blocks), and what the menus chosen point to.
 	$out['menus'] = \Eizport\Menus\suggested( array() === $out['chosen'] ? array() : array_merge( ...array_values( $out['chosen'] ) ) );
+	$chosen       = $out['chosen'];
 	unset( $out['chosen'] );
-	// What the site has of its look: every item is suggested, row by row.
+	// What the site has of its look: every item is suggested, row by row; a plugin's row (Advanced Custom Fields) suggests what the items use.
 	$out['appearance'] = array();
 	foreach ( \Eizport\Appearance\KEYS as $key ) {
 		$keys = wp_list_pluck( \Eizport\Appearance\items( $key ), 'key' );
+		if ( 'advanced-custom-fields' === $key ) {
+			/**
+			 * Filters the items a plugin's look row suggests for the items
+			 * chosen (the Advanced Custom Fields row: the field groups their values use).
+			 *
+			 * @param string[]             $keys   Keys suggested.
+			 * @param string               $row    The row.
+			 * @param array<string, int[]> $chosen Post type => IDs chosen.
+			 */
+			$keys = array_values( array_intersect( $keys, (array) apply_filters( 'eizport_look_suggested', array(), $key, $chosen ) ) );
+		}
 		if ( $keys ) {
 			$out['appearance'][ $key ] = $keys;
 		}

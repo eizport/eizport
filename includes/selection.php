@@ -62,7 +62,14 @@ function types() {
 	}
 	$types['attachment'] = 'attachment';
 
-	return $types;
+	/**
+	 * Filters the post types the Export screen offers: post type =>
+	 * value of core's "content" radio. A plugin takes out its own types
+	 * that travel another way (ACF's field groups).
+	 *
+	 * @param array<string, string> $types Post type => value.
+	 */
+	return (array) apply_filters( 'eizport_content_types', $types );
 }
 
 /**
@@ -86,7 +93,14 @@ function content_types() {
 	}
 	$types['attachment'] = 'attachment';
 
-	return $types;
+	/**
+	 * Filters the post types the Export screen offers: post type =>
+	 * value of core's "content" radio. A plugin takes out its own types
+	 * that travel another way (ACF's field groups).
+	 *
+	 * @param array<string, string> $types Post type => value.
+	 */
+	return (array) apply_filters( 'eizport_content_types', $types );
 }
 
 /**

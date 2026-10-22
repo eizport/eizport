@@ -1,6 +1,6 @@
 /**
  * The side panel of a look row (Customizer theme mods and custom CSS, Editor
- * global styles and global CSS, Widgets): its items from
+ * global styles and global CSS, Widgets, Advanced Custom Fields): its items from
  * eizport/get-export-options — a theme mod, a CSS rule, a group of styles, a
  * widget — each with a preview and its checkbox. Checking or clicking one
  * takes it to the export at once; the "Selection" filter shows all, the ones
@@ -73,6 +73,14 @@ function texts( key: string ): { title: string; subTitle: string } {
 				title: __( 'Editor global CSS', 'eizport' ),
 				subTitle: __(
 					'Check the rules of the Site Editor’s Additional CSS to export; they’re added as the Customizer’s are (Details).',
+					'eizport'
+				),
+			};
+		case 'advanced-custom-fields':
+			return {
+				title: __( 'Advanced Custom Fields (ACF)', 'eizport' ),
+				subTitle: __(
+					'Check the post types, taxonomies and field groups to export, in ACF’s own export format. On import, ACF imports them before the content (one with the same key there is updated), and the fields that store IDs point to the items there.',
 					'eizport'
 				),
 			};

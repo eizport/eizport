@@ -358,6 +358,8 @@ function Stage() {
 			global_styles: __( 'Editor global styles', 'eizport' ),
 			global_css: __( 'Editor global CSS', 'eizport' ),
 			widgets: __( 'Widgets', 'eizport' ),
+			// ACF's post types, taxonomies and field groups (with ACF active).
+			'advanced-custom-fields': __( 'Advanced Custom Fields (ACF)', 'eizport' ),
 		};
 		Object.entries( LOOK_ROWS ).forEach( ( [ row, key ] ) => {
 			const count = options?.appearance?.[ key ]?.length || 0;

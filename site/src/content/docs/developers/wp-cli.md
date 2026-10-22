@@ -18,7 +18,7 @@ wp eizport export --types=page --menus=classic:18 --filename=header
 | --- | --- |
 | `--types=<types>` | Content types, comma-separated: `type:ID+ID` for some items, the type alone for all of it. None: all content |
 | `--options=<options>` | Option groups (like `basics`) and option names, comma-separated |
-| `--appearance=<parts>` | The site's [look](../../exporting/appearance/): `all`, or rows comma-separated, each whole or with its items' keys after a colon joined by `+` (`theme_mods:custom_logo+background_color,custom_css:r:1a2b3c4d5e`) |
+| `--appearance=<parts>` | The site's [look](../../exporting/appearance/): `all`, or rows comma-separated, each whole or with its items' keys after a colon joined by `+` (`theme_mods:custom_logo+background_color,custom_css:r:1a2b3c4d5e`); with ACF active, `advanced-custom-fields` takes its [post types, taxonomies and field groups](../../exporting/advanced-custom-fields/) (`advanced-custom-fields:group_abc123+post_type_def456`) |
 | `--css-mode=<mode>` | How the CSS rules are added on import: `end` (default), `start`, `replace` (the block of the same name; at the end with none) or `replace_all` |
 | `--[no-]css-markers` | Head/tail comments around the CSS rules (default: Settings → Export) |
 | `--menus=<menus>` | [Menus](../../exporting/menus/): `all`, or `classic:ID+ID` (menu term IDs) and `navigation:ID+ID` (`wp_navigation` IDs), comma-separated. None: no menus (all content already has them) |

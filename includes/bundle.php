@@ -865,6 +865,18 @@ function apply_options_at_end( $data ) {
 	}
 	require_once __DIR__ . '/apply-options.php';
 
+	// ACF's post types, taxonomies and field groups before the items that use them (import-advanced-custom-fields.php).
+	if ( doing_action( 'import_start' ) ) {
+		eizport_acf_start( $data );
+	} else {
+		add_action(
+			'import_start',
+			function () use ( $data ) {
+				eizport_acf_start( $data );
+			}
+		);
+	}
+
 	$action = function () use ( $data ) {
 		$importer = $GLOBALS['wp_import'] ?? null;
 		// Names of the options set, for whoever runs the import.
@@ -874,6 +886,10 @@ function apply_options_at_end( $data ) {
 			is_object( $importer ) ? (array) $importer->processed_terms : array(),
 			is_object( $importer ) ? eizport_urls_with_source( (array) $importer->url_remap, function_exists( 'eizport_source_home' ) ? eizport_source_home( $importer ) : (string) $importer->base_url ) : array()
 		);
+		// ACF's items, imported when the import started (import-advanced-custom-fields.php).
+		if ( ! empty( $GLOBALS['eizport_acf_imported'] ) ) {
+			$GLOBALS['eizport_applied_options'][] = 'advanced-custom-fields';
+		}
 	};
 	add_action( 'import_end', $action );
 

@@ -1,26 +1,27 @@
 ---
 title: "Compatibilities"
-description: "Which plugins are supported (WooCommerce) and which aren't officially yet (ACF, Elementor), how support is built from the public hooks, and how a plugin ships its own."
+description: "Which plugins are supported (WooCommerce, Advanced Custom Fields) and which aren't officially yet (Elementor), how support is built from the public hooks, and how a plugin ships its own."
 ---
 
-Support for another plugin is a **compatibility**: a file that uses only the public [hooks](../hooks/). The plugin ships one, for WooCommerce; any plugin can add its own — or replace the bundled one.
+Support for another plugin is a **compatibility**: a file that uses only the public [hooks](../hooks/). The plugin ships two, for WooCommerce and Advanced Custom Fields; any plugin can add its own — or replace the bundled one.
 
 ## At a glance
 
 | Plugin | Status | What to expect |
 | --- | --- | --- |
 | **WooCommerce** | Supported | Products, variations, orders and coupons as content types; shop, cart, checkout, my account and terms pages as linked settings; product galleries and category images; products shown by blocks suggested; product reviews in their own row; the product lookup table refreshed after an import |
-| **Advanced Custom Fields (ACF)** | Not officially supported yet, not tested | See below |
+| **Advanced Custom Fields (ACF)** | Supported (6.1 or later, free) | Its post types, taxonomies and field groups in its own export format, on their own row, imported before the content; fields that store IDs remapped; field groups and linked posts suggested; image and file fields as media used |
 | **Elementor** | Not officially supported yet, not tested | See below |
 
-Not tested means just that: nothing here was checked against these plugins. What follows comes from how they store their data, and from what the WordPress Importer does with it.
+Not tested means just that: nothing was checked against Elementor. What follows comes from how it stores its data, and from what the WordPress Importer does with it.
 
 ### Advanced Custom Fields
 
-- **Field values** live in each post's custom fields (post meta), and the WXR carries every post's custom fields, so they come along with the items exported.
-- **Fields that hold IDs** (image, file, gallery, relationship, post object, page link, user) keep the IDs of the old site: the WordPress Importer doesn't remap IDs inside custom fields. Where the other site gives the items new IDs, those fields point to the wrong item or to nothing.
-- **Field groups** are stored by ACF as its own post types, or in local JSON files in the theme; neither is chosen for you. Export them with ACF's own tools (*ACF → Tools → Export*), or keep them in the theme's JSON.
-- **Options pages** store their values in site options (names starting with `options_`), which the **Options** row can export by name.
+Supported, with its own row: see [Advanced Custom Fields](../../exporting/advanced-custom-fields/). In short:
+
+- **Post types, taxonomies and field groups** go in ACF's own export format and are imported before the content, updating the ones with the same key.
+- **Field values** travel in the posts' and terms' custom fields; the ones that hold IDs (image, file, post object, relationship, page link, taxonomy, user) are **remapped** to the items on the other site.
+- **ACF PRO** (repeater, flexible content, gallery, options pages, blocks) isn't covered yet; values on users don't travel (a WXR has no users).
 
 ### Elementor
 
@@ -45,6 +46,20 @@ Using one of these and want it supported? [Open an issue](https://github.com/eiz
 | `import_end` | Saves each imported product the way WooCommerce does and refreshes its row in `wc_product_meta_lookup` (prices, SKU, stock: what the shop's filters and sorting read) |
 | `eizport_suggested_items` | Products that blocks and `[products ids="…"]` show in the items chosen |
 | `export_wp` + `query` | Product reviews: only the ones chosen, when the export says which (`reviews`) |
+
+## The Advanced Custom Fields compatibility
+
+`includes/compat/advanced-custom-fields.php`, registered on `eizport_register_compat` when ACF 6.1 or later is active, and `includes/import-advanced-custom-fields.php` for the import:
+
+| Hook | Adds |
+| --- | --- |
+| `eizport_content_types` | Leaves ACF's own post types out of the content rows |
+| `eizport_look_items`, `eizport_look_data`, `eizport_look_suggested` | The *Advanced Custom Fields (ACF)* row: its items, their export (ACF's format) and what the posts chosen suggest |
+| `eizport_media_used` | The attachments of image and file fields |
+| `eizport_suggested_items` | The posts of post object, relationship and page link fields |
+| `import_start` | Imports the post types, taxonomies and field groups (`acf_import_internal_post_type()`), and registers them |
+| `import_end` | Maps the IDs in the values and in field groups' location rules |
+| `wp_import_existing_post` | ACF's own posts in a WXR exist by key, not by title and date |
 
 ## Writing one
 

@@ -98,6 +98,18 @@ add_filter(
 );
 
 add_action(
+	'import_start',
+	function () {
+		// ACF's post types, taxonomies and field groups before the items that use them (import-advanced-custom-fields.php).
+		$path = dirname( __DIR__ ) . '/eizport-media/options.json';
+		$data = is_file( $path ) ? json_decode( (string) file_get_contents( $path ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( function_exists( 'eizport_acf_start' ) ) {
+			eizport_acf_start( $data );
+		}
+	}
+);
+
+add_action(
 	'import_end',
 	function () {
 		$path     = dirname( __DIR__ ) . '/eizport-media/options.json';

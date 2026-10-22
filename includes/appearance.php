@@ -26,7 +26,7 @@ require_once __DIR__ . '/apply-options.php';
 /**
  * What can be exported, in the screen's order.
  */
-const KEYS = array( 'theme_mods', 'custom_css', 'global_styles', 'global_css', 'widgets' );
+const KEYS = array( 'theme_mods', 'custom_css', 'global_styles', 'global_css', 'widgets', 'advanced-custom-fields' );
 
 /**
  * What the site has, for the Export screen's rows: key => number of items
@@ -344,7 +344,14 @@ function items( $row ) {
 		}
 	}
 
-	return $items;
+	/**
+	 * Filters the items of a look row: a plugin fills its own row (the Advanced Custom Fields
+	 * row: key, label, details and preview, as the others).
+	 *
+	 * @param array  $items Items.
+	 * @param string $row   The row (a key of KEYS).
+	 */
+	return (array) apply_filters( 'eizport_look_items', $items, $row );
 }
 
 /**
@@ -506,6 +513,22 @@ function data( $choice, $css = array() ) {
 		}
 		if ( $entry['instances'] ) {
 			$out['widgets'] = $entry;
+		}
+	}
+
+	// A plugin's row (Advanced Custom Fields) fills its own entry.
+	foreach ( array( 'advanced-custom-fields' ) as $row ) {
+		$keys = keys_of( $choice, $row );
+		if ( $keys ) {
+			/**
+			 * Filters the options file's data for a look row a plugin adds
+			 * (the Advanced Custom Fields row): the row's entry goes in $out.
+			 *
+			 * @param array    $out  Data so far.
+			 * @param string   $row  The row (a key of KEYS).
+			 * @param string[] $keys Item keys chosen of that row.
+			 */
+			$out = (array) apply_filters( 'eizport_look_data', $out, $row, $keys );
 		}
 	}
 
