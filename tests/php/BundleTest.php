@@ -243,14 +243,14 @@ class BundleTest extends Test_Case {
 		$this->assertSame( Bundle\REQUIRES, $manifest['requires'] );
 		$this->assertSame( 'Eizport ' . \Eizport\VERSION, $manifest['generator'] );
 		$this->assertSame( \Eizport\VERSION, Bundle\made_with( $manifest ) );
-		$this->assertSame( Bundle\SCHEMA_URL, $manifest['$schema'], 'Editors validate it.' );
+		$this->assertSame( Bundle\schema_url(), $manifest['$schema'], 'Editors validate it.' );
 		$this->assertStringStartsWith( '{"$schema":', (string) wp_json_encode( $manifest ), 'The first key.' );
 	}
 
 	public function test_a_hand_edited_manifest_is_checked_against_its_schema() {
 		$wxr   = $this->wxr( array() );
 		$base  = array(
-			'$schema'  => Bundle\SCHEMA_URL,
+			'$schema'  => Bundle\schema_url(),
 			'format'   => 'wxrz',
 			'version'  => 2,
 			'requires' => '1.1.0',
@@ -287,13 +287,19 @@ class BundleTest extends Test_Case {
 	}
 
 	public function test_the_schema_files() {
-		$dir    = dirname( __DIR__, 2 ) . '/schemas/';
-		$schema = (string) file_get_contents( $dir . 'eizport-schema-2.json' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$dir = dirname( __DIR__, 2 ) . '/schemas/';
 
-		$this->assertSame( $schema, (string) file_get_contents( $dir . 'eizport-schema.json' ), 'The unnumbered one is the newest.' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$decoded = json_decode( $schema, true );
-		$this->assertIsArray( $decoded );
-		$this->assertSame( Bundle\SCHEMA_URL, $decoded['id'] );
+		// One per version, each naming its own URL.
+		foreach ( glob( $dir . '*/manifest.json' ) as $file ) {
+			$version = basename( dirname( $file ) );
+			$this->assertMatchesRegularExpression( '/^\d+\.\d+$/', $version );
+			$this->assertSame( 'https://eizport.github.io/schemas/' . $version . '/manifest.json', json_decode( (string) file_get_contents( $file ), true )['id'] ?? '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		}
+
+		$this->assertStringStartsWith( Bundle\schema_version() . '.', \Eizport\VERSION, 'Its major.minor: 1.1.0 and 1.1.1 share 1.1.' );
+		$decoded = Bundle\schema();
+		$this->assertNotEmpty( $decoded, 'This version has its schema.' );
+		$this->assertSame( Bundle\schema_url(), $decoded['id'] );
 		$this->assertSame( array( 2 ), $decoded['properties']['version']['enum'] );
 
 		// Only what WordPress's validator understands (rest_validate_value_from_schema), so editors and the import agree.
