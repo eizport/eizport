@@ -99,7 +99,8 @@ class ImportChoicesTest extends Test_Case {
 		}
 		$this->assertTrue( Playground\network_code_limited(), 'Logged out on a network: limited.' );
 		$this->assertSame( array(), Playground\mu_plugin_choices() );
-		$this->assertSame( array(), array_diff( array_keys( Playground\plugin_choices() ), (array) get_option( 'active_plugins', array() ) ), 'Only this site\'s active plugins.' );
+		$active = array_merge( (array) get_option( 'active_plugins', array() ), array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+		$this->assertSame( array(), array_diff( array_keys( Playground\plugin_choices() ), $active ), 'Only the plugins active on this site.' );
 	}
 
 	/**

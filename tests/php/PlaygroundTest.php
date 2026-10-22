@@ -96,6 +96,7 @@ class PlaygroundTest extends Test_Case {
 	 * Removes the blueprint filter and the child theme from the caches.
 	 */
 	protected function tear_down() {
+		wp_set_current_user( 0 );
 		remove_all_filters( 'eizport_playground_blueprint' );
 		remove_all_filters( 'wp_import_post_data_raw' );
 		remove_all_filters( 'pre_http_request' );
@@ -498,7 +499,19 @@ class PlaygroundTest extends Test_Case {
 		wp_set_current_user( 0 );
 	}
 
+	/**
+	 * On a network, logs in a super admin: the network's plugins, themes
+	 * and must-use plugins are theirs to put in a Playground .zip.
+	 */
+	private function as_network_admin() {
+		if ( is_multisite() ) {
+			$admin = get_user_by( 'login', (string) current( get_super_admins() ) );
+			wp_set_current_user( $admin ? $admin->ID : 1 );
+		}
+	}
+
 	public function test_blueprint_in_a_language() {
+		$this->as_network_admin();
 		$steps = Playground\blueprint( 'site.xml', array( $this->child ), array( 'eizport/eizport.php' ) )['steps'];
 		$this->assertNotContains( 'setSiteLanguage', wp_list_pluck( $steps, 'step' ), 'English: no step.' );
 
@@ -565,6 +578,7 @@ class PlaygroundTest extends Test_Case {
 	}
 
 	public function test_must_use_plugins_offered() {
+		$this->as_network_admin();
 		$this->mu_plugin( array( 'eizport-test-single.php' => "<?php\n/* Plugin Name: EIZ Test Single */\n" ) );
 		$choices = Playground\mu_plugin_choices();
 
@@ -585,6 +599,7 @@ class PlaygroundTest extends Test_Case {
 	}
 
 	public function test_must_use_plugins_and_the_folders_they_load() {
+		$this->as_network_admin();
 		$this->mu_plugin(
 			array(
 				'eizport-test-single.php'          => "<?php\n/* Plugin Name: EIZ Test Single */\n",

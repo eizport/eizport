@@ -757,7 +757,7 @@ function network_code_limited() {
 
 /**
  * Plugins that can go in the .zip: every installed plugin (on a network, for
- * a site admin, the ones active on this site).
+ * a site admin, the ones active on this site, network-activated ones too).
  *
  * @return array<string, array> Plugin file => plugin data.
  */
@@ -766,8 +766,9 @@ function plugin_choices() {
 
 	$plugins = get_plugins();
 	if ( network_code_limited() ) {
-		// The plugins active on this site only.
-		$plugins = array_intersect_key( $plugins, array_flip( (array) get_option( 'active_plugins', array() ) ) );
+		// The plugins active on this site only (network-activated ones too: they run here).
+		$active  = array_merge( (array) get_option( 'active_plugins', array() ), array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+		$plugins = array_intersect_key( $plugins, array_flip( $active ) );
 	}
 
 	return $plugins;
