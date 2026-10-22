@@ -863,8 +863,8 @@ function export_input_schema() {
 			),
 			'css_mode'        => array(
 				'type'        => 'string',
-				'enum'        => array( 'end', 'start' ),
-				'description' => __( 'Where the CSS rules are added on import: at the end of the other site\'s CSS (default) or at its start. Whoever imports can change it, replace a block of the same name the other site already has, or all of its CSS.', 'eizport' ),
+				'enum'        => array( 'end', 'start', 'replace', 'replace_all' ),
+				'description' => __( 'How the CSS rules are added on import: at the end of the other site\'s CSS (default), at its start, replacing the head/tail blocks of the same name it already has (replace; with none, at the end), or replacing all its CSS (replace_all). Whoever imports can change it.', 'eizport' ),
 			),
 			'css_markers'     => array(
 				'type'        => 'boolean',

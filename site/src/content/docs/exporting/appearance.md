@@ -21,7 +21,7 @@ The images the items chosen use are exported with them, even when the Attachment
 
 ## On the other site
 
-- **CSS rules** (the Customizer's and the Site Editor's) are **added** to the other site's CSS, where **Details → CSS rules on import** says: at the end (the default) or at the start. They go between two comments named after the file:
+- **CSS rules** (the Customizer's and the Site Editor's) are **added** to the other site's CSS, as **Details → CSS rules on import** says: at the end (the default), at the start, replacing the block of the same name the other site already has (at the end when it has none), or replacing all its CSS. They go between two comments named after the file:
 
   ```css
   .their-own { color: purple; }
@@ -32,8 +32,8 @@ The images the items chosen use are exported with them, even when the Attachment
   ```
 
   The name is the file's name without extension — `COMB-584.wxrz` here, named after a task: a mark of where the rules came from. Each import adds its own block — blocks aren't unique, and the same name can show up more than once. Without the comments ([Settings → Export](../../settings/export-settings/), or the importer), rules the other site already has (same text) aren't repeated.
-- Whoever imports starts from the export's choice and can change it on the importer's step 1 (**Additional CSS**), with `css_mode`/`css_markers` in [`eizport/import`](../../developers/abilities/#eizportimport), or with `--css-mode`/`--[no-]css-markers` in [WP-CLI](../../developers/wp-cli/). Two choices exist only there:
-  - **Replace the "COMB-584" block this site already has** — offered when the other site's CSS has a head/tail block of the same name (an earlier delivery of a file with that name): the new block takes its place, the rest of the CSS staying (`replace`);
+- Whoever imports starts from the export's choice and can change it on the importer's step 1 (**Additional CSS**), with `css_mode`/`css_markers` in [`eizport/import`](../../developers/abilities/#eizportimport), or with `--css-mode`/`--[no-]css-markers` in [WP-CLI](../../developers/wp-cli/). There:
+  - **Replace the "COMB-584" block this site already has** — offered only when the other site's CSS has a head/tail block of the same name (an earlier delivery of a file with that name): the new block takes its place, the rest of the CSS staying (`replace`);
   - **Replace all of this site's CSS** — only the file's rules remain (`replace_all`).
 - **Theme mods** chosen go to the active theme and are **merged** into its own: what the file doesn't hold stays (the other settings, the menus' locations). The logo and the header image point to the imported attachments, the header and background images' addresses to the imported files.
 - **Style groups** chosen replace the same groups on the other site's styles (a block theme); its other groups stay.

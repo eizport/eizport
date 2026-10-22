@@ -746,8 +746,8 @@ function css_field() {
 			'heading'      => __( 'Additional CSS', 'eizport' ),
 			'modeName'     => CSS_MODE_FIELD,
 			'modeLabel'    => __( 'The file\'s CSS rules', 'eizport' ),
-			// As the export chose; replacing a block of the same name is offered below when there is one.
-			'mode'         => 'start' === ( $css['mode'] ?? '' ) ? 'start' : 'end',
+			// As the export chose; replacing a block of the same name is offered below only when there is one (else: at the end).
+			'mode'         => 'replace' === ( $css['mode'] ?? '' ) && ! $replace ? 'end' : ( in_array( $css['mode'] ?? '', array( 'start', 'replace', 'replace_all' ), true ) ? $css['mode'] : 'end' ),
 			'modes'        => array_merge(
 				array(
 					array(

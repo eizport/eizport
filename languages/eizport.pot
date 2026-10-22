@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T19:34:26+00:00\n"
+"POT-Creation-Date: 2026-10-21T19:42:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -63,6 +63,12 @@ msgstr ""
 msgid "Add at the start of the site’s CSS"
 msgstr ""
 
+msgid "Replace the block of the same name (at the end when the site has none)"
+msgstr ""
+
+msgid "Replace all the site’s CSS"
+msgstr ""
+
 msgid "Themes to install"
 msgstr ""
 
@@ -114,6 +120,12 @@ msgid "updates existing"
 msgstr ""
 
 msgid "CSS at the start"
+msgstr ""
+
+msgid "CSS replaces its block"
+msgstr ""
+
+msgid "CSS replaces all"
 msgstr ""
 
 msgid "Details"
@@ -215,7 +227,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:251
+#: includes/cli.php:255
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -260,7 +272,7 @@ msgstr ""
 msgid "Check the settings to export: they join the other site’s theme mods, the rest staying as it is there. Images go with them."
 msgstr ""
 
-msgid "Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS or at its start (Details), between head/tail comments named after the file."
+msgid "Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS, at its start, or replace its block of the same name or all of it (Details), between head/tail comments named after the file."
 msgstr ""
 
 msgid "Check the groups to export: each replaces the same group on the other site, the rest of its styles staying."
@@ -868,7 +880,7 @@ msgid "The site's look, in the bundle's options file, row => \"all\" or the keys
 msgstr ""
 
 #: includes/abilities.php:867
-msgid "Where the CSS rules are added on import: at the end of the other site's CSS (default) or at its start. Whoever imports can change it, replace a block of the same name the other site already has, or all of its CSS."
+msgid "How the CSS rules are added on import: at the end of the other site's CSS (default), at its start, replacing the head/tail blocks of the same name it already has (replace; with none, at the end), or replacing all its CSS (replace_all). Whoever imports can change it."
 msgstr ""
 
 #: includes/abilities.php:871
@@ -1320,12 +1332,12 @@ msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:238
+#: includes/cli.php:242
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:247
+#: includes/cli.php:251
 #, php-format
 msgid "Bundle written to %s."
 msgstr ""

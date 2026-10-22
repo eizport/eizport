@@ -101,7 +101,7 @@ Input: `search`, `include` (only these), `page`, `per_page`. Returns `items` (`i
 | `update_existing` | boolean: ask the import to update the items that already exist (same type and slug); saved in the bundle | `false` |
 | `reviews` | object: `ids` (comment IDs; `[]` for none) or `all` — WooCommerce product reviews | all of the products' reviews |
 | `appearance` | object: row (`theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets`) → `"all"` or the keys of its items (from `eizport/get-export-options`); a list of rows means each whole — the site's [look](../../exporting/appearance/), with the media it uses; needs `bundle` | none |
-| `css_mode` | `end` or `start`: where the CSS rules are added on import (whoever imports can also replace a block of the same name, or all the CSS) | `end` |
+| `css_mode` | `end`, `start`, `replace` (the head/tail blocks of the same name the other site has; at the end with none) or `replace_all`: how the CSS rules are added on import; whoever imports can change it | `end` |
 | `css_markers` | head/tail comments around the CSS rules | Settings → Export |
 | `menus` | object: `classic` (menu term IDs, with their items and theme locations), `navigation` (`wp_navigation` IDs), or `all` — [menus](../../exporting/menus/) | none (*all content* has them) |
 | `filename` | string, without extension | `<site>.WordPress.<date>` |

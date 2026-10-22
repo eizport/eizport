@@ -437,14 +437,14 @@ function css_id( $filename ) {
  * custom_css, global_styles, global_css and widgets entries.
  *
  * @param array $choice normalize()'s (or a list of rows).
- * @param array $css    `mode` (end or start), `markers` and `filename`, for the CSS entries.
+ * @param array $css    `mode` (end, start, replace, replace_all), `markers` and `filename`, for the CSS entries.
  * @return array{options: array, custom_css?: array, global_styles?: array, global_css?: array, widgets?: array}
  */
 function data( $choice, $css = array() ) {
 	$choice     = normalize( $choice );
 	$stylesheet = get_stylesheet();
 	$out        = array( 'options' => array() );
-	$mode       = 'start' === ( $css['mode'] ?? '' ) ? 'start' : 'end';
+	$mode       = in_array( $css['mode'] ?? '', array( 'end', 'start', 'replace', 'replace_all' ), true ) ? $css['mode'] : 'end';
 	$markers    = array_key_exists( 'markers', $css ) ? (bool) $css['markers'] : true;
 	$id         = css_id( (string) ( $css['filename'] ?? '' ) );
 

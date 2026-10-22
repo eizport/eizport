@@ -126,7 +126,7 @@ function sanitize( $defaults ) {
 				},
 				array_intersect_key( (array) ( $in['appearance_items'] ?? array() ), array_flip( \Eizport\Appearance\KEYS ) )
 			),
-			'css_mode'          => 'start' === ( $in['css_mode'] ?? '' ) ? 'start' : 'end',
+			'css_mode'          => in_array( $in['css_mode'] ?? '', array( 'end', 'start', 'replace', 'replace_all' ), true ) ? $in['css_mode'] : 'end',
 			'as_plugin'         => ! empty( $in['as_plugin'] ),
 			'update_existing'   => ! empty( $in['update_existing'] ),
 			'themes'            => array_values( array_intersect( $names( 'themes' ), array_keys( \Eizport\Playground\theme_choices() ) ) ),

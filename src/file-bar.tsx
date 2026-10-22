@@ -324,6 +324,17 @@ function useFields(
 						value: 'start',
 						label: __( 'Add at the start of the site’s CSS', 'eizport' ),
 					},
+					{
+						value: 'replace',
+						label: __(
+							'Replace the block of the same name (at the end when the site has none)',
+							'eizport'
+						),
+					},
+					{
+						value: 'replace_all',
+						label: __( 'Replace all the site’s CSS', 'eizport' ),
+					},
 				],
 				// Only with CSS rules chosen (Customizer custom CSS, Editor global CSS).
 				isVisible: ( item: FileSettings ) => hasCss( item ),
@@ -416,6 +427,12 @@ function fileSummary( settings: FileSettings, format: string ): string {
 			: [] ),
 		...( hasCss( settings ) && settings.css_mode === 'start'
 			? [ __( 'CSS at the start', 'eizport' ) ]
+			: [] ),
+		...( hasCss( settings ) && settings.css_mode === 'replace'
+			? [ __( 'CSS replaces its block', 'eizport' ) ]
+			: [] ),
+		...( hasCss( settings ) && settings.css_mode === 'replace_all'
+			? [ __( 'CSS replaces all', 'eizport' ) ]
 			: [] ),
 	]
 		.filter( Boolean )

@@ -183,12 +183,16 @@ function export_input( $assoc_args ) {
  * lists the items.
  *
  * [--css-mode=<mode>]
- * : Where the CSS rules are added on import: at the end of the other
- * site's CSS or at its start. Default: end.
+ * : How the CSS rules are added on import: at the end of the other site's
+ * CSS, at its start, replacing the head/tail blocks of the same name it
+ * already has (replace; with none, at the end), or replacing all its CSS
+ * (replace_all). Default: end.
  * ---
  * options:
  *   - end
  *   - start
+ *   - replace
+ *   - replace_all
  * ---
  *
  * [--[no-]css-markers]

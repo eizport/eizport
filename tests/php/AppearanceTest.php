@@ -236,6 +236,7 @@ class AppearanceTest extends Test_Case {
 		);
 		$this->assertSame( '.c { color: blue; }', $data['custom_css']['css'] );
 		$this->assertSame( 'start', $data['custom_css']['mode'] );
+		$this->assertSame( 'replace_all', Appearance\data( array( 'custom_css' => 'all' ), array( 'mode' => 'replace_all' ) )['custom_css']['mode'], 'Any mode, from the export too.' );
 		$this->assertFalse( $data['custom_css']['markers'] );
 		$this->assertSame( 'delivery', $data['custom_css']['id'], 'The file name, nothing else.' );
 		$this->assertSame( Appearance\css_id( 'delivery' ), $data['custom_css']['id'], 'The same name, the same ID.' );
