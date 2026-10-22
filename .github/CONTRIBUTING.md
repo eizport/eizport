@@ -64,6 +64,11 @@ Export navigation menus: classic menus with their theme locations, and block nav
    `-- --locale br=<eizport-ptb>`), `npm run video` when the scenes changed.
    A feature PR only updates the docs and `src/data/screenshots.ts` when a
    screen shows something new.
+   **Versions checked**, on the release branch too: `IMPORTER_TESTED` in
+   `includes/import.php` is the newest WordPress Importer the tests passed
+   with (CI installs the latest); `Bundle\REQUIRES` in `includes/bundle.php`
+   rises, with `FORMAT_VERSION`, only when the bundle layout changes in a way
+   an older Eizport would read wrong.
 4. **Optional pre-release** for testing, on GitHub only (not the latest
    release, not on WordPress.org): write the `= 1.1.0 =` Upgrade Notice in
    readme.txt (the Changelog comes from `changelog/`), then

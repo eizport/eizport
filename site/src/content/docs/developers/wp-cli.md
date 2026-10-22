@@ -62,7 +62,7 @@ wp eizport import site.wxrz --user=admin
 | `--css-mode=<mode>` | How the bundle's CSS rules are added: `end`, `start`, `replace` (the head/tail blocks of the same name this site has; with none, at the end) or `replace_all`; default: what the bundle asks |
 | `--[no-]css-markers` | Head/tail comments around them; default: what the bundle asks |
 
-It needs the WordPress Importer plugin installed (it doesn't have to be active).
+It needs the WordPress Importer plugin installed (it doesn't have to be active), in version 0.9.6 or newer; one newer than the version Eizport was tested with imports with a warning. A bundle made by a newer Eizport than this site's stops with an error that says which version it needs.
 
 ## Exporting with the ability
 

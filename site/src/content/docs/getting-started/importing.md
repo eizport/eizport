@@ -23,6 +23,11 @@ The WordPress Importer skips an item that already exists, and adds a copy when o
 
 It's off unless the bundle asks for it: **Update existing**, in the Export screen's **Details** panel, saves the choice in the bundle, and the box comes checked. The person importing can still uncheck it.
 
+## Versions
+
+- **A bundle made by a newer Eizport** — one that needs a version this site doesn't have — isn't imported: the upload, `wp eizport import`, the ability and a bundle plugin's screen say which Eizport it needs, and the bundle plugin offers **Update now**. Bundles made by older versions import as they did.
+- **The WordPress Importer** must be 0.9.6 or newer (Eizport stops and asks to update it). A version newer than the one Eizport was tested with still imports, with a notice on the importer's screen, on the bundle plugin's and in WP-CLI.
+
 ## Behind the scenes
 
 Before the importer reads anything:
