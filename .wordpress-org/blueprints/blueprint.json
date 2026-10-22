@@ -1,0 +1,29 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"meta": {
+		"title": "Eizport",
+		"description": "The Export screen of Eizport on a new WordPress site: content types, items and options to pick, .wxrz or .zip bundles with media, and Playground .zip exports.",
+		"author": "eizport"
+	},
+	"landingPage": "/wp-admin/export.php",
+	"features": {
+		"networking": true
+	},
+	"steps": [
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "eizport"
+			},
+			"options": {
+				"activate": true
+			}
+		}
+	]
+}

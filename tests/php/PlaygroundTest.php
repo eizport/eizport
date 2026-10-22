@@ -630,4 +630,28 @@ class PlaygroundTest extends Test_Case {
 			$folder->close();
 		}
 	}
+
+	public function test_the_directory_s_live_preview_blueprint() {
+		$file = dirname( __DIR__, 2 ) . '/.wordpress-org/blueprints/blueprint.json';
+		$text = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$data = json_decode( $text, true );
+
+		// WordPress.org's rules: json_decode() reads it, 100 KB at most.
+		$this->assertIsArray( $data, 'Valid JSON for PHP.' );
+		$this->assertLessThan( 100 * 1024, strlen( $text ) );
+		$this->assertSame( '/wp-admin/export.php', $data['landingPage'], 'Eizport\'s Export screen.' );
+		$this->assertSame(
+			array(
+				'step'       => 'installPlugin',
+				'pluginData' => array(
+					'resource' => 'wordpress.org/plugins',
+					'slug'     => 'eizport',
+				),
+				'options'    => array( 'activate' => true ),
+			),
+			$data['steps'][1],
+			'From the directory: the version released there.'
+		);
+		$this->assertSame( array( 'login', 'installPlugin' ), array_column( $data['steps'], 'step' ), 'A plain site: its own posts and pages, nothing written into it.' );
+	}
 }
