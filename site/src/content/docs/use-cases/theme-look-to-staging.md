@@ -24,7 +24,7 @@ The same goes for a block theme customized in the Site Editor: a new color palet
 
 ## Next time
 
-Another change locally, another export: on staging, a new block is added after the first (the comments show which file each came from; tidy up in *Additional CSS* when needed). With *Update existing* on, the *Hours* widget is updated in place instead of added again.
+Name the exports after the task — `COMB-584.wxrz` — and the rules on staging sit between `/* head COMB-584 */` and `/* tail COMB-584 */`. Another change for the same task, another export with the same name: the importer's step 1 now offers **Replace the "COMB-584" block this site already has**, which swaps the old rules for the new ones and leaves the rest of staging's CSS as it is. Leave it at the export's choice instead, and a second block is added after the first. With *Update existing* on, the *Hours* widget is updated in place instead of added again.
 
 ## What it doesn't
 

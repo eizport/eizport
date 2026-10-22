@@ -674,7 +674,7 @@ function serve_bundle() {
  */
 function look_import( $args ) {
 	$choice = array();
-	if ( isset( $args['css_mode'] ) && in_array( $args['css_mode'], array( 'end', 'start', 'replace' ), true ) ) {
+	if ( isset( $args['css_mode'] ) && in_array( $args['css_mode'], array( 'end', 'start', 'replace', 'replace_all' ), true ) ) {
 		$choice['css_mode'] = $args['css_mode'];
 	}
 	if ( array_key_exists( 'css_markers', $args ) && null !== $args['css_markers'] ) {
@@ -739,26 +739,40 @@ function css_field() {
 	if ( ! is_array( $css ) ) {
 		return;
 	}
+	$replace = eizport_css_has_block( (string) ( $css['id'] ?? '' ) );
 	steps_script(
 		'css',
 		array(
 			'heading'      => __( 'Additional CSS', 'eizport' ),
 			'modeName'     => CSS_MODE_FIELD,
 			'modeLabel'    => __( 'The file\'s CSS rules', 'eizport' ),
-			'mode'         => (string) ( $css['mode'] ?? 'replace' ),
-			'modes'        => array(
+			// As the export chose; replacing a block of the same name is offered below when there is one.
+			'mode'         => 'start' === ( $css['mode'] ?? '' ) ? 'start' : 'end',
+			'modes'        => array_merge(
 				array(
-					'value' => 'end',
-					'label' => __( 'Add at the end of this site\'s CSS', 'eizport' ),
+					array(
+						'value' => 'end',
+						'label' => __( 'Add at the end of this site\'s CSS', 'eizport' ),
+					),
+					array(
+						'value' => 'start',
+						'label' => __( 'Add at the start of this site\'s CSS', 'eizport' ),
+					),
 				),
+				// Only when this site already has a block of the same name (an earlier delivery of COMB-584.wxrz, say).
+				$replace ? array(
+					array(
+						'value' => 'replace',
+						/* translators: %s: the name of the CSS block, the file's name, like "delivery". */
+						'label' => sprintf( __( 'Replace the "%s" block this site already has', 'eizport' ), (string) ( $css['id'] ?? '' ) ),
+					),
+				) : array(),
 				array(
-					'value' => 'start',
-					'label' => __( 'Add at the start of this site\'s CSS', 'eizport' ),
-				),
-				array(
-					'value' => 'replace',
-					'label' => __( 'Replace this site\'s CSS', 'eizport' ),
-				),
+					array(
+						'value' => 'replace_all',
+						'label' => __( 'Replace all of this site\'s CSS', 'eizport' ),
+					),
+				)
 			),
 			'markersName'  => CSS_MARKERS_FIELD,
 			'markers'      => ! empty( $css['markers'] ),

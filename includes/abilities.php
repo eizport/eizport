@@ -689,8 +689,8 @@ function register() {
 					),
 					'css_mode'        => array(
 						'type'        => 'string',
-						'enum'        => array( 'end', 'start', 'replace' ),
-						'description' => __( 'How the bundle\'s CSS rules are added: at the end of this site\'s CSS, at its start, or replacing it. Default: as the bundle asks.', 'eizport' ),
+						'enum'        => array( 'end', 'start', 'replace', 'replace_all' ),
+						'description' => __( 'How the bundle\'s CSS rules are added: at the end of this site\'s CSS, at its start, replacing the head/tail blocks of the same name this site already has (replace; with none, at the end), or replacing all of this site\'s CSS (replace_all). Default: as the bundle asks.', 'eizport' ),
 					),
 					'css_markers'     => array(
 						'type'        => 'boolean',
@@ -863,8 +863,8 @@ function export_input_schema() {
 			),
 			'css_mode'        => array(
 				'type'        => 'string',
-				'enum'        => array( 'end', 'start', 'replace' ),
-				'description' => __( 'How the CSS rules are added on import: at the end of the other site\'s CSS (default), at its start, or replacing it. Whoever imports can change it.', 'eizport' ),
+				'enum'        => array( 'end', 'start' ),
+				'description' => __( 'Where the CSS rules are added on import: at the end of the other site\'s CSS (default) or at its start. Whoever imports can change it, replace a block of the same name the other site already has, or all of its CSS.', 'eizport' ),
 			),
 			'css_markers'     => array(
 				'type'        => 'boolean',

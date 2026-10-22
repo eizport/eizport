@@ -236,32 +236,93 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	}
 
 	/**
+	 * The pattern of the head/tail blocks with a name.
+	 *
+	 * @param string $id The block's name.
+	 * @return string
+	 */
+	function eizport_css_block_pattern( $id ) {
+		return '#(?:\n\n)?/\* head ' . preg_quote( $id, '#' ) . ' \*/.*?/\* tail ' . preg_quote( $id, '#' ) . ' \*/#s';
+	}
+
+	/**
+	 * A block name, as it goes in the comments.
+	 *
+	 * @param string $id Name.
+	 * @return string
+	 */
+	function eizport_css_block_id( $id ) {
+		return trim( (string) preg_replace( '/[^A-Za-z0-9._ -]+/', '-', (string) $id ) );
+	}
+
+	/**
+	 * Whether this site's CSS (the Customizer's or the Site Editor's) already
+	 * has a head/tail block with a name: then an import may replace it.
+	 *
+	 * @param string $id Name.
+	 * @return bool
+	 */
+	function eizport_css_has_block( $id ) {
+		$id = eizport_css_block_id( $id );
+		if ( '' === $id ) {
+			return false;
+		}
+		$css = (string) wp_get_custom_css();
+		if ( wp_is_block_theme() && class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+			$post = WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( wp_get_theme(), false );
+			$data = isset( $post['post_content'] ) ? json_decode( (string) $post['post_content'], true ) : null;
+			$css .= (string) ( $data['styles']['css'] ?? '' );
+		}
+
+		return (bool) preg_match( eizport_css_block_pattern( $id ), $css );
+	}
+
+	/**
 	 * This site's CSS with the file's rules in it.
 	 *
 	 * - With markers, the rules go between "head ID" and "tail ID" comments,
 	 *   a mark of the file they came from (blocks aren't unique: each import
 	 *   adds its own).
 	 * - Without, rules this site already has (same text) aren't repeated.
-	 * - Mode: "end" (after this site's CSS), "start" (before it) or
-	 *   "replace" (only the file's).
+	 * - Mode: "end" (after this site's CSS), "start" (before it),
+	 *   "replace": the blocks this site has with the same name give way to
+	 *   the new one, the rest of its CSS staying (with no such block, or
+	 *   without markers, it's "end"), or "replace_all": only the file's.
 	 *
 	 * @param string $current This site's CSS.
 	 * @param string $rules   The file's rules.
 	 * @param string $mode    end, start or replace.
 	 * @param bool   $markers Mark the block.
-	 * @param string $id      The block's ID.
+	 * @param string $id      The block's name.
 	 * @return string
 	 */
 	function eizport_merge_css( $current, $rules, $mode, $markers, $id ) {
 		$current = trim( (string) $current );
 		$rules   = trim( (string) $rules );
-		$id      = trim( (string) preg_replace( '/[^A-Za-z0-9._ -]+/', '-', (string) $id ) );
+		$id      = eizport_css_block_id( $id );
 		if ( '' === $rules ) {
 			return $current;
 		}
 		if ( $markers && '' !== $id ) {
-			// A mark of where the rules came from: each import adds its own block, the same name may repeat.
-			$block = "/* head {$id} */\n{$rules}\n/* tail {$id} */";
+			$block   = "/* head {$id} */\n{$rules}\n/* tail {$id} */";
+			$pattern = eizport_css_block_pattern( $id );
+			if ( 'replace' === $mode && preg_match( $pattern, $current ) ) {
+				// The first one where it was, the others gone.
+				$first = true;
+				return trim(
+					(string) preg_replace_callback(
+						$pattern,
+						function ( $found ) use ( $block, &$first ) {
+							if ( ! $first ) {
+								return '';
+							}
+							$first = false;
+							return ( 0 === strpos( $found[0], "\n\n" ) ? "\n\n" : '' ) . $block;
+						},
+						$current
+					)
+				);
+			}
 		} else {
 			$have  = array_map( 'eizport_css_normalize', eizport_css_rules( $current ) );
 			$block = implode(
@@ -273,11 +334,11 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 					}
 				)
 			);
-			if ( '' === $block && 'replace' !== $mode ) {
+			if ( '' === $block && 'replace_all' !== $mode ) {
 				return $current;
 			}
 		}
-		if ( 'replace' === $mode || '' === $current ) {
+		if ( '' === $current || 'replace_all' === $mode ) {
 			return $block;
 		}
 
@@ -285,18 +346,20 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	}
 
 	/**
-	 * How an import adds the file's CSS: the file's choice, unless whoever
-	 * imports picked otherwise (the importer's step 1, eizport/import, WP-CLI).
+	 * How an import adds the file's CSS: the file's choice (end or start),
+	 * unless whoever imports picked otherwise (the importer's step 1,
+	 * eizport/import, WP-CLI), who may also replace the block of the same name,
+	 * or all of this site's CSS.
 	 *
 	 * @param array $entry The file's custom_css or global_css entry.
 	 * @return array{0: string, 1: bool} Mode and markers.
 	 */
 	function eizport_css_choice( $entry ) {
 		$asked   = (array) ( $GLOBALS['eizport_look_import'] ?? array() );
-		$mode    = (string) ( $asked['css_mode'] ?? $entry['mode'] ?? 'replace' );
+		$mode    = (string) ( $asked['css_mode'] ?? $entry['mode'] ?? 'end' );
 		$markers = array_key_exists( 'css_markers', $asked ) ? (bool) $asked['css_markers'] : ! empty( $entry['markers'] );
 
-		return array( in_array( $mode, array( 'end', 'start', 'replace' ), true ) ? $mode : 'end', $markers );
+		return array( in_array( $mode, array( 'end', 'start', 'replace', 'replace_all' ), true ) ? $mode : 'end', $markers );
 	}
 
 	/**

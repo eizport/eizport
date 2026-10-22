@@ -354,7 +354,7 @@ function bundle_settings( $in ) {
 	// the Playground .zip: Playground starts from a new site).
 	$out['update_existing'] = $out['bundle'] && ! $out['blueprint'] && ! empty( $in['update_existing'] );
 	// How the look's CSS is added on import (Appearance\data()).
-	$out['css_mode']    = in_array( $in['css_mode'] ?? '', array( 'end', 'start', 'replace' ), true ) ? $in['css_mode'] : 'end';
+	$out['css_mode']    = 'start' === ( $in['css_mode'] ?? '' ) ? 'start' : 'end';
 	$out['css_markers'] = array_key_exists( 'css_markers', $in ) ? (bool) $in['css_markers'] : \Eizport\Settings\get()['css_markers'];
 	$out['options']     = $out['bundle'] ? array_values( array_filter( (array) ( $in['options'] ?? array() ), 'is_string' ) ) : array();
 	$out['linked']      = $out['bundle'] && ! empty( $in['linked'] );

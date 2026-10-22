@@ -53,5 +53,5 @@ Copies made by the Export screen are listed in the plugin's **Settings → Copie
 | `post_content/<slug>.html` | Put back into the item's content |
 | `options.json` | Set at the end; options listed in `post_ids` get the imported post's ID |
 | `term_media` in the manifest | Term meta holding an attachment ID get the imported attachment's ID |
-| The look ([appearance](../../exporting/appearance/)) | CSS rules added to this site's CSS as the bundle asks (end, start or replace; head/tail comments) — step 1 of the importer, `css_mode`/`css_markers` and `--css-mode`/`--[no-]css-markers` change it; theme mods, style groups and widgets join this site's |
+| The look ([appearance](../../exporting/appearance/)) | CSS rules added to this site's CSS as the bundle asks (end or start; head/tail comments), or — chosen on import — replacing a head/tail block of the same name or all the CSS — step 1 of the importer, `css_mode`/`css_markers` and `--css-mode`/`--[no-]css-markers` change it; theme mods, style groups and widgets join this site's |
 | Products and their variations, pages and their children | Imported with their parents, as the WordPress Importer does |

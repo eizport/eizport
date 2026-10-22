@@ -101,7 +101,7 @@ Input: `search`, `include` (only these), `page`, `per_page`. Returns `items` (`i
 | `update_existing` | boolean: ask the import to update the items that already exist (same type and slug); saved in the bundle | `false` |
 | `reviews` | object: `ids` (comment IDs; `[]` for none) or `all` — WooCommerce product reviews | all of the products' reviews |
 | `appearance` | object: row (`theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets`) → `"all"` or the keys of its items (from `eizport/get-export-options`); a list of rows means each whole — the site's [look](../../exporting/appearance/), with the media it uses; needs `bundle` | none |
-| `css_mode` | `end`, `start` or `replace`: how the CSS rules are added on import | `end` |
+| `css_mode` | `end` or `start`: where the CSS rules are added on import (whoever imports can also replace a block of the same name, or all the CSS) | `end` |
 | `css_markers` | head/tail comments around the CSS rules | Settings → Export |
 | `menus` | object: `classic` (menu term IDs, with their items and theme locations), `navigation` (`wp_navigation` IDs), or `all` — [menus](../../exporting/menus/) | none (*all content* has them) |
 | `filename` | string, without extension | `<site>.WordPress.<date>` |
@@ -129,7 +129,7 @@ Returns the copy:
 
 ## eizport/import
 
-Input: `copy` (a copy's name) or `attachment_id` (a `.wxrz`, `.zip`, `.xml` or `.xml.gz` in the media library). `update_existing` (boolean) updates the items that already exist (same type and slug) instead of adding copies; default: what the bundle asks. `css_mode` (`end`, `start`, `replace`) and `css_markers` (boolean) change how the bundle's CSS rules are added ([appearance](../../exporting/appearance/)); default: what the bundle asks. Needs the WordPress Importer installed. A plugin made [as plugin](../../exporting/as-plugin/) is refused (`eizport_plugin_zip`): install it as a plugin. Returns `posts` (how many the importer created or found), `options` (the names set) and `log` (the importer's messages, as text).
+Input: `copy` (a copy's name) or `attachment_id` (a `.wxrz`, `.zip`, `.xml` or `.xml.gz` in the media library). `update_existing` (boolean) updates the items that already exist (same type and slug) instead of adding copies; default: what the bundle asks. `css_mode` (`end`, `start`, `replace` — the head/tail blocks of the same name this site has, or at the end when there are none —, `replace_all`) and `css_markers` (boolean) change how the bundle's CSS rules are added ([appearance](../../exporting/appearance/)); default: what the bundle asks. Needs the WordPress Importer installed. A plugin made [as plugin](../../exporting/as-plugin/) is refused (`eizport_plugin_zip`): install it as a plugin. Returns `posts` (how many the importer created or found), `options` (the names set) and `log` (the importer's messages, as text).
 
 ## Defaults
 

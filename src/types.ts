@@ -169,8 +169,8 @@ export interface FileSettings {
 	appearance: string[];
 	/** The look's items chosen one by one, by row (theme mod names, rule keys, style groups, widget IDs). */
 	appearance_items: Record< string, string[] >;
-	/** How the CSS rules are added on import: after the other site's CSS, before it, or instead of it. */
-	css_mode: 'end' | 'start' | 'replace';
+	/** Where the CSS rules are added on import: after the other site's CSS, or before it. */
+	css_mode: 'end' | 'start';
 	themes: string[];
 	plugins: string[];
 }

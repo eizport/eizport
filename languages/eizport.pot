@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T19:17:40+00:00\n"
+"POT-Creation-Date: 2026-10-21T19:34:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -63,9 +63,6 @@ msgstr ""
 msgid "Add at the start of the site’s CSS"
 msgstr ""
 
-msgid "Replace the site’s CSS"
-msgstr ""
-
 msgid "Themes to install"
 msgstr ""
 
@@ -117,9 +114,6 @@ msgid "updates existing"
 msgstr ""
 
 msgid "CSS at the start"
-msgstr ""
-
-msgid "CSS replaces"
 msgstr ""
 
 msgid "Details"
@@ -221,7 +215,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:249
+#: includes/cli.php:251
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -266,7 +260,7 @@ msgstr ""
 msgid "Check the settings to export: they join the other site’s theme mods, the rest staying as it is there. Images go with them."
 msgstr ""
 
-msgid "Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS, at its start, or replace it (Details), between head/tail comments named after the file."
+msgid "Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS or at its start (Details), between head/tail comments named after the file."
 msgstr ""
 
 msgid "Check the groups to export: each replaces the same group on the other site, the rest of its styles staying."
@@ -838,7 +832,7 @@ msgid "Update the posts that already exist (same type and slug) with the importe
 msgstr ""
 
 #: includes/abilities.php:693
-msgid "How the bundle's CSS rules are added: at the end of this site's CSS, at its start, or replacing it. Default: as the bundle asks."
+msgid "How the bundle's CSS rules are added: at the end of this site's CSS, at its start, replacing the head/tail blocks of the same name this site already has (replace; with none, at the end), or replacing all of this site's CSS (replace_all). Default: as the bundle asks."
 msgstr ""
 
 #: includes/abilities.php:697
@@ -874,7 +868,7 @@ msgid "The site's look, in the bundle's options file, row => \"all\" or the keys
 msgstr ""
 
 #: includes/abilities.php:867
-msgid "How the CSS rules are added on import: at the end of the other site's CSS (default), at its start, or replacing it. Whoever imports can change it."
+msgid "Where the CSS rules are added on import: at the end of the other site's CSS (default) or at its start. Whoever imports can change it, replace a block of the same name the other site already has, or all of its CSS."
 msgstr ""
 
 #: includes/abilities.php:871
@@ -1220,7 +1214,7 @@ msgid "Visit the site"
 msgstr ""
 
 #: includes/bundle-plugin.php:533
-#: includes/import.php:921
+#: includes/import.php:935
 msgid "Importer messages"
 msgstr ""
 
@@ -1319,19 +1313,19 @@ msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 
 #. translators: %d: number of posts.
-#: includes/cli.php:77
+#: includes/cli.php:80
 #, php-format
 msgid "%d post imported."
 msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:236
+#: includes/cli.php:238
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:245
+#: includes/cli.php:247
 #, php-format
 msgid "Bundle written to %s."
 msgstr ""
@@ -1536,62 +1530,68 @@ msgstr ""
 msgid "Existing items"
 msgstr ""
 
-#: includes/import.php:745
+#: includes/import.php:746
 msgid "Additional CSS"
 msgstr ""
 
-#: includes/import.php:747
+#: includes/import.php:748
 msgid "The file's CSS rules"
 msgstr ""
 
-#: includes/import.php:752
+#: includes/import.php:755
 msgid "Add at the end of this site's CSS"
 msgstr ""
 
-#: includes/import.php:756
+#: includes/import.php:759
 msgid "Add at the start of this site's CSS"
 msgstr ""
 
-#: includes/import.php:760
-msgid "Replace this site's CSS"
+#. translators: %s: the name of the CSS block, the file's name, like "delivery".
+#: includes/import.php:767
+#, php-format
+msgid "Replace the \"%s\" block this site already has"
+msgstr ""
+
+#: includes/import.php:773
+msgid "Replace all of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name the CSS rules are marked with: the file's name, like "delivery".
-#: includes/import.php:766
+#: includes/import.php:780
 #, php-format
 msgid "Between \"head\" and \"tail\" comments with the file's name (%s)"
 msgstr ""
 
-#: includes/import.php:834
+#: includes/import.php:848
 msgid ".wxrz bundles, the .zip of a bundle exported as plugin and gzipped WXR files are accepted too: their attachment files come from the bundle."
 msgstr ""
 
-#: includes/import.php:886
-#: includes/import.php:930
+#: includes/import.php:900
+#: includes/import.php:944
 msgid "All importers"
 msgstr ""
 
-#: includes/import.php:915
+#: includes/import.php:929
 msgid "Choose file"
 msgstr ""
 
-#: includes/import.php:916
+#: includes/import.php:930
 msgid "Change file"
 msgstr ""
 
-#: includes/import.php:918
+#: includes/import.php:932
 msgid "Choose who the imported items belong to and whether their attachments come along."
 msgstr ""
 
-#: includes/import.php:919
+#: includes/import.php:933
 msgid "What was imported, and the importer’s messages."
 msgstr ""
 
-#: includes/import.php:924
+#: includes/import.php:938
 msgid "The file could not be imported."
 msgstr ""
 
-#: includes/import.php:925
+#: includes/import.php:939
 msgid "Choose another file"
 msgstr ""
 

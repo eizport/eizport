@@ -181,12 +181,22 @@ class AppearanceTest extends Test_Case {
 		$end = eizport_merge_css( $site, '.new { color: red; }', 'end', true, 'delivery' );
 		$this->assertSame( ".site { color: black; }\n\n/* head delivery */\n.new { color: red; }\n/* tail delivery */", $end );
 		$this->assertStringStartsWith( '/* head delivery */', eizport_merge_css( $site, '.new {}', 'start', true, 'delivery' ) );
-		$this->assertStringNotContainsString( '.site', eizport_merge_css( $site, '.new {}', 'replace', true, 'delivery' ) );
+		$this->assertStringStartsWith( $site, eizport_merge_css( $site, '.new {}', 'replace', true, 'delivery' ), 'No block of that name yet: at the end.' );
 
 		// The same file again: another block, as the mode says (blocks aren't unique).
 		$again = eizport_merge_css( $end, '.new { color: blue; }', 'end', true, 'delivery' );
 		$this->assertSame( 2, substr_count( $again, '/* head delivery */' ) );
 		$this->assertStringEndsWith( "/* head delivery */\n.new { color: blue; }\n/* tail delivery */", $again );
+
+		// Replace: the blocks of the same name give way to the new one, the rest stays; with none, at the end.
+		$twice    = $again . "\n\n.after {}";
+		$replaced = eizport_merge_css( $twice, '.new { color: green; }', 'replace', true, 'delivery' );
+		$this->assertSame( ".site { color: black; }\n\n/* head delivery */\n.new { color: green; }\n/* tail delivery */\n\n.after {}", $replaced );
+		$this->assertSame( $site . "\n\n/* head COMB-584 */\n.x {}\n/* tail COMB-584 */", eizport_merge_css( $site, '.x {}', 'replace', true, 'COMB-584' ) );
+
+		// Replace all: only the file's.
+		$this->assertSame( "/* head delivery */\n.only {}\n/* tail delivery */", eizport_merge_css( $replaced, '.only {}', 'replace_all', true, 'delivery' ) );
+		$this->assertSame( '.only {}', eizport_merge_css( $replaced, '.only {}', 'replace_all', false, 'delivery' ) );
 
 		// Without markers, rules the site has aren't repeated.
 		$plain = eizport_merge_css( $site, ".site  {  color: black; }\n.new {}", 'end', false, 'delivery' );
@@ -206,7 +216,7 @@ class AppearanceTest extends Test_Case {
 		);
 		$this->assertSame( array( 'replace', false ), eizport_css_choice( $entry ) );
 		unset( $GLOBALS['eizport_look_import'] );
-		$this->assertSame( array( 'replace', false ), eizport_css_choice( array() ), 'A bundle from before modes replaces, as it did.' );
+		$this->assertSame( array( 'end', false ), eizport_css_choice( array() ), 'No mode: at the end.' );
 	}
 
 	public function test_only_the_rules_chosen_go() {
@@ -348,11 +358,11 @@ class AppearanceTest extends Test_Case {
 		eizport_apply_look( array( 'global_css' => array( 'css' => 'p { color: blue; }' ) ) );
 		$styles = Appearance\global_styles();
 		$this->assertSame( '#123456', $styles['styles']['color']['background'], 'The CSS left the styles as they were.' );
-		$this->assertSame( 'p { color: blue; }', $styles['styles']['css'] );
+		$this->assertSame( "p { color: red; }\n\np { color: blue; }", $styles['styles']['css'], 'Added at the end.' );
 
 		$data = Appearance\data( array( 'global_styles', 'global_css' ) );
 		$this->assertArrayNotHasKey( 'css', $data['global_styles']['content']['styles'] );
-		$this->assertSame( 'p { color: blue; }', $data['global_css']['css'] );
+		$this->assertSame( "p { color: red; }\n\np { color: blue; }", $data['global_css']['css'] );
 	}
 
 	/**

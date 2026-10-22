@@ -36,12 +36,15 @@ function bootstrap() {
  *
  * [--css-mode=<mode>]
  * : How the bundle's CSS rules are added: at the end of this site's CSS,
- * at its start, or replacing it. Default: as the bundle asks.
+ * at its start, replacing the head/tail blocks of the same name this site
+ * already has (replace; with none, at the end), or replacing all of this
+ * site's CSS (replace_all). Default: as the bundle asks.
  * ---
  * options:
  *   - end
  *   - start
  *   - replace
+ *   - replace_all
  * ---
  *
  * [--[no-]css-markers]
@@ -180,13 +183,12 @@ function export_input( $assoc_args ) {
  * lists the items.
  *
  * [--css-mode=<mode>]
- * : How the CSS rules are added on import: at the end of the other site's
- * CSS, at its start, or replacing it. Default: end.
+ * : Where the CSS rules are added on import: at the end of the other
+ * site's CSS or at its start. Default: end.
  * ---
  * options:
  *   - end
  *   - start
- *   - replace
  * ---
  *
  * [--[no-]css-markers]

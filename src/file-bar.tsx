@@ -324,10 +324,6 @@ function useFields(
 						value: 'start',
 						label: __( 'Add at the start of the site’s CSS', 'eizport' ),
 					},
-					{
-						value: 'replace',
-						label: __( 'Replace the site’s CSS', 'eizport' ),
-					},
 				],
 				// Only with CSS rules chosen (Customizer custom CSS, Editor global CSS).
 				isVisible: ( item: FileSettings ) => hasCss( item ),
@@ -420,9 +416,6 @@ function fileSummary( settings: FileSettings, format: string ): string {
 			: [] ),
 		...( hasCss( settings ) && settings.css_mode === 'start'
 			? [ __( 'CSS at the start', 'eizport' ) ]
-			: [] ),
-		...( hasCss( settings ) && settings.css_mode === 'replace'
-			? [ __( 'CSS replaces', 'eizport' ) ]
 			: [] ),
 	]
 		.filter( Boolean )
