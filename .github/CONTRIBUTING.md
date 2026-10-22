@@ -82,10 +82,27 @@ Export navigation menus: classic menus with their theme locations, and block nav
    from `1.1.0-dev`/`-rc.N`). It bumps the version and Stable tag, runs the
    checks, commits, tags `1.1.0`, moves `latest` and `stable`, and pushes. The
    tag runs `.github/workflows/release.yml`: the GitHub release and the
-   WordPress.org deploy.
+   WordPress.org deploy. It also moves the `site` branch onto `1.1.0`, which
+   publishes the site (below).
 6. **Back to `trunk`:** cherry-pick the `chore: release 1.1.0` commit, keeping
    `trunk`'s dev version and taking readme.txt's Changelog, Upgrade Notice and
    Stable tag.
 
 Patch releases (`1.1.1`) come from the same `release/1.1`, for bugs that break
 something for users; everything else waits for the next minor.
+
+## Fixing the site between releases
+
+The site shows the released plugin: `.github/workflows/pages.yml` publishes
+the `site` branch, the latest release plus the site fixes made after it
+(`trunk`'s docs describe what isn't released yet). A fix to the site alone
+(a typo, a link, a button) doesn't wait for a release:
+
+1. A PR into `trunk` that changes only `site/`, as usual (no changelog entry).
+2. Once it's squashed: `git switch site && git cherry-pick <commit> && git push`.
+   The push publishes the site; the workflow refuses to if anything but
+   `site/` changed on `site` since the release.
+
+A release moves `site` onto itself and replays the fixes it doesn't bring
+yet (those it already has, from `trunk`, drop out). If one no longer
+applies, `eizport release` says what to run by hand.
