@@ -353,7 +353,7 @@ body.eizport-import .eizport-import__moved {
 /* One height for every line, the one with a button too. No wrapping of the items: a long text wraps inside itself, next to its ✓ or ✗, and a button keeps its width. */
 .eizport-checks li {
 	display: flex;
-	align-items: baseline;
+	align-items: center;
 	gap: 4px 8px;
 	min-height: 32px;
 	margin: 0;
