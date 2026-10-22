@@ -17,9 +17,17 @@ Or open its link on playground.wordpress.net (new screen: the **Open in Playgrou
 
 **Even from a local server.** Playground runs in your browser, so a copy made on WordPress Studio or any `localhost` site opens on playground.wordpress.net without uploading it anywhere — the browser fetches it from your machine (the link works on your computer only).
 
-## Themes and plugins
+## Playground options
 
-Any **installed** theme or plugin can go in. The ones from the WordPress.org directory aren't copied: the blueprint installs them from the directory, **in the version this site has** (`woocommerce.11.2.1.zip`). The others — premium, custom, in-house — are zipped from the site into the bundle, and Playground installs them from there. WordPress's own update check says which ones are from the directory.
+**Details → Playground options** (enabled with the Playground format) opens two groups, one at a time; the button counts what's set.
+
+### Landing page
+
+Where Playground opens once the site is ready — **Home page** (the default), **Dashboard**, **A page** of this site, or **A path** (`/shop/`). A page goes in the blueprint as a relative path, `/?pagename=<its path>`, so it opens the same page whatever ID it gets in Playground. (Without it, Playground itself would open the dashboard.)
+
+### Themes and plugins
+
+Any **installed** theme or plugin can go in. Plugins are installed **active or inactive as they are on this site**; of the themes, this site's is activated (when chosen), and a child theme brings its parent. The ones from the WordPress.org directory aren't copied: the blueprint installs them from the directory, **in the version this site has** (`woocommerce.11.2.1.zip`). The others — premium, custom, in-house — are zipped from the site into the bundle, and Playground installs them from there. WordPress's own update check says which ones are from the directory.
 
 > **Use it responsibly.** Premium and custom themes and plugins are copied into the file. Share a Playground `.zip` only where their licenses allow — keep the ones with paid licenses to yourself or your team.
 
