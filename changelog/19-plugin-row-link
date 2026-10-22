@@ -1,4 +1,4 @@
 Significance: patch
-Type: changed
+Type: update
 
 The plugin's row on the Plugins screen keeps only Settings: no "Import .wxrz" or "Install the WordPress Importer" link — importing starts from Tools → Import.
