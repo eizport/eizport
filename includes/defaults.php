@@ -94,7 +94,7 @@ function sanitize( $defaults ) {
 	};
 
 	// Rows that bring what the items chosen suggest.
-	$rows    = array_merge( array( '__options', '__reviews' ), array_keys( \Eizport\Selection\content_types() ) );
+	$rows    = array_merge( array( '__options', '__reviews', '__menus' ), array_keys( \Eizport\Selection\content_types() ) );
 	$suggest = array_values( array_intersect( $names( 'include_suggested' ), $rows ) );
 
 	// Only the filters set: the export's schema refuses empty ones.
@@ -117,6 +117,8 @@ function sanitize( $defaults ) {
 			'include_suggested' => $suggest,
 			'review_ids'        => array_values( array_unique( array_map( 'absint', array_filter( (array) ( $in['review_ids'] ?? array() ), 'is_numeric' ) ) ) ),
 			'review_all'        => ! empty( $in['review_all'] ),
+			'menu_ids'          => array_values( preg_grep( '/^[cn]:\d+$/', $names( 'menu_ids' ) ) ),
+			'menu_all'          => ! empty( $in['menu_all'] ),
 			'as_plugin'         => ! empty( $in['as_plugin'] ),
 			'update_existing'   => ! empty( $in['update_existing'] ),
 			'themes'            => array_values( array_intersect( $names( 'themes' ), array_keys( \Eizport\Playground\theme_choices() ) ) ),

@@ -10,12 +10,14 @@ Exports as the Export screen does, to a copy kept on the site, and prints its pa
 ```bash
 wp eizport export --types=page:43,product --options=basics,page_on_front
 wp eizport export --types=page:43+44 --as-plugin --update-existing --filename=delivery
+wp eizport export --types=page --menus=classic:18 --filename=header
 ```
 
 | Argument | |
 | --- | --- |
 | `--types=<types>` | Content types, comma-separated: `type:ID+ID` for some items, the type alone for all of it. None: all content |
 | `--options=<options>` | Option groups (like `basics`) and option names, comma-separated |
+| `--menus=<menus>` | [Menus](../../exporting/menus/): `all`, or `classic:ID+ID` (menu term IDs) and `navigation:ID+ID` (`wp_navigation` IDs), comma-separated. None: no menus (all content already has them) |
 | `--[no-]media` | Media files inside; default: yes |
 | `--zip` | A `.zip` bundle instead of `.wxrz` |
 | `--as-plugin` | A [plugin](../../exporting/as-plugin/) `.zip` that imports its bundle |

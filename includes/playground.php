@@ -294,12 +294,16 @@ function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = a
 /**
  * Code of the temporary must-use plugin (includes/playground-media.php):
  * answers the importer's attachment downloads from the files the blueprint
- * wrote to MEDIA_DIR, and puts the content files into their items.
+ * wrote to MEDIA_DIR, and puts the content files into their items; then
+ * includes/import-menus.php (menu locations, existing menus, navigation refs).
  *
  * @return string
  */
 function media_plugin_code() {
-	return (string) file_get_contents( __DIR__ . '/playground-media.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	// With the menus' import code (import-menus.php) after it: one must-use plugin, one PHP file.
+	$menus = (string) file_get_contents( __DIR__ . '/import-menus.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+	return (string) file_get_contents( __DIR__ . '/playground-media.php' ) . "\n" . preg_replace( '/^<\?php\s*/', '', $menus ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 }
 
 /**

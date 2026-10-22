@@ -95,7 +95,7 @@ function register() {
 		'eizport/get-export-options',
 		array(
 			'label'               => __( 'Get export options', 'eizport' ),
-			'description'         => __( 'Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export.', 'eizport' ),
+			'description'         => __( 'Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the navigation menus (classic, with their theme locations, and block navigations); the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export.', 'eizport' ),
 			'category'            => CATEGORY,
 			// No input. Not "properties => array()": PHP sends [] where JSON Schema needs {}.
 			'input_schema'        => array(
@@ -176,7 +176,7 @@ function register() {
 		'eizport/get-suggestions',
 		array(
 			'label'               => __( 'Get suggestions', 'eizport' ),
-			'description'         => __( 'What the items chosen suggest exporting too: "items" (post type => IDs, like the products a block in their content shows), "reviews" (comment IDs of the products\' approved reviews) and "options" (settings pointing to them, like page_on_front, as Settings → Export → "Linked settings" says). Nothing is added by itself: pass them to eizport/export to include them.', 'eizport' ),
+			'description'         => __( 'What the items chosen suggest exporting too: "items" (post type => IDs, like the products a block in their content shows, or the pages the menus chosen link to), "reviews" (comment IDs of the products\' approved reviews), "options" (settings pointing to them, like page_on_front, as Settings → Export → "Linked settings" says) and "menus" (the classic menus in theme locations and the navigations their content or the theme\'s templates use). Nothing is added by itself: pass them to eizport/export to include them.', 'eizport' ),
 			'category'            => CATEGORY,
 			'input_schema'        => array(
 				'type'                 => 'object',
@@ -187,6 +187,16 @@ function register() {
 						'type'        => 'array',
 						'items'       => array( 'type' => 'string' ),
 						'description' => __( 'Post types chosen whole (the same as {} in "types"; easier to send in a URL).', 'eizport' ),
+					),
+					'menus' => array(
+						'type'        => 'object',
+						'description' => __( 'Menus chosen: "classic" (menu term IDs); the pages, posts and products their items point to are suggested.', 'eizport' ),
+						'properties'  => array(
+							'classic' => array(
+								'type'  => 'array',
+								'items' => array( 'type' => 'integer' ),
+							),
+						),
 					),
 				),
 				'additionalProperties' => false,
@@ -202,6 +212,19 @@ function register() {
 					'options' => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'string' ),
+					),
+					'menus'   => array(
+						'type'       => 'object',
+						'properties' => array(
+							'classic'    => array(
+								'type'  => 'array',
+								'items' => array( 'type' => 'integer' ),
+							),
+							'navigation' => array(
+								'type'  => 'array',
+								'items' => array( 'type' => 'integer' ),
+							),
+						),
 					),
 				),
 			),
@@ -505,7 +528,7 @@ function register() {
 
 	$defaults_schema = array(
 		'type'        => 'object',
-		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews"), review_ids, review_all, themes, plugins).', 'eizport' ),
+		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews", "__menus"), review_ids, review_all, menu_ids ("c:<menu term ID>", "n:<navigation ID>"), menu_all, themes, plugins).', 'eizport' ),
 	);
 
 	wp_register_ability(
@@ -819,6 +842,22 @@ function export_input_schema() {
 				),
 				'additionalProperties' => false,
 			),
+			'menus'           => array(
+				'type'                 => 'object',
+				'description'          => __( 'Navigation menus to export: "classic" (menu term IDs, with their items and theme locations) and "navigation" (wp_navigation post IDs, the menus of navigation blocks), or "all". Default: none (all content already has them). eizport/get-export-options lists them; eizport/get-suggestions says which the items chosen use.', 'eizport' ),
+				'properties'           => array(
+					'classic'    => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'integer' ),
+					),
+					'navigation' => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'integer' ),
+					),
+					'all'        => array( 'type' => 'boolean' ),
+				),
+				'additionalProperties' => false,
+			),
 			'media_used'      => array(
 				'type'        => 'boolean',
 				'description' => __( 'With types: also the media the exported items use in their content without being attached (images, galleries, covers, files). Default: true, unless the "Only attached media" setting is on.', 'eizport' ),
@@ -1062,6 +1101,33 @@ function get_export_options( $input = array() ) { // phpcs:ignore Generic.CodeAn
 			)
 		) : 0,
 		'bundle_zip'    => \Eizport\Settings\get()['bundle_zip'],
+		// Navigation menus, for the Menus row.
+		'menus'         => \Eizport\Menus\all(),
+	);
+}
+
+/**
+ * The menus of eizport/export's input, as the runner takes them.
+ *
+ * @param array|null $menus `classic`, `navigation`, or `all`; null: none.
+ * @return array{classic: int[], navigation: int[]}|null
+ */
+function menus_input( $menus ) {
+	if ( ! is_array( $menus ) ) {
+		return null;
+	}
+	if ( ! empty( $menus['all'] ) ) {
+		$all = \Eizport\Menus\all();
+
+		return array(
+			'classic'    => wp_list_pluck( $all['classic'], 'id' ),
+			'navigation' => wp_list_pluck( $all['navigation'], 'id' ),
+		);
+	}
+
+	return array(
+		'classic'    => array_map( 'intval', (array) ( $menus['classic'] ?? array() ) ),
+		'navigation' => array_map( 'intval', (array) ( $menus['navigation'] ?? array() ) ),
 	);
 }
 
@@ -1137,6 +1203,7 @@ function export( $input = array() ) {
 			'media_used'      => array_key_exists( 'media_used', $input ) ? (bool) $input['media_used'] : null,
 			// Product reviews: null exports them all, as WordPress does.
 			'reviews'         => isset( $input['reviews'] ) && empty( $input['reviews']['all'] ) ? array_map( 'intval', (array) ( $input['reviews']['ids'] ?? array() ) ) : null,
+			'menus'           => menus_input( $input['menus'] ?? null ),
 			'blueprint'       => $blueprint,
 			'as_plugin'       => ! $blueprint && ! empty( $input['as_plugin'] ),
 			'update_existing' => ! empty( $input['update_existing'] ),
@@ -1330,6 +1397,14 @@ function get_suggestions( $input = array() ) {
 		return $specs;
 	}
 	$out = \Eizport\Suggestions\suggest( $specs );
+	// The menus the items use (theme locations, navigation blocks), and what the menus chosen point to.
+	$out['menus'] = \Eizport\Menus\suggested( array() === $out['chosen'] ? array() : array_merge( ...array_values( $out['chosen'] ) ) );
+	unset( $out['chosen'] );
+	foreach ( \Eizport\Menus\targets( (array) ( $input['menus']['classic'] ?? array() ) ) as $type => $ids ) {
+		if ( isset( Selection\content_types()[ $type ] ) ) {
+			$out['items'][ $type ] = array_values( array_unique( array_merge( $out['items'][ $type ] ?? array(), $ids ) ) );
+		}
+	}
 	// An object, also when empty.
 	$out['items'] = (object) $out['items'];
 

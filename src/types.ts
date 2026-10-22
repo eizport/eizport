@@ -36,6 +36,30 @@ export interface ExportOptions {
 	review_count: number;
 	/** Bundles are plain .zip files (Settings → Export). */
 	bundle_zip: boolean;
+	/** Navigation menus: classic ones and block navigations. */
+	menus: {
+		classic: ClassicMenu[];
+		navigation: NavigationMenu[];
+	};
+}
+
+/** A classic menu (Appearance → Menus). */
+export interface ClassicMenu {
+	id: number;
+	name: string;
+	slug: string;
+	/** Menu items. */
+	items: number;
+	/** Labels of the theme locations it sits in. */
+	locations: string[];
+}
+
+/** A block navigation (wp_navigation). */
+export interface NavigationMenu {
+	id: number;
+	title: string;
+	/** Links in it. */
+	links: number;
 }
 
 /** What the items chosen suggest exporting too (eizport/get-suggestions). */
@@ -46,6 +70,8 @@ export interface Suggestions {
 	reviews: number[];
 	/** Option names. */
 	options: string[];
+	/** Classic menus in theme locations; navigations the items or the theme use. */
+	menus?: { classic: number[]; navigation: number[] };
 }
 
 /** A post's role on the site: an option pointing to it (eizport_linked_options). */
@@ -109,7 +135,7 @@ export interface FileSettings {
 	option_names: string[];
 	option_all: boolean;
 	option_groups: string[];
-	/** Rows that bring what the items chosen suggest (post types, "__options", "__reviews"). */
+	/** Rows that bring what the items chosen suggest (post types, "__options", "__reviews", "__menus"). */
 	include_suggested: string[];
 	/** A plugin .zip holding the bundle. */
 	as_plugin: boolean;
@@ -119,6 +145,10 @@ export interface FileSettings {
 	review_ids: number[];
 	/** Every product review. */
 	review_all: boolean;
+	/** Menus chosen one by one: "c:<term ID>" (classic), "n:<post ID>" (navigation). */
+	menu_ids: string[];
+	/** Every menu. */
+	menu_all: boolean;
 	themes: string[];
 	plugins: string[];
 }

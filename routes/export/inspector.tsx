@@ -25,9 +25,11 @@ import { errorMessage, getExportOptions, getItems } from '../../src/abilities';
 import HeaderRow from '../../src/header-row';
 import mergeSelection from '../../src/merge-selection';
 import usePhoneView from '../../src/use-phone-view';
+import MenusPicker from '../../src/menus-picker';
 import OptionsPicker from '../../src/options-picker';
 import {
 	OPTIONS_ROW,
+	MENUS_ROW,
 	REVIEWS_ROW,
 	chosenFor,
 	setRowItems,
@@ -357,6 +359,9 @@ function Inspector() {
 	}
 	if ( type === REVIEWS_ROW ) {
 		return <ReviewsPicker />;
+	}
+	if ( type === MENUS_ROW ) {
+		return <MenusPicker />;
 	}
 	return type ? <Picker key={ type } typeName={ type } /> : null;
 }

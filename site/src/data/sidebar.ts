@@ -23,12 +23,18 @@ export const sidebar: SidebarGroup[] = [
 		pages: [ { title: 'Introduction' }, { title: 'Installation' }, { title: 'Your first export' }, { title: 'Importing' } ],
 	},
 	{
+		title: 'Use cases',
+		icon: 'start',
+		pages: [ { title: 'Header menus to staging' } ],
+	},
+	{
 		title: 'Exporting',
 		icon: 'export',
 		pages: [
 			{ title: 'Export screen' },
 			{ title: 'Choosing items' },
 			{ title: 'Options' },
+			{ title: 'Menus' },
 			{ title: 'Media' },
 			{ title: 'File and formats' },
 			{ title: 'As plugin' },

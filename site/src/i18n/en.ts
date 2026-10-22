@@ -76,6 +76,7 @@ export const en = {
 		original: 'Read the English page',
 		groups: {
 			'getting-started': 'Getting started',
+			'use-cases': 'Use cases',
 			exporting: 'Exporting',
 			formats: 'Formats',
 			settings: 'Settings',

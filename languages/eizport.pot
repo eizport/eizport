@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Eizport 1.0.0\n"
+"Project-Id-Version: Eizport 1.1.0-dev\n"
 "Report-Msgid-Bugs-To: https://github.com/eizport/eizport/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-14T02:28:34+00:00\n"
+"POT-Creation-Date: 2026-10-21T13:47:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -120,6 +120,7 @@ msgid "Done"
 msgstr ""
 
 #. translators: %d: number of items.
+#. translators: %d: number of menu items.
 #, js-format
 msgid "%d item"
 msgid_plural "%d items"
@@ -157,6 +158,9 @@ msgstr ""
 msgid "Product reviews"
 msgstr ""
 
+msgid "Menus"
+msgstr ""
+
 #: includes/bundle-plugin.php:605
 msgid "Options"
 msgstr ""
@@ -184,7 +188,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:168
+#: includes/cli.php:186
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -198,6 +202,9 @@ msgid "%d content type checked. Choose items per type; set up the file above."
 msgid_plural "%d content types checked. Choose items per type; set up the file above."
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "No content type checked: only the menus are exported. Check types to export content too."
+msgstr ""
 
 msgid "No content type checked: all content is exported. Check types to export only those."
 msgstr ""
@@ -223,6 +230,37 @@ msgstr ""
 msgid "Suggested"
 msgstr ""
 
+msgid "Classic menu"
+msgstr ""
+
+msgid "Navigation"
+msgstr ""
+
+#. translators: %d: number of links in a navigation menu.
+#, js-format
+msgid "%d link"
+msgid_plural "%d links"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Menu"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Location"
+msgstr ""
+
+msgid "Check menus to export them: classic menus go with their items and theme locations, navigations with their links. The pages they link to are suggested in their rows."
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
 msgid "Option"
 msgstr ""
 
@@ -242,12 +280,6 @@ msgid "IDs mapped on import"
 msgstr ""
 
 msgid "Check the options to set on the site that imports the file: they join the export at once. Site URLs, the admin email, keys, active plugins, roles and transients are never listed."
-msgstr ""
-
-msgid "Close"
-msgstr ""
-
-msgid "Select"
 msgstr ""
 
 msgid "Product"
@@ -542,7 +574,7 @@ msgid "Get export options"
 msgstr ""
 
 #: includes/abilities.php:98
-msgid "Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export."
+msgid "Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the navigation menus (classic, with their theme locations, and block navigations); the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export."
 msgstr ""
 
 #: includes/abilities.php:121
@@ -562,301 +594,309 @@ msgid "Get suggestions"
 msgstr ""
 
 #: includes/abilities.php:179
-msgid "What the items chosen suggest exporting too: \"items\" (post type => IDs, like the products a block in their content shows), \"reviews\" (comment IDs of the products' approved reviews) and \"options\" (settings pointing to them, like page_on_front, as Settings → Export → \"Linked settings\" says). Nothing is added by itself: pass them to eizport/export to include them."
+msgid "What the items chosen suggest exporting too: \"items\" (post type => IDs, like the products a block in their content shows, or the pages the menus chosen link to), \"reviews\" (comment IDs of the products' approved reviews), \"options\" (settings pointing to them, like page_on_front, as Settings → Export → \"Linked settings\" says) and \"menus\" (the classic menus in theme locations and the navigations their content or the theme's templates use). Nothing is added by itself: pass them to eizport/export to include them."
 msgstr ""
 
 #: includes/abilities.php:189
 msgid "Post types chosen whole (the same as {} in \"types\"; easier to send in a URL)."
 msgstr ""
 
-#: includes/abilities.php:222
+#: includes/abilities.php:193
+msgid "Menus chosen: \"classic\" (menu term IDs); the pages, posts and products their items point to are suggested."
+msgstr ""
+
+#: includes/abilities.php:245
 msgid "Get product reviews"
 msgstr ""
 
-#: includes/abilities.php:223
+#: includes/abilities.php:246
 msgid "Lists a page of WooCommerce's approved product reviews (author, product, rating, excerpt), searched, or only the ones in \"include\". Use their IDs in eizport/export reviews.ids. Empty without WooCommerce."
 msgstr ""
 
-#: includes/abilities.php:268
+#: includes/abilities.php:291
 msgid "Get options"
 msgstr ""
 
-#: includes/abilities.php:269
+#: includes/abilities.php:292
 msgid "Lists a page of the site's options that can be exported, one by one (never site URLs, the admin email, keys, active plugins, roles or transients), with their size, whether they are autoloaded and whether they hold a post ID (mapped on import). Use the names in eizport/export options.names."
 msgstr ""
 
-#: includes/abilities.php:279
+#: includes/abilities.php:302
 msgid "Only these options (for instance, the ones chosen)."
 msgstr ""
 
-#: includes/abilities.php:284
+#: includes/abilities.php:307
 msgid "Only the options of this group (eizport/get-export-options option_groups)."
 msgstr ""
 
-#: includes/abilities.php:310
+#: includes/abilities.php:333
 msgid "The value in a line (arrays as JSON), up to 200 characters."
 msgstr ""
 
-#: includes/abilities.php:335
+#: includes/abilities.php:358
 msgid "Export content"
 msgstr ""
 
-#: includes/abilities.php:336
+#: includes/abilities.php:359
 msgid "Exports content to a temporary copy on this site and returns its link: a .wxrz bundle (WXR, media and content files, settings) for the WordPress Importer, or, with \"blueprint\", a WordPress Playground .zip that also installs themes and plugins. Without \"types\", everything is exported."
 msgstr ""
 
-#: includes/abilities.php:355
+#: includes/abilities.php:378
 msgid "Get copies"
 msgstr ""
 
-#: includes/abilities.php:356
+#: includes/abilities.php:379
 msgid "Lists the export copies kept on this site (.wxrz bundles and Playground .zip files), with their download link, Playground link and expiry."
 msgstr ""
 
-#: includes/abilities.php:382
+#: includes/abilities.php:405
 msgid "Delete copies"
 msgstr ""
 
-#: includes/abilities.php:383
+#: includes/abilities.php:406
 msgid "Permanently deletes export copies, by name, or all of them with \"all\"."
 msgstr ""
 
-#: includes/abilities.php:392
+#: includes/abilities.php:415
 msgid "Names of the copies to delete, as eizport/get-copies returns them."
 msgstr ""
 
-#: includes/abilities.php:396
+#: includes/abilities.php:419
 msgid "Delete every copy."
 msgstr ""
 
-#: includes/abilities.php:424
+#: includes/abilities.php:447
 msgid "How long copies are kept, in seconds; 0 keeps them until deleted."
 msgstr ""
 
-#: includes/abilities.php:428
+#: includes/abilities.php:451
 msgid "Whether Tools → Export opens the plugin's Export screen. Off, WordPress's Export screen is left as it is, the plugin's is at Tools → Eizport, and classic_ui doesn't apply."
 msgstr ""
 
-#: includes/abilities.php:432
+#: includes/abilities.php:455
 msgid "Whether Tools → Import opens the WordPress Importer directly (its screen links to all importers)."
 msgstr ""
 
-#: includes/abilities.php:436
+#: includes/abilities.php:459
 msgid "Whether Tools → Import → WordPress looks like the plugin's Export screen. Off, the WordPress Importer looks as it is."
 msgstr ""
 
-#: includes/abilities.php:440
+#: includes/abilities.php:463
 msgid "Whether Tools → Export opens the classic screen instead of the new one (only with replace_export)."
 msgstr ""
 
-#: includes/abilities.php:444
+#: includes/abilities.php:467
 msgid "Whether bundles are plain .zip files instead of .wxrz (gzipped tar)."
 msgstr ""
 
-#: includes/abilities.php:448
+#: includes/abilities.php:471
 msgid "What a plugin exported \"as plugin\" holds: wxrz (one .wxrz file), root (the bundle's files next to the plugin's) or folder (in a bundle/ folder)."
 msgstr ""
 
-#: includes/abilities.php:452
+#: includes/abilities.php:475
 msgid "Whether exports of some items bring only their attached media and featured images, like WordPress, without the media they use in their content."
 msgstr ""
 
-#: includes/abilities.php:456
+#: includes/abilities.php:479
 msgid "Whether bundles keep each post's content in post_content/<slug>.html files instead of the WXR."
 msgstr ""
 
-#: includes/abilities.php:460
+#: includes/abilities.php:483
 msgid "Who saved export defaults belong to: each user, or the whole site."
 msgstr ""
 
-#: includes/abilities.php:464
+#: includes/abilities.php:487
 msgid "When settings that point to exported items (homepage, posts page, shop…) are added: both, check, export or off."
 msgstr ""
 
-#: includes/abilities.php:485
+#: includes/abilities.php:508
 msgid "Get settings"
 msgstr ""
 
-#: includes/abilities.php:486
+#: includes/abilities.php:509
 msgid "The plugin's settings, with their choices: how long export copies are kept, whether Tools → Export is the plugin's screen and whether it is the classic one, whether the WordPress Importer looks like it and whether Tools → Import opens it, who saved export defaults belong to, and when settings linked to exported items are added."
 msgstr ""
 
-#: includes/abilities.php:508
-msgid "The Export screen's choices: \"types\" (post type => \"ids\" or \"filters\", as eizport/export takes them) and \"settings\" (format \"wxr\" or \"playground\", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, \"__options\", \"__reviews\"), review_ids, review_all, themes, plugins)."
+#: includes/abilities.php:531
+msgid "The Export screen's choices: \"types\" (post type => \"ids\" or \"filters\", as eizport/export takes them) and \"settings\" (format \"wxr\" or \"playground\", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, \"__options\", \"__reviews\", \"__menus\"), review_ids, review_all, menu_ids (\"c:<menu term ID>\", \"n:<navigation ID>\"), menu_all, themes, plugins)."
 msgstr ""
 
-#: includes/abilities.php:514
+#: includes/abilities.php:537
 msgid "Get export defaults"
 msgstr ""
 
-#: includes/abilities.php:515
+#: includes/abilities.php:538
 msgid "The export choices saved as default (the current user's, or the site's, as Settings → Saved defaults says), which the Export screens start with; empty when none."
 msgstr ""
 
-#: includes/abilities.php:538
+#: includes/abilities.php:561
 msgid "Save export defaults"
 msgstr ""
 
-#: includes/abilities.php:539
+#: includes/abilities.php:562
 msgid "Saves export choices as default (sanitized: unknown types, options never exported and themes or plugins not installed are dropped) and returns them. The site's defaults need manage_options."
 msgstr ""
 
-#: includes/abilities.php:566
+#: includes/abilities.php:589
 msgid "Clear export defaults"
 msgstr ""
 
-#: includes/abilities.php:567
+#: includes/abilities.php:590
 msgid "Forgets the export choices saved as default: the Export screens start empty again."
 msgstr ""
 
-#: includes/abilities.php:591
+#: includes/abilities.php:614
 msgid "Update settings"
 msgstr ""
 
-#: includes/abilities.php:592
+#: includes/abilities.php:615
 msgid "Changes the plugin's settings given (copy_lifetime in seconds, replace_export, classic_ui, style_import, import_direct, content_files, attached_only, bundle_zip, plugin_content, plugin_import_again, defaults_scope, linked_options: one of the choices eizport/get-settings lists) and returns them all."
 msgstr ""
 
-#: includes/abilities.php:641
+#: includes/abilities.php:664
 msgid "Import content"
 msgstr ""
 
-#: includes/abilities.php:642
+#: includes/abilities.php:665
 msgid "Imports a copy kept on this site, or a WXR/.wxrz file in the media library, with the WordPress Importer: posts, media (from the bundle when it has them) and settings, with IDs mapped. Posts go to the current user."
 msgstr ""
 
-#: includes/abilities.php:650
+#: includes/abilities.php:673
 msgid "Name of a copy, as eizport/get-copies returns it."
 msgstr ""
 
-#: includes/abilities.php:655
+#: includes/abilities.php:678
 msgid "ID of a .wxrz, .xml or .xml.gz file in the media library."
 msgstr ""
 
-#: includes/abilities.php:659
+#: includes/abilities.php:682
 msgid "Update the posts that already exist (same type and slug) with the imported content instead of adding copies. Default: as the bundle asks (exported with update_existing), else no."
 msgstr ""
 
-#: includes/abilities.php:706
+#: includes/abilities.php:729
 msgid "Post type, as eizport/get-export-options lists them."
 msgstr ""
 
-#: includes/abilities.php:712
+#: includes/abilities.php:735
 msgid "Only these items (for instance, the ones chosen)."
 msgstr ""
 
-#: includes/abilities.php:770
+#: includes/abilities.php:793
 msgid "Post type => what to export of it: \"ids\", or \"filters\". Omit to export everything."
 msgstr ""
 
-#: includes/abilities.php:804
+#: includes/abilities.php:827
 msgid "Ask the import to update the posts that already exist on the other site (same type and slug) instead of adding copies: the bundle's default, which the importer can change. Not with blueprint."
 msgstr ""
 
-#: includes/abilities.php:808
+#: includes/abilities.php:831
 msgid "A plugin .zip holding the bundle: installed on another site, it shows a screen (Tools) that checks the plugins needed and imports the bundle with one click. Not with blueprint."
 msgstr ""
 
-#: includes/abilities.php:812
+#: includes/abilities.php:835
 msgid "WooCommerce product reviews to export with their products: \"ids\" (comment IDs; none: no reviews) or \"all\". Default: all of the exported products' reviews."
 msgstr ""
 
-#: includes/abilities.php:824
+#: includes/abilities.php:847
+msgid "Navigation menus to export: \"classic\" (menu term IDs, with their items and theme locations) and \"navigation\" (wp_navigation post IDs, the menus of navigation blocks), or \"all\". Default: none (all content already has them). eizport/get-export-options lists them; eizport/get-suggestions says which the items chosen use."
+msgstr ""
+
+#: includes/abilities.php:863
 msgid "With types: also the media the exported items use in their content without being attached (images, galleries, covers, files). Default: true, unless the \"Only attached media\" setting is on."
 msgstr ""
 
-#: includes/abilities.php:828
+#: includes/abilities.php:867
 msgid "The bundle as a plain .zip instead of a .wxrz (gzipped tar), with the same contents. Default: the \"Bundle as .zip\" setting."
 msgstr ""
 
-#: includes/abilities.php:832
+#: includes/abilities.php:871
 msgid "A .wxrz bundle (default true). False: core's plain WXR .xml, without media, content files or settings."
 msgstr ""
 
-#: includes/abilities.php:836
+#: includes/abilities.php:875
 msgid "Include the attachment files. Default true."
 msgstr ""
 
-#: includes/abilities.php:840
+#: includes/abilities.php:879
 msgid "Content as post_content/<slug>.html files instead of inside the WXR. Default: the \"Content as .html files\" setting (on unless changed)."
 msgstr ""
 
-#: includes/abilities.php:844
+#: includes/abilities.php:883
 msgid "Settings to include: groups, option names or all, and whether to set the exported homepage and posts page on import."
 msgstr ""
 
-#: includes/abilities.php:860
+#: includes/abilities.php:899
 msgid "Also the settings that point to the posts exported (homepage, posts page, shop…). Default: the \"Linked settings\" setting."
 msgstr ""
 
-#: includes/abilities.php:864
+#: includes/abilities.php:903
 msgid "Every option that can be exported (no transients, no denied options), instead of groups and names."
 msgstr ""
 
-#: includes/abilities.php:871
+#: includes/abilities.php:910
 msgid "Make a WordPress Playground .zip instead of a .wxrz, installing these themes (a child theme brings its parent) and plugins."
 msgstr ""
 
-#: includes/abilities.php:886
+#: includes/abilities.php:925
 msgid "File name without extension. Default: \"<site name>.WordPress.<date>\"."
 msgstr ""
 
-#: includes/abilities.php:911
+#: includes/abilities.php:950
 msgid "When the copy is deleted (ISO 8601), or \"\" when it is kept until deleted."
 msgstr ""
 
-#: includes/abilities.php:916
+#: includes/abilities.php:955
 msgid "Opens a Playground .zip on playground.wordpress.net; \"\" for a .wxrz."
 msgstr ""
 
-#: includes/abilities.php:920
+#: includes/abilities.php:959
 msgid "Runs a downloaded Playground .zip with the Playground CLI; \"\" for a .wxrz."
 msgstr ""
 
-#: includes/abilities.php:1013
+#: includes/abilities.php:1052
 msgid "Attachments"
 msgstr ""
 
-#: includes/abilities.php:1078
+#: includes/abilities.php:1144
 msgid "Give the \"type\" of the items to list."
 msgstr ""
 
 #. translators: %s: post type.
-#: includes/abilities.php:1084
+#: includes/abilities.php:1150
 #: includes/selection.php:569
 #, php-format
 msgid "\"%s\" is not a content type that can be exported."
 msgstr ""
 
 #. translators: %s: option names.
-#: includes/abilities.php:1112
+#: includes/abilities.php:1178
 #, php-format
 msgid "These options are never exported: %s."
 msgstr ""
 
 #. translators: %s: theme stylesheets or plugin files.
-#: includes/abilities.php:1127
+#: includes/abilities.php:1193
 #, php-format
 msgid "Not installed on this site: %s."
 msgstr ""
 
-#: includes/abilities.php:1184
+#: includes/abilities.php:1251
 msgid "Give the names of the copies to delete, or \"all\"."
 msgstr ""
 
-#: includes/abilities.php:1200
+#: includes/abilities.php:1267
 msgid "There is no such copy: see eizport/get-copies."
 msgstr ""
 
-#: includes/abilities.php:1207
+#: includes/abilities.php:1274
 msgid "The attachment is not a .wxrz, .zip, .xml or .xml.gz file."
 msgstr ""
 
-#: includes/abilities.php:1212
+#: includes/abilities.php:1279
 msgid "Give a \"copy\" name or an \"attachment_id\" to import."
 msgstr ""
 
-#: includes/abilities.php:1225
+#: includes/abilities.php:1292
 msgid "This .zip is a plugin: install it in Plugins → Add Plugin → Upload Plugin, then run its import screen under Tools."
 msgstr ""
 
@@ -1026,7 +1066,7 @@ msgid "Visit the site"
 msgstr ""
 
 #: includes/bundle-plugin.php:533
-#: includes/import.php:835
+#: includes/import.php:838
 msgid "Importer messages"
 msgstr ""
 
@@ -1087,7 +1127,7 @@ msgid "The bundle: %1$s, %2$s, made %3$s."
 msgstr ""
 
 #: includes/bundle-plugin.php:657
-#: includes/import.php:681
+#: includes/import.php:684
 msgid "Update pages, posts and products that already exist (same slug) instead of adding copies"
 msgstr ""
 
@@ -1132,12 +1172,12 @@ msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:155
+#: includes/cli.php:173
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:164
+#: includes/cli.php:182
 #, php-format
 msgid "Bundle written to %s."
 msgstr ""
@@ -1330,49 +1370,55 @@ msgstr ""
 msgid "The decompressed .wxrz file could not be saved."
 msgstr ""
 
-#: includes/import.php:545
+#: includes/import.php:548
 msgid "The WordPress Importer plugin is not installed."
 msgstr ""
 
-#: includes/import.php:561
+#: includes/import.php:564
 msgid "The WordPress Importer could not be loaded."
 msgstr ""
 
-#: includes/import.php:680
+#: includes/import.php:683
 msgid "Existing items"
 msgstr ""
 
-#: includes/import.php:748
+#: includes/import.php:751
 msgid ".wxrz bundles, the .zip of a bundle exported as plugin and gzipped WXR files are accepted too: their attachment files come from the bundle."
 msgstr ""
 
-#: includes/import.php:800
-#: includes/import.php:844
+#: includes/import.php:803
+#: includes/import.php:847
 msgid "All importers"
 msgstr ""
 
-#: includes/import.php:829
+#: includes/import.php:832
 msgid "Choose file"
 msgstr ""
 
-#: includes/import.php:830
+#: includes/import.php:833
 msgid "Change file"
 msgstr ""
 
-#: includes/import.php:832
+#: includes/import.php:835
 msgid "Choose who the imported items belong to and whether their attachments come along."
 msgstr ""
 
-#: includes/import.php:833
+#: includes/import.php:836
 msgid "What was imported, and the importer’s messages."
 msgstr ""
 
-#: includes/import.php:838
+#: includes/import.php:841
 msgid "The file could not be imported."
 msgstr ""
 
-#: includes/import.php:839
+#: includes/import.php:842
 msgid "Choose another file"
+msgstr ""
+
+#: includes/menus.php:64
+#: includes/selection.php:432
+#: includes/selection.php:907
+msgid "(no title)"
 msgstr ""
 
 #: includes/options.php:34
@@ -1442,7 +1488,7 @@ msgstr ""
 msgid "An export already ran in this request: run each export in its own request."
 msgstr ""
 
-#: includes/runner.php:89
+#: includes/runner.php:90
 msgid "The export could not be written to a file."
 msgstr ""
 
@@ -1501,11 +1547,6 @@ msgstr ""
 
 #: includes/selection.php:275
 msgid "Status:"
-msgstr ""
-
-#: includes/selection.php:432
-#: includes/selection.php:901
-msgid "(no title)"
 msgstr ""
 
 #: includes/settings.php:35
