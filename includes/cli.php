@@ -34,6 +34,21 @@ function bootstrap() {
  * : Update the posts that already exist (same type and slug) instead of
  * adding copies. Default: as the bundle asks, else no.
  *
+ * [--css-mode=<mode>]
+ * : How the bundle's CSS rules are added: at the end of this site's CSS,
+ * at its start, or replacing it. Default: as the bundle asks.
+ * ---
+ * options:
+ *   - end
+ *   - start
+ *   - replace
+ * ---
+ *
+ * [--[no-]css-markers]
+ * : Put the CSS rules between "head" and "tail" comments named after the
+ * file, replacing them when the same file is imported again. Default: as
+ * the bundle asks.
+ *
  * ## EXAMPLES
  *
  *     wp eizport import site.wxrz --user=admin
@@ -43,7 +58,17 @@ function bootstrap() {
  * @param array    $assoc_args Flags.
  */
 function import_command( $args, $assoc_args = array() ) {
-	$result = \Eizport\Import\import_file( $args[0], array_key_exists( 'update-existing', $assoc_args ) ? array( 'update_existing' => (bool) \WP_CLI\Utils\get_flag_value( $assoc_args, 'update-existing' ) ) : array() );
+	$import = array();
+	if ( array_key_exists( 'update-existing', $assoc_args ) ) {
+		$import['update_existing'] = (bool) \WP_CLI\Utils\get_flag_value( $assoc_args, 'update-existing' );
+	}
+	if ( isset( $assoc_args['css-mode'] ) ) {
+		$import['css_mode'] = (string) $assoc_args['css-mode'];
+	}
+	if ( array_key_exists( 'css-markers', $assoc_args ) ) {
+		$import['css_markers'] = (bool) \WP_CLI\Utils\get_flag_value( $assoc_args, 'css-markers' );
+	}
+	$result = \Eizport\Import\import_file( $args[0], $import );
 	if ( is_wp_error( $result ) ) {
 		WP_CLI::error( $result );
 	}
@@ -85,10 +110,22 @@ function export_input( $assoc_args ) {
 			'names'  => array_values( array_diff( $chosen, $groups ) ),
 		);
 	}
-	// The look: all of it, or some of theme_mods, custom_css, global_styles, global_css, widgets.
+	// The look: "all", or rows, each whole or with its items (theme_mods:custom_logo+background_color,custom_css:r:1a2b3c4d5e,widgets).
 	$look = (string) ( $assoc_args['appearance'] ?? '' );
-	if ( '' !== $look ) {
-		$input['appearance'] = 'all' === $look ? \Eizport\Appearance\KEYS : array_values( array_intersect( \Eizport\Appearance\KEYS, array_map( 'trim', explode( ',', $look ) ) ) );
+	if ( 'all' === $look ) {
+		$input['appearance'] = \Eizport\Appearance\KEYS;
+	} elseif ( '' !== $look ) {
+		$input['appearance'] = array();
+		foreach ( array_filter( array_map( 'trim', explode( ',', $look ) ) ) as $part ) {
+			list( $row, $keys )                          = array_pad( explode( ':', $part, 2 ), 2, '' );
+			$input['appearance'][ sanitize_key( $row ) ] = '' === $keys || 'all' === $keys ? 'all' : array_values( array_filter( explode( '+', $keys ) ) );
+		}
+	}
+	if ( isset( $assoc_args['css-mode'] ) ) {
+		$input['css_mode'] = (string) $assoc_args['css-mode'];
+	}
+	if ( array_key_exists( 'css-markers', $assoc_args ) ) {
+		$input['css_markers'] = $flag( 'css-markers', true );
 	}
 	// The menus flag: all of them, or classic menu and navigation IDs.
 	$menus = (string) ( $assoc_args['menus'] ?? '' );
@@ -136,9 +173,26 @@ function export_input( $assoc_args ) {
  * comma-separated. Default: none (all content already has them).
  *
  * [--appearance=<parts>]
- * : The site's look: `all`, or some of theme_mods (Customizer), custom_css
- * (Customizer's Additional CSS), global_styles and global_css (Site Editor,
- * block themes) and widgets, comma-separated.
+ * : The site's look: `all`, or rows comma-separated — theme_mods
+ * (Customizer), custom_css (Customizer's Additional CSS), global_styles and
+ * global_css (Site Editor, block themes) and widgets — each whole, or with
+ * the keys of its items after a colon, joined by "+"
+ * (theme_mods:custom_logo+background_color). eizport/get-export-options
+ * lists the items.
+ *
+ * [--css-mode=<mode>]
+ * : How the CSS rules are added on import: at the end of the other site's
+ * CSS, at its start, or replacing it. Default: end.
+ * ---
+ * options:
+ *   - end
+ *   - start
+ *   - replace
+ * ---
+ *
+ * [--[no-]css-markers]
+ * : Put the CSS rules between "head" and "tail" comments named after the
+ * file. Default: Settings → Export.
  *
  * [--[no-]media]
  * : Put the media files inside. Default: yes.

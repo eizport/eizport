@@ -26,6 +26,8 @@ export const DEFAULT_STATE: ExportState = {
 		menu_ids: [],
 		menu_all: false,
 		appearance: [],
+		appearance_items: {},
+		css_mode: 'end',
 		themes: [],
 		plugins: [],
 	},
@@ -190,9 +192,7 @@ export function suggestedFor( row: string ): Id[] {
 		return suggestions.reviews;
 	}
 	if ( LOOK_ROWS[ row ] ) {
-		return ( suggestions.appearance || [] ).includes( LOOK_ROWS[ row ] )
-			? [ LOOK_ROWS[ row ] ]
-			: [];
+		return suggestions.appearance?.[ LOOK_ROWS[ row ] ] || [];
 	}
 	if ( row === MENUS_ROW ) {
 		return [
@@ -236,9 +236,7 @@ export function explicitFor( state: ExportState, row: string ): Id[] {
 		return state.settings.menu_ids;
 	}
 	if ( LOOK_ROWS[ row ] ) {
-		return state.settings.appearance.includes( LOOK_ROWS[ row ] )
-			? [ LOOK_ROWS[ row ] ]
-			: [];
+		return state.settings.appearance_items?.[ LOOK_ROWS[ row ] ] || [];
 	}
 	return state.types[ row ]?.ids || [];
 }
@@ -311,16 +309,20 @@ function withRow(
 		};
 	}
 	if ( LOOK_ROWS[ row ] ) {
-		const others = current.settings.appearance.filter(
-			( key ) => key !== LOOK_ROWS[ row ]
-		);
+		const key = LOOK_ROWS[ row ];
+		const chosen = { ...( settings.appearance_items || {} ) };
+		if ( explicit.length ) {
+			chosen[ key ] = explicit.map( String );
+		} else {
+			delete chosen[ key ];
+		}
 		return {
 			...current,
 			settings: {
 				...settings,
-				appearance: explicit.length
-					? [ ...others, LOOK_ROWS[ row ] ]
-					: others,
+				// Items chosen one by one: the row isn't whole anymore.
+				appearance: settings.appearance.filter( ( whole ) => whole !== key ),
+				appearance_items: chosen,
 			},
 		};
 	}
@@ -402,7 +404,13 @@ export function exportAll( row: string ) {
 			};
 		}
 		if ( LOOK_ROWS[ row ] ) {
-			return withRow( current, row, [ LOOK_ROWS[ row ] ], false );
+			return {
+				...next,
+				settings: {
+					...next.settings,
+					appearance: [ ...next.settings.appearance, LOOK_ROWS[ row ] ],
+				},
+			};
 		}
 		return { ...next, types: { ...next.types, [ row ]: {} } };
 	} );
@@ -458,10 +466,18 @@ export function exportInput( state: ExportState ): Record< string, unknown > {
 		menus: settings.menu_all
 			? { all: true }
 			: menusOf( chosenFor( state, MENUS_ROW ) ),
-		// The look, row by row (theme mods, custom CSS, global styles and CSS, widgets).
-		appearance: Object.keys( LOOK_ROWS ).flatMap( ( row ) =>
-			chosenFor( state, row ).map( String )
+		// The look, row by row (theme mods, custom CSS, global styles and CSS, widgets): whole, or its items.
+		appearance: Object.fromEntries(
+			Object.entries( LOOK_ROWS )
+				.map( ( [ row, key ] ): [ string, string | string[] ] => [
+					key,
+					settings.appearance.includes( key )
+						? 'all'
+						: chosenFor( state, row ).map( String ),
+				] )
+				.filter( ( [ , value ] ) => value.length > 0 )
 		),
+		css_mode: settings.css_mode || 'end',
 	};
 	const types = resolvedTypes( state );
 	if ( Object.keys( types ).length ) {
@@ -510,8 +526,10 @@ export function needsBundle( state: ExportState ): boolean {
  * @return Whether any look row is chosen.
  */
 export function hasLook( state: ExportState ): boolean {
-	return Object.keys( LOOK_ROWS ).some(
-		( row ) => chosenFor( state, row ).length > 0
+	return Object.entries( LOOK_ROWS ).some(
+		( [ row, key ] ) =>
+			state.settings.appearance.includes( key ) ||
+			chosenFor( state, row ).length > 0
 	);
 }
 

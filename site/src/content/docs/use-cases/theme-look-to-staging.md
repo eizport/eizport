@@ -1,32 +1,32 @@
 ---
 title: "Theme look to staging"
-description: "A theme customized locally — logo, background, Additional CSS, widgets, or a block theme's styles — repeated on staging without redoing it in the Customizer or the Site Editor."
+description: "A change to a theme's look made locally — the last CSS rule, the logo, one widget, or a block theme's palette — taken to staging without touching what staging has of its own."
 ---
 
 ## The scenario
 
-A classic theme was customized locally: the logo, a background image and color in the Customizer, a few lines of Additional CSS, and the footer sidebar with an image, a menu and a block of text. Staging has the same theme, freshly installed. Redoing all of it by hand — and uploading the images again — is the part everyone forgets something in.
+Staging already has its look: its own Additional CSS, its widgets, its colors. Locally, a last CSS rule was added for the footer, the logo changed, and an *Hours* widget went into the footer. Only those should reach staging — copying the whole look over would wipe what staging has of its own, and redoing it by hand is where something gets forgotten.
 
-The same goes for a block theme customized in the Site Editor: its colors and typography (*Styles*) and its Additional CSS.
+The same goes for a block theme customized in the Site Editor: a new color palette, one more rule in its Additional CSS.
 
 ## The steps
 
-1. On the local site, **Tools → Export**. The rows **Customizer theme mods**, **Customizer custom CSS** and **Widgets** say *Suggested* (with a block theme: **Editor global styles** and **Editor global CSS**). Check them.
-2. Check **Menus** too if a widget shows a menu, and the pages the site needs.
-3. **Export**, and on staging **Tools → Import → WordPress** with the file (with Eizport active there, which sets the look when the import ends).
+1. On the local site, **Tools → Export**. Open **Choose items** on **Customizer custom CSS** and check only the last rule (*Rule 3 of 3 (the last)*), each with its preview; on **Customizer theme mods**, the Logo; on **Widgets**, *Hours*. With a block theme: the *Color palette* group of **Editor global styles** and a rule of **Editor global CSS**.
+2. **Details → CSS rules on import**: *Add at the end of the site's CSS* (the default).
+3. **Export**, and on staging **Tools → Import → WordPress** with the file (with Eizport active there). Step 1 shows **Additional CSS**, as the file asks; change it there if needed.
 
-## What the file carries
+## What staging gets
 
-- The theme mods, the Additional CSS, and the widgets with their sidebars — or the block theme's styles and CSS.
-- The images they use: the logo, the background, the image widget's image.
+- Its own CSS, then the rule, between `/* head … */` and `/* tail … */` comments named after the file.
+- The logo (the image is imported with it); its other theme mods as they were.
+- *Hours* at the end of its footer, after its own widgets.
+- With a block theme: the palette; its own colors and typography as they were.
 
-On staging, the logo and the background are the imported images, the widgets are back in the footer, the menu widget shows the imported menu, and the CSS is the theme's Additional CSS. Staging's own settings that the file doesn't hold stay as they were.
+## Next time
+
+Change the rule locally and export again **with the same file name**: on staging the block between the comments is replaced, not added again. With *Update existing* on, the *Hours* widget is updated in place too.
 
 ## What it doesn't
 
 - Fonts installed with the Font Library.
 - A sidebar staging's theme doesn't have: its widgets go to *Inactive widgets*.
-
-## Only the CSS
-
-To bring only a block theme's Additional CSS, check just **Editor global CSS**: staging keeps its own colors and typography.

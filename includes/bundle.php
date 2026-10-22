@@ -190,7 +190,7 @@ function with_options_data( $options ) {
 	$options['options']              = $names ? \Eizport\Options\data( $names ) : null;
 
 	// The look chosen on its own rows (Customizer, Site Editor, widgets) goes in the same file.
-	$look = \Eizport\Appearance\data( (array) ( $options['appearance'] ?? array() ) );
+	$look = \Eizport\Appearance\data( (array) ( $options['appearance'] ?? array() ), (array) ( $options['css'] ?? array() ) );
 	if ( $look['options'] || count( $look ) > 1 ) {
 		$data            = $options['options'] ? $options['options'] : array(
 			'format'   => 'eizport-options',

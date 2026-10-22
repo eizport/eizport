@@ -25,10 +25,12 @@ import { errorMessage, getExportOptions, getItems } from '../../src/abilities';
 import HeaderRow from '../../src/header-row';
 import mergeSelection from '../../src/merge-selection';
 import usePhoneView from '../../src/use-phone-view';
+import LookPicker from '../../src/look-picker';
 import MenusPicker from '../../src/menus-picker';
 import OptionsPicker from '../../src/options-picker';
 import {
 	OPTIONS_ROW,
+	LOOK_ROWS,
 	MENUS_ROW,
 	REVIEWS_ROW,
 	chosenFor,
@@ -362,6 +364,9 @@ function Inspector() {
 	}
 	if ( type === MENUS_ROW ) {
 		return <MenusPicker />;
+	}
+	if ( type && LOOK_ROWS[ type ] ) {
+		return <LookPicker key={ type } row={ type } />;
 	}
 	return type ? <Picker key={ type } typeName={ type } /> : null;
 }

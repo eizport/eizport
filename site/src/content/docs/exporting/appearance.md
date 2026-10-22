@@ -1,39 +1,51 @@
 ---
 title: "Appearance"
-description: "The site's look on rows of its own: the Customizer's theme mods and custom CSS, the Site Editor's global styles and global CSS, and widgets — with the media they use."
+description: "The site's look on rows of its own, item by item: Customizer theme mods and CSS rules, the Site Editor's style groups and CSS rules, and widgets — with a preview of each, the media they use, and how the other site takes them."
 ---
 
-The site's look is exported on rows of its own, next to the content types. Each row is one thing, in or out, and shows only when the active theme has it:
+The site's look is exported on rows of its own, next to the content types. A row shows only when the active theme has something in it, and its **Choose items** panel lists what it holds, each with a preview:
 
-| Row | What it is | Shows with |
-| --- | --- | --- |
-| **Customizer theme mods** | *Appearance → Customize*: logo, header image, background image and color, the theme's own settings | Classic themes (or any theme with Customizer settings) |
-| **Customizer custom CSS** | *Customize → Additional CSS* | A theme with Additional CSS |
-| **Editor global styles** | *Appearance → Editor → Styles*: colors, typography, layout | Block themes with saved styles |
-| **Editor global CSS** | *Styles → Additional CSS* | Block themes with Additional CSS there |
-| **Widgets** | *Appearance → Widgets*: classic widgets (text, image, menu…) and block widgets, with their sidebars | Classic themes with widgets in their sidebars |
+| Row | Each item | Preview | Shows with |
+| --- | --- | --- | --- |
+| **Customizer theme mods** | A setting of *Appearance → Customize*: Logo, Header image, Background image and color, Header text color, the theme's own settings | The image, the color, or the value | A theme with Customizer settings |
+| **Customizer custom CSS** | A rule of *Customize → Additional CSS* (an `@media` block counts as one; a comment right before goes with it) | The rule, and which one it is: *Rule 3 of 3 (the last)* | A theme with Additional CSS |
+| **Editor global styles** | A group of *Appearance → Editor → Styles*: Color palette, Site colors, Typography, Spacing and layout, Elements, each block with styles of its own | Its colors, or a summary | Block themes with saved styles |
+| **Editor global CSS** | A rule of the Site Editor's *Additional CSS* | The rule | Block themes with Additional CSS there |
+| **Widgets** | A widget — classic (text, image, menu…) or block — with its sidebar | Its text or image | Classic themes with widgets in their sidebars |
 
-Every row the site has is suggested. They need a bundle (`.wxrz`, `.zip` or a Playground `.zip`): they travel in its `options.json`.
+Check a row to take all it has (every item is suggested), or open **Choose items** and check only some: the last CSS rule, the logo and the background color, one widget. They need a bundle (`.wxrz`, `.zip` or a Playground `.zip`): they travel in its `options.json`.
 
 ## What comes along
 
-The images the look uses are exported with it, even when the Attachments row isn't checked: the logo, the header and background images, the media of image widgets and block widgets, and the uploads the styles and the CSS point to (*Only attached media* in [Settings → Export](../../settings/export-settings/) turns it off, as for content).
+The images the items chosen use are exported with them, even when the Attachments row isn't checked: the logo, the header and background images, the media of image widgets and block widgets, and the uploads the styles and the CSS point to (*Only attached media* in [Settings → Export](../../settings/export-settings/) turns it off, as for content).
 
 ## On the other site
 
-- **Theme mods** go to the active theme and are **merged** into its own: what the file doesn't hold stays (like the menus' locations). The logo and the header image point to the imported attachments, and the header and background images' addresses to the imported files.
-- **Custom CSS** becomes the active theme's Additional CSS.
-- **Global styles** and **global CSS** go to the active theme's styles, when it's a block theme. Each changes only its own part: importing the styles keeps the other site's Additional CSS, and the other way round.
-- **Widgets** go back to their sidebars; a sidebar the other theme doesn't have sends its widgets to *Inactive widgets*, as WordPress does. A Navigation Menu widget points to the imported menu (export it on the [Menus](../menus/) row), an image widget to the imported image, and the addresses in block widgets to the imported files.
+- **CSS rules** (the Customizer's and the Site Editor's) are **added** to the other site's CSS, as **Details → CSS rules on import** says: at the end (the default), at the start, or replacing it. They go between two comments named after the file:
+
+  ```css
+  .their-own { color: purple; }
+
+  /* head delivery 0bf978b5 */
+  .site-footer { background: #ffeedd; }
+  /* tail delivery 0bf978b5 */
+  ```
+
+  The name is the file's name and a short hash of this site and that name, the same for each delivery of the same file: **importing it again replaces its block in place**, whatever the mode, instead of adding the rules twice. Without the comments ([Settings → Export](../../settings/export-settings/), or the importer), rules the other site already has (same text) aren't repeated.
+- Whoever imports can change both on the importer's step 1 (**Additional CSS**), with `css_mode`/`css_markers` in [`eizport/import`](../../developers/abilities/#eizportimport), or with `--css-mode`/`--[no-]css-markers` in [WP-CLI](../../developers/wp-cli/).
+- **Theme mods** chosen go to the active theme and are **merged** into its own: what the file doesn't hold stays (the other settings, the menus' locations). The logo and the header image point to the imported attachments, the header and background images' addresses to the imported files.
+- **Style groups** chosen replace the same groups on the other site's styles (a block theme); its other groups stay.
+- **Widgets** chosen go at the **end of the same sidebar**, next to the other site's own widgets (to *Inactive widgets* when its theme has no such sidebar), each with a free number. Importing the same file again with *Update existing* updates them in place instead of adding them twice. A Navigation Menu widget points to the imported menu (export it on the [Menus](../menus/) row), an image widget to the imported image, and the addresses in block widgets to the imported files.
 
 ## From WP-CLI and the ability
 
 ```bash
-wp eizport export --types=page --appearance=theme_mods,custom_css,widgets
-wp eizport export --appearance=all --menus=all
+wp eizport export --types=page --appearance=theme_mods:custom_logo+background_color,custom_css,widgets:text-3
+wp eizport export --appearance=all --css-mode=start --no-css-markers
+wp eizport import delivery.wxrz --css-mode=replace
 ```
 
-The [`eizport/export`](../../developers/abilities/#eizportexport) ability takes `appearance`; [`eizport/get-export-options`](../../developers/abilities/#eizportget-export-options) says what the site has.
+A row alone takes all of it; a CSS rule's key (`r:…`) comes from [`eizport/get-export-options`](../../developers/abilities/#eizportget-export-options), which lists each row's items. The [`eizport/export`](../../developers/abilities/#eizportexport) ability takes `appearance` (row → `"all"` or keys), `css_mode` and `css_markers`.
 
 ## Limits
 

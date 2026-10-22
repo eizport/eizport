@@ -353,8 +353,11 @@ function bundle_settings( $in ) {
 	// The bundle asks its importer to update the items that already exist (not with
 	// the Playground .zip: Playground starts from a new site).
 	$out['update_existing'] = $out['bundle'] && ! $out['blueprint'] && ! empty( $in['update_existing'] );
-	$out['options']         = $out['bundle'] ? array_values( array_filter( (array) ( $in['options'] ?? array() ), 'is_string' ) ) : array();
-	$out['linked']          = $out['bundle'] && ! empty( $in['linked'] );
+	// How the look's CSS is added on import (Appearance\data()).
+	$out['css_mode']    = in_array( $in['css_mode'] ?? '', array( 'end', 'start', 'replace' ), true ) ? $in['css_mode'] : 'end';
+	$out['css_markers'] = array_key_exists( 'css_markers', $in ) ? (bool) $in['css_markers'] : \Eizport\Settings\get()['css_markers'];
+	$out['options']     = $out['bundle'] ? array_values( array_filter( (array) ( $in['options'] ?? array() ), 'is_string' ) ) : array();
+	$out['linked']      = $out['bundle'] && ! empty( $in['linked'] );
 	// A plain .zip instead of the .wxrz (gzipped tar): as asked, else as Settings → Export says.
 	$out['zip']     = $out['bundle'] && ! $out['blueprint'] && ! $out['as_plugin'] && ( array_key_exists( 'zip', $in ) ? ! empty( $in['zip'] ) : \Eizport\Settings\get()['bundle_zip'] );
 	$out['themes']  = array();
@@ -420,6 +423,11 @@ function file_output( $args ) {
 			'keep_copy'    => ! empty( $args['keep_copy'] ),
 			'option_names' => $args['options'] ?? array(),
 			'appearance'   => \Eizport\Appearance\chosen( $args ),
+			'css'          => array(
+				'mode'     => (string) ( $args['css_mode'] ?? 'end' ),
+				'markers'  => array_key_exists( 'css_markers', $args ) ? (bool) $args['css_markers'] : \Eizport\Settings\get()['css_markers'],
+				'filename' => $name,
+			),
 			'linked'       => ! empty( $args['linked'] ),
 			'zip'          => ! empty( $args['zip'] ),
 			'as_plugin'    => $as_plugin,

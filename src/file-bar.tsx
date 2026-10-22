@@ -15,9 +15,32 @@ import { Stack } from '@wordpress/ui';
 import { needsBundle, setExportState, useExportState } from './state';
 import type { ExportOptions, FileSettings } from './types';
 
+/**
+ * Whether CSS rules are chosen (the Customizer's or the Site Editor's).
+ *
+ * @param settings File settings.
+ * @return Whether there are.
+ */
+function hasCss( settings: FileSettings ): boolean {
+	return [ 'custom_css', 'global_css' ].some(
+		( key ) =>
+			settings.appearance.includes( key ) ||
+			// A checked row brings what it suggests: all its rules.
+			settings.include_suggested.includes( `__${ key }` ) ||
+			( settings.appearance_items?.[ key ] || [] ).length > 0
+	);
+}
+
 const BAR_FORM: Form = {
 	layout: { type: 'row', alignment: 'end' },
-	fields: [ 'format', 'filename', 'media', 'as_plugin', 'update_existing' ],
+	fields: [
+		'format',
+		'filename',
+		'media',
+		'as_plugin',
+		'update_existing',
+		'css_mode',
+	],
 };
 
 const MORE_FORM: Form = {
@@ -288,6 +311,28 @@ function useFields(
 				Edit: UpdateExistingEdit,
 			},
 			{
+				id: 'css_mode',
+				label: __( 'CSS rules on import', 'eizport' ),
+				type: 'text',
+				Edit: 'select',
+				elements: [
+					{
+						value: 'end',
+						label: __( 'Add at the end of the site’s CSS', 'eizport' ),
+					},
+					{
+						value: 'start',
+						label: __( 'Add at the start of the site’s CSS', 'eizport' ),
+					},
+					{
+						value: 'replace',
+						label: __( 'Replace the site’s CSS', 'eizport' ),
+					},
+				],
+				// Only with CSS rules chosen (Customizer custom CSS, Editor global CSS).
+				isVisible: ( item: FileSettings ) => hasCss( item ),
+			},
+			{
 				id: 'themes',
 				label: __( 'Themes to install', 'eizport' ),
 				type: 'array',
@@ -372,6 +417,12 @@ function fileSummary( settings: FileSettings, format: string ): string {
 			: [] ),
 		...( settings.format !== 'playground' && settings.update_existing
 			? [ __( 'updates existing', 'eizport' ) ]
+			: [] ),
+		...( hasCss( settings ) && settings.css_mode === 'start'
+			? [ __( 'CSS at the start', 'eizport' ) ]
+			: [] ),
+		...( hasCss( settings ) && settings.css_mode === 'replace'
+			? [ __( 'CSS replaces', 'eizport' ) ]
 			: [] ),
 	]
 		.filter( Boolean )

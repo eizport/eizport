@@ -120,6 +120,13 @@ function sanitize( $defaults ) {
 			'menu_ids'          => array_values( preg_grep( '/^[cn]:\d+$/', $names( 'menu_ids' ) ) ),
 			'menu_all'          => ! empty( $in['menu_all'] ),
 			'appearance'        => array_values( array_intersect( \Eizport\Appearance\KEYS, $names( 'appearance' ) ) ),
+			'appearance_items'  => array_map(
+				function ( $keys ) {
+					return array_values( array_filter( array_map( 'strval', (array) $keys ), 'strlen' ) );
+				},
+				array_intersect_key( (array) ( $in['appearance_items'] ?? array() ), array_flip( \Eizport\Appearance\KEYS ) )
+			),
+			'css_mode'          => in_array( $in['css_mode'] ?? '', array( 'end', 'start', 'replace' ), true ) ? $in['css_mode'] : 'end',
 			'as_plugin'         => ! empty( $in['as_plugin'] ),
 			'update_existing'   => ! empty( $in['update_existing'] ),
 			'themes'            => array_values( array_intersect( $names( 'themes' ), array_keys( \Eizport\Playground\theme_choices() ) ) ),

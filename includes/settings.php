@@ -92,7 +92,7 @@ function plugin_content_choices() {
 /**
  * The settings' defaults.
  *
- * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string}
+ * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string, css_markers: bool}
  */
 function defaults() {
 	return array(
@@ -108,13 +108,14 @@ function defaults() {
 		'plugin_import_again' => false,
 		'defaults_scope'      => 'user',
 		'linked_options'      => 'both',
+		'css_markers'         => true,
 	);
 }
 
 /**
  * The settings, with defaults.
  *
- * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string}
+ * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string, css_markers: bool}
  */
 function get() {
 	return sanitize( get_option( OPTION, array() ) );
@@ -125,7 +126,7 @@ function get() {
  * Keys not known are dropped.
  *
  * @param mixed $value Settings sent or stored.
- * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string}
+ * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string, css_markers: bool}
  */
 function sanitize( $value ) {
 	$value    = is_array( $value ) ? $value : array();
@@ -148,6 +149,7 @@ function sanitize( $value ) {
 		'plugin_import_again' => ! empty( $value['plugin_import_again'] ),
 		'defaults_scope'      => isset( defaults_scope_choices()[ $scope ] ) ? $scope : $defaults['defaults_scope'],
 		'linked_options'      => isset( linked_options_choices()[ $linked ] ) ? $linked : $defaults['linked_options'],
+		'css_markers'         => array_key_exists( 'css_markers', $value ) ? ! empty( $value['css_markers'] ) : $defaults['css_markers'],
 	);
 }
 
@@ -155,7 +157,7 @@ function sanitize( $value ) {
  * Saves settings: the ones given replace the stored ones, the rest stay.
  *
  * @param array $changes Settings to change.
- * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string} The settings saved.
+ * @return array{copy_lifetime: int, replace_export: bool, classic_ui: bool, style_import: bool, import_direct: bool, content_files: bool, attached_only: bool, bundle_zip: bool, plugin_content: string, plugin_import_again: bool, defaults_scope: string, linked_options: string, css_markers: bool} The settings saved.
  */
 function update( $changes ) {
 	$settings = sanitize( array_merge( get(), array_intersect_key( (array) $changes, defaults() ) ) );

@@ -26,6 +26,7 @@ const FORM: Form = {
 				'plugin_content',
 				'plugin_import_again',
 				'content_files',
+				'css_markers',
 			],
 		},
 	],

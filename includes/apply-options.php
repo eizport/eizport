@@ -110,24 +110,12 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 				}
 				$value = array_merge( $current, $value );
 			}
-			// Widgets: the menu of a Navigation Menu widget, the media of media widgets, the URLs in block widgets.
+			// Widgets as options (bundles made before widgets had their own entry): pointed to this site.
 			if ( 0 === strpos( $name, 'widget_' ) && is_array( $value ) ) {
 				foreach ( $value as $number => $widget ) {
-					if ( ! is_array( $widget ) ) {
-						continue;
+					if ( is_array( $widget ) ) {
+						$value[ $number ] = eizport_map_widget( substr( $name, 7 ), $widget, $posts, $terms, $urls );
 					}
-					if ( 'widget_nav_menu' === $name && isset( $widget['nav_menu'] ) ) {
-						$widget['nav_menu'] = $terms[ (int) $widget['nav_menu'] ] ?? (int) $widget['nav_menu'];
-					}
-					if ( isset( $widget['attachment_id'] ) ) {
-						$widget['attachment_id'] = $posts[ (int) $widget['attachment_id'] ] ?? (int) $widget['attachment_id'];
-					}
-					foreach ( array( 'url', 'content' ) as $key ) {
-						if ( isset( $widget[ $key ] ) && is_string( $widget[ $key ] ) ) {
-							$widget[ $key ] = eizport_remap_urls( $widget[ $key ], $urls );
-						}
-					}
-					$value[ $number ] = $widget;
 				}
 			}
 			$apply[ $name ] = $value;
@@ -156,7 +144,9 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 			update_option( $name, $value );
 		}
 
-		return array_merge( array_keys( $apply ), eizport_apply_look( $data, $urls ) );
+		$widgets = isset( $data['widgets'] ) && is_array( $data['widgets'] ) ? eizport_apply_widgets( $data['widgets'], $posts, $terms, $urls ) : array();
+
+		return array_merge( array_keys( $apply ), eizport_apply_look( $data, $urls ), $widgets ? array( 'widgets' ) : array() );
 	}
 
 	/**
@@ -181,9 +171,312 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	}
 
 	/**
+	 * A stylesheet's top-level rules, in order: a rule set, an at-rule with
+	 * its block (a whole `@media`), or a statement (`@import …;`), each with
+	 * the comments right before it. Strings and comments may hold braces.
+	 *
+	 * @param string $css CSS.
+	 * @return string[]
+	 */
+	function eizport_css_rules( $css ) {
+		$css     = (string) $css;
+		$rules   = array();
+		$current = '';
+		$depth   = 0;
+		$length  = strlen( $css );
+		for ( $i = 0; $i < $length; $i++ ) {
+			$char = $css[ $i ];
+			// A comment: copied whole.
+			if ( '/' === $char && '*' === ( $css[ $i + 1 ] ?? '' ) ) {
+				$end      = strpos( $css, '*/', $i + 2 );
+				$end      = false === $end ? $length : $end + 2;
+				$current .= substr( $css, $i, $end - $i );
+				$i        = $end - 1;
+				continue;
+			}
+			// A string: copied whole, escapes kept.
+			if ( '"' === $char || "'" === $char ) {
+				$j = $i + 1;
+				while ( $j < $length && $css[ $j ] !== $char ) {
+					$j += '\\' === $css[ $j ] ? 2 : 1;
+				}
+				$current .= substr( $css, $i, $j - $i + 1 );
+				$i        = $j;
+				continue;
+			}
+			$current .= $char;
+			if ( '{' === $char ) {
+				++$depth;
+			} elseif ( '}' === $char && $depth > 0 ) {
+				--$depth;
+				if ( 0 === $depth ) {
+					$rules[] = trim( $current );
+					$current = '';
+				}
+			} elseif ( ';' === $char && 0 === $depth ) {
+				$rules[] = trim( $current );
+				$current = '';
+			}
+		}
+		if ( '' !== trim( $current ) ) {
+			$rules[] = trim( $current );
+		}
+
+		return array_values( array_filter( $rules, 'strlen' ) );
+	}
+
+	/**
+	 * A rule's text for comparing: whitespace collapsed.
+	 *
+	 * @param string $rule Rule.
+	 * @return string
+	 */
+	function eizport_css_normalize( $rule ) {
+		return trim( (string) preg_replace( '/\s+/', ' ', (string) $rule ) );
+	}
+
+	/**
+	 * This site's CSS with the file's rules in it.
+	 *
+	 * - With markers, the rules go between "head ID" and "tail ID" comments;
+	 *   a block with the same ID already there is replaced in place (a second
+	 *   delivery of the same file), whatever the mode.
+	 * - Without, rules this site already has (same text) aren't repeated.
+	 * - Mode: "end" (after this site's CSS), "start" (before it) or
+	 *   "replace" (only the file's).
+	 *
+	 * @param string $current This site's CSS.
+	 * @param string $rules   The file's rules.
+	 * @param string $mode    end, start or replace.
+	 * @param bool   $markers Mark the block.
+	 * @param string $id      The block's ID.
+	 * @return string
+	 */
+	function eizport_merge_css( $current, $rules, $mode, $markers, $id ) {
+		$current = trim( (string) $current );
+		$rules   = trim( (string) $rules );
+		$id      = trim( (string) preg_replace( '/[^A-Za-z0-9._ -]+/', '-', (string) $id ) );
+		if ( '' === $rules ) {
+			return $current;
+		}
+		if ( $markers && '' !== $id ) {
+			$block   = "/* head {$id} */\n{$rules}\n/* tail {$id} */";
+			$pattern = '#/\* head ' . preg_quote( $id, '#' ) . ' \*/.*?/\* tail ' . preg_quote( $id, '#' ) . ' \*/#s';
+			if ( preg_match( $pattern, $current ) ) {
+				return (string) preg_replace_callback(
+					$pattern,
+					function () use ( $block ) {
+						return $block;
+					},
+					$current,
+					1
+				);
+			}
+		} else {
+			$have  = array_map( 'eizport_css_normalize', eizport_css_rules( $current ) );
+			$block = implode(
+				"\n\n",
+				array_filter(
+					eizport_css_rules( $rules ),
+					function ( $rule ) use ( $have ) {
+						return ! in_array( eizport_css_normalize( $rule ), $have, true );
+					}
+				)
+			);
+			if ( '' === $block && 'replace' !== $mode ) {
+				return $current;
+			}
+		}
+		if ( 'replace' === $mode || '' === $current ) {
+			return $block;
+		}
+
+		return 'start' === $mode ? $block . "\n\n" . $current : $current . "\n\n" . $block;
+	}
+
+	/**
+	 * How an import adds the file's CSS: the file's choice, unless whoever
+	 * imports picked otherwise (the importer's step 1, eizport/import, WP-CLI).
+	 *
+	 * @param array $entry The file's custom_css or global_css entry.
+	 * @return array{0: string, 1: bool} Mode and markers.
+	 */
+	function eizport_css_choice( $entry ) {
+		$asked   = (array) ( $GLOBALS['eizport_look_import'] ?? array() );
+		$mode    = (string) ( $asked['css_mode'] ?? $entry['mode'] ?? 'replace' );
+		$markers = array_key_exists( 'css_markers', $asked ) ? (bool) $asked['css_markers'] : ! empty( $entry['markers'] );
+
+		return array( in_array( $mode, array( 'end', 'start', 'replace' ), true ) ? $mode : 'end', $markers );
+	}
+
+	/**
+	 * A value at a dotted path ("styles.color"), or null.
+	 *
+	 * @param array  $data Data.
+	 * @param string $path Path.
+	 * @return mixed
+	 */
+	function eizport_path_get( $data, $path ) {
+		foreach ( explode( '.', $path ) as $key ) {
+			if ( ! is_array( $data ) || ! array_key_exists( $key, $data ) ) {
+				return null;
+			}
+			$data = $data[ $key ];
+		}
+
+		return $data;
+	}
+
+	/**
+	 * The data with a dotted path set (null: removed).
+	 *
+	 * @param array  $data  Data.
+	 * @param string $path  Path.
+	 * @param mixed  $value Value, or null to remove.
+	 * @return array
+	 */
+	function eizport_path_set( $data, $path, $value ) {
+		$keys = explode( '.', $path );
+		$key  = array_shift( $keys );
+		if ( ! $keys ) {
+			if ( null === $value ) {
+				unset( $data[ $key ] );
+			} else {
+				$data[ $key ] = $value;
+			}
+			return $data;
+		}
+		$child = isset( $data[ $key ] ) && is_array( $data[ $key ] ) ? $data[ $key ] : array();
+		$child = eizport_path_set( $child, implode( '.', $keys ), $value );
+		if ( $child ) {
+			$data[ $key ] = $child;
+		} else {
+			unset( $data[ $key ] );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Whether an import updates what an earlier import of the same file
+	 * brought (widgets), as "Update existing" asks.
+	 *
+	 * @return bool
+	 */
+	function eizport_look_updates_existing() {
+		/**
+		 * Filters whether an import updates the widgets an earlier import of
+		 * the same file added, instead of adding them again. "Update
+		 * existing" turns it on for its import.
+		 *
+		 * @param bool $update Whether to update them.
+		 */
+		return (bool) apply_filters( 'eizport_look_update_existing', false );
+	}
+
+	/**
+	 * A widget's settings pointed to this site: its menu, its media, the
+	 * URLs in it.
+	 *
+	 * @param string $id_base Widget type.
+	 * @param array  $widget  Settings.
+	 * @param array  $posts   Old post ID => new.
+	 * @param array  $terms   Old term ID => new.
+	 * @param array  $urls    Old URL => new.
+	 * @return array
+	 */
+	function eizport_map_widget( $id_base, $widget, $posts, $terms, $urls ) {
+		if ( 'nav_menu' === $id_base && isset( $widget['nav_menu'] ) ) {
+			$widget['nav_menu'] = $terms[ (int) $widget['nav_menu'] ] ?? (int) $widget['nav_menu'];
+		}
+		if ( isset( $widget['attachment_id'] ) ) {
+			$widget['attachment_id'] = $posts[ (int) $widget['attachment_id'] ] ?? (int) $widget['attachment_id'];
+		}
+		foreach ( array( 'url', 'content', 'text' ) as $key ) {
+			if ( isset( $widget[ $key ] ) && is_string( $widget[ $key ] ) ) {
+				$widget[ $key ] = eizport_remap_urls( $widget[ $key ], $urls );
+			}
+		}
+
+		return $widget;
+	}
+
+	/**
+	 * Adds the file's widgets to this site's sidebars, keeping the ones it
+	 * has: each gets a free number of its type and goes at the end of its
+	 * sidebar (to the inactive widgets when the theme has no such sidebar).
+	 * A widget an earlier import of the same file added is updated in place
+	 * when the import updates existing items.
+	 *
+	 * @param array $entry The file's widgets entry: id, sidebars, instances.
+	 * @param array $posts Old post ID => new.
+	 * @param array $terms Old term ID => new.
+	 * @param array $urls  Old URL => new.
+	 * @return string[] This site's IDs of the widgets added or updated.
+	 */
+	function eizport_apply_widgets( $entry, $posts, $terms, $urls ) {
+		global $wp_registered_sidebars;
+
+		$instances = isset( $entry['instances'] ) && is_array( $entry['instances'] ) ? $entry['instances'] : array();
+		if ( ! $instances ) {
+			return array();
+		}
+		$source   = (string) ( $entry['id'] ?? '' );
+		$sidebars = (array) get_option( 'sidebars_widgets', array() );
+		$known    = (array) get_option( 'eizport_imported_widgets', array() );
+		$update   = eizport_look_updates_existing();
+		$where    = array();
+		foreach ( (array) ( $entry['sidebars'] ?? array() ) as $sidebar => $ids ) {
+			foreach ( (array) $ids as $old ) {
+				$where[ (string) $old ] = (string) $sidebar;
+			}
+		}
+
+		$done = array();
+		foreach ( $instances as $old => $instance ) {
+			$old = (string) $old;
+			if ( ! preg_match( '/^(.+)-(\d+)$/', $old, $m ) || ! is_array( $instance ) ) {
+				continue;
+			}
+			$id_base = $m[1];
+			$option  = 'widget_' . $id_base;
+			$all     = (array) get_option( $option, array() );
+			$widget  = eizport_map_widget( $id_base, $instance, $posts, $terms, $urls );
+			$mapped  = (string) ( $known[ $source ][ $old ] ?? '' );
+			if ( $update && '' !== $mapped && preg_match( '/-(\d+)$/', $mapped, $n ) && isset( $all[ (int) $n[1] ] ) ) {
+				$all[ (int) $n[1] ] = $widget;
+				update_option( $option, $all );
+				$done[] = $mapped;
+				continue;
+			}
+			$numbers             = array_filter( array_keys( $all ), 'is_int' );
+			$number              = $numbers ? max( $numbers ) + 1 : 2;
+			$all[ $number ]      = $widget;
+			$all['_multiwidget'] = 1;
+			update_option( $option, $all );
+			$new     = $id_base . '-' . $number;
+			$sidebar = $where[ $old ] ?? 'wp_inactive_widgets';
+			if ( 'wp_inactive_widgets' !== $sidebar && ! isset( $wp_registered_sidebars[ $sidebar ] ) ) {
+				$sidebar = 'wp_inactive_widgets';
+			}
+			$sidebars[ $sidebar ]     = array_merge( (array) ( $sidebars[ $sidebar ] ?? array() ), array( $new ) );
+			$known[ $source ][ $old ] = $new;
+			$done[]                   = $new;
+		}
+		update_option( 'sidebars_widgets', $sidebars );
+		if ( '' !== $source ) {
+			update_option( 'eizport_imported_widgets', $known, false );
+		}
+
+		return $done;
+	}
+
+	/**
 	 * Sets the look entries of an options file on the active theme: the
-	 * Customizer's custom CSS, and the Site Editor's global styles and
-	 * global CSS (a block theme only; each leaves the other's part as it is).
+	 * Customizer's custom CSS and the Site Editor's global CSS (added as the
+	 * file and whoever imports ask: see eizport_merge_css()), the Site
+	 * Editor's global styles (the groups that came replace the same groups
+	 * here; all of them when the file has no list) — a block theme only.
 	 *
 	 * @param array $data The options file's data.
 	 * @param array $urls Old URL => new.
@@ -192,14 +485,16 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	function eizport_apply_look( $data, $urls = array() ) {
 		$set = array();
 		if ( isset( $data['custom_css']['css'] ) && is_string( $data['custom_css']['css'] ) ) {
-			$result = wp_update_custom_css_post( eizport_remap_urls( $data['custom_css']['css'], $urls ), array( 'stylesheet' => get_stylesheet() ) );
+			list( $mode, $markers ) = eizport_css_choice( $data['custom_css'] );
+			$css                    = eizport_merge_css( (string) wp_get_custom_css(), eizport_remap_urls( $data['custom_css']['css'], $urls ), $mode, $markers, (string) ( $data['custom_css']['id'] ?? '' ) );
+			$result                 = wp_update_custom_css_post( $css, array( 'stylesheet' => get_stylesheet() ) );
 			if ( ! is_wp_error( $result ) ) {
 				$set[] = 'custom_css';
 			}
 		}
 
 		$styles = isset( $data['global_styles']['content'] ) && is_array( $data['global_styles']['content'] ) ? $data['global_styles']['content'] : null;
-		$css    = isset( $data['global_css']['css'] ) && is_string( $data['global_css']['css'] ) ? $data['global_css']['css'] : null;
+		$css    = isset( $data['global_css']['css'] ) && is_string( $data['global_css']['css'] ) ? $data['global_css'] : null;
 		if ( ( null === $styles && null === $css ) || ! wp_is_block_theme() || ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
 			return $set;
 		}
@@ -209,19 +504,28 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 			'version'                     => 2,
 			'isGlobalStylesUserThemeJSON' => true,
 		);
-		$keep    = $current['styles']['css'] ?? null;
 		if ( null !== $styles ) {
-			$styles  = json_decode( eizport_remap_urls( (string) wp_json_encode( $styles, JSON_UNESCAPED_SLASHES ), $urls ), true );
-			$current = array_merge( is_array( $styles ) ? $styles : array(), array( 'isGlobalStylesUserThemeJSON' => true ) );
-			// The styles leave this site's own CSS as it was.
-			unset( $current['styles']['css'] );
-			if ( null !== $keep ) {
-				$current['styles']['css'] = $keep;
+			$styles = json_decode( eizport_remap_urls( (string) wp_json_encode( $styles, JSON_UNESCAPED_SLASHES ), $urls ), true );
+			$styles = is_array( $styles ) ? $styles : array();
+			$paths  = isset( $data['global_styles']['paths'] ) && is_array( $data['global_styles']['paths'] ) ? $data['global_styles']['paths'] : null;
+			if ( null === $paths ) {
+				// All of them: this site's styles become the file's, its own CSS kept.
+				$keep    = $current['styles']['css'] ?? null;
+				$current = array_merge( $styles, array( 'isGlobalStylesUserThemeJSON' => true ) );
+				unset( $current['styles']['css'] );
+				if ( null !== $keep ) {
+					$current['styles']['css'] = $keep;
+				}
+			} else {
+				foreach ( $paths as $path ) {
+					$current = eizport_path_set( $current, (string) $path, eizport_path_get( $styles, (string) $path ) );
+				}
 			}
 			$set[] = 'global_styles';
 		}
 		if ( null !== $css ) {
-			$current['styles']['css'] = eizport_remap_urls( $css, $urls );
+			list( $mode, $markers )   = eizport_css_choice( $css );
+			$current['styles']['css'] = eizport_merge_css( (string) ( $current['styles']['css'] ?? '' ), eizport_remap_urls( (string) $css['css'], $urls ), $mode, $markers, (string) ( $css['id'] ?? '' ) );
 			$set[]                    = 'global_css';
 		}
 		if ( empty( $post['ID'] ) ) {

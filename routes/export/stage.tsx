@@ -129,22 +129,17 @@ function describe(
 	const parts: string[] = [];
 	const suggestions = suggestedFor( row );
 	const choice: TypeChoice | undefined = state.types[ row ];
-	// The look's rows are one thing each: in or out.
-	if ( LOOK_ROWS[ row ] ) {
-		const included = chosenFor( state, row ).length > 0;
-		let summary: string = __( 'Not included', 'eizport' );
-		if ( included ) {
-			summary = __( 'Included', 'eizport' );
-		} else if ( suggestions.length ) {
-			summary = __( 'Suggested', 'eizport' );
-		}
-		return { checked: included, summary, exportsAll: included };
-	}
+	// A look row whole: "All", like a whole type.
+	const lookWhole =
+		!! LOOK_ROWS[ row ] &&
+		state.settings.appearance.includes( LOOK_ROWS[ row ] );
 	if ( row === OPTIONS_ROW && state.settings.option_all ) {
 		parts.push( __( 'All options', 'eizport' ) );
 	} else if ( row === REVIEWS_ROW && state.settings.review_all ) {
 		parts.push( __( 'All', 'eizport' ) );
 	} else if ( row === MENUS_ROW && state.settings.menu_all ) {
+		parts.push( __( 'All', 'eizport' ) );
+	} else if ( lookWhole ) {
 		parts.push( __( 'All', 'eizport' ) );
 	} else if ( choice && ! choice.ids ) {
 		parts.push(
@@ -177,6 +172,8 @@ function describe(
 		exportsAll = state.settings.review_all;
 	} else if ( row === MENUS_ROW ) {
 		exportsAll = state.settings.menu_all;
+	} else if ( LOOK_ROWS[ row ] ) {
+		exportsAll = lookWhole;
 	}
 	if ( parts.length ) {
 		return { checked: true, summary: parts.join( ' + ' ), exportsAll };
@@ -363,7 +360,7 @@ function Stage() {
 			widgets: __( 'Widgets', 'eizport' ),
 		};
 		Object.entries( LOOK_ROWS ).forEach( ( [ row, key ] ) => {
-			const count = options?.appearance?.[ key ] || 0;
+			const count = options?.appearance?.[ key ]?.length || 0;
 			if ( count ) {
 				list.push( {
 					type: row,
@@ -437,8 +434,6 @@ function Stage() {
 						? __( 'Close items', 'eizport' )
 						: __( 'Choose items', 'eizport' ),
 				isPrimary: true,
-				// The look's rows have no side panel.
-				isEligible: ( item ) => ! LOOK_ROWS[ item.type ],
 				callback: ( [ item ] ) =>
 					navigate( {
 						href:

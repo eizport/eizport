@@ -40,7 +40,7 @@ function export( $specs, $settings ) {
 	$media_used = $settings['media_used'] ?? null;
 	$reviews    = $settings['reviews'] ?? null;
 	$menus      = $settings['menus'] ?? null;
-	$appearance = (array) ( $settings['appearance'] ?? array() );
+	$appearance = \Eizport\Appearance\normalize( $settings['appearance'] ?? array() );
 	$bundle     = ! array_key_exists( 'bundle', $settings ) || ! empty( $settings['bundle'] ) || ! empty( $settings['blueprint'] );
 	$filename   = (string) ( $settings['filename'] ?? '' );
 	$settings   = \Eizport\Export\bundle_settings( array_merge( $settings, array( 'bundle' => $bundle ) ) );

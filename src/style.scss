@@ -289,3 +289,41 @@
 	font-size: 12px;
 	line-height: 1.4;
 }
+
+// A look row's previews: an image, color swatches, a CSS rule or some text.
+.eizport-look-preview__image {
+	display: block;
+	max-width: 4rem;
+	max-height: 2.5rem;
+	object-fit: contain;
+}
+
+.eizport-look-preview__colors {
+	display: inline-flex;
+	gap: 0.25rem;
+}
+
+.eizport-look-preview__swatch {
+	display: inline-block;
+	width: 1rem;
+	height: 1rem;
+	border-radius: 50%;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.eizport-look-preview__code {
+	margin: 0;
+	max-width: 28rem;
+	max-height: 6rem;
+	overflow: auto;
+	font-size: 0.75rem;
+	white-space: pre-wrap;
+}
+
+.eizport-look-preview__text {
+	display: -webkit-box;
+	max-width: 28rem;
+	overflow: hidden;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
