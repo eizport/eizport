@@ -10,7 +10,7 @@ Exports as the Export screen does, to a copy kept on the site, and prints its pa
 ```bash
 wp eizport export --types=page:43,product --options=basics,page_on_front
 wp eizport export --types=page:43+44 --as-plugin --update-existing --filename=delivery
-wp eizport export --types=page:43 --playground --themes=twentytwentyfive --plugins=woocommerce/woocommerce.php --landing=page:43
+wp eizport export --types=page:43 --playground --themes=twentytwentyfive --plugins=woocommerce/woocommerce.php --landing=page:43 --language=pt_BR
 wp eizport export --types=page --menus=classic:18 --filename=header
 ```
 
@@ -30,6 +30,7 @@ wp eizport export --types=page --menus=classic:18 --filename=header
 | `--themes=<stylesheets>` | With `--playground`: themes to install, comma-separated (a child theme brings its parent) |
 | `--plugins=<files>` | With `--playground`: plugin files to install, comma-separated (`woocommerce/woocommerce.php`), active or inactive as on this site |
 | `--landing=<where>` | With `--playground`: where it opens — `home` (default), `admin`, `page:ID` (saved as `/?pagename=<its path>`) or a path (`/shop/`) |
+| `--language=<language>` | With `--playground`: the language it opens in — `site` (default), `user`, `en_US` or an installed locale (`pt_BR`) |
 | `--filename=<name>` | File name, without extension |
 | `--dir=<folder>` | Also write the bundle's files to a folder (see below) |
 
