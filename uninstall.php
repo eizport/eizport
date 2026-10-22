@@ -1,25 +1,28 @@
 <?php
 /**
- * Removes what the plugin leaves behind: uploads/eizport/ (temporary
- * Playground copies and folders of bundles whose import was never
- * finished), the settings, the saved export defaults (the site's and each
- * user's), what bundle plugins noted and the cleanup event.
+ * Removes what the plugin leaves behind (includes/uninstall-site.php) on
+ * every site: each site of a network, or the site. Defaults users saved
+ * before they were kept per site (user meta) go too.
  *
  * @package Eizport
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
-require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
-$eizport_folder = wp_get_upload_dir()['basedir'] . '/eizport';
-if ( is_dir( $eizport_folder ) ) {
-	( new WP_Filesystem_Direct( null ) )->rmdir( $eizport_folder, true );
-}
+require_once __DIR__ . '/includes/uninstall-site.php';
 
-wp_clear_scheduled_hook( 'eizport_cleanup' );
-delete_option( 'eizport_settings' );
-delete_option( 'eizport_export_defaults' );
-delete_option( 'eizport_bundle_plugins_before' );
-delete_option( 'eizport_bundle_plugins_imported' );
+if ( is_multisite() ) {
+	foreach ( get_sites(
+		array(
+			'fields' => 'ids',
+			'number' => 0,
+		)
+	) as $eizport_site ) {
+		switch_to_blog( (int) $eizport_site );
+		eizport_uninstall_site();
+		restore_current_blog();
+	}
+} else {
+	eizport_uninstall_site();
+}
 delete_metadata( 'user', 0, 'eizport_export_defaults', '', true );

@@ -269,9 +269,12 @@ function import_file( $file, $args = array() ) {
 	$GLOBALS['wp_import']        = $importer; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- the importer's own global, which other code reads.
 	$GLOBALS['post']             = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- wp_delete_attachment( 0 ) would fall back to it.
 
+	// The file's own address (base_blog_url), read when the import ends (import-links.php).
+	$GLOBALS['eizport_wxr_file'] = $wxr;
 	ob_start();
 	$importer->import( $wxr );
 	$log = ob_get_clean();
+	unset( $GLOBALS['eizport_wxr_file'] );
 
 	if ( $apply ) {
 		remove_action( 'import_end', $apply );

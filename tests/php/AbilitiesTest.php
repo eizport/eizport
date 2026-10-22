@@ -162,7 +162,8 @@ class AbilitiesTest extends Test_Case {
 		// Saved per user by default; the site's need manage_options. Nothing reaches the database.
 		$written = array();
 		$keep    = function ( $check, $object_id, $key, $value ) use ( &$written ) {
-			if ( \Eizport\Defaults\KEY === $key ) {
+			// A user option: the key carries the site's prefix.
+			if ( $GLOBALS['wpdb']->get_blog_prefix() . \Eizport\Defaults\KEY === $key ) {
 				$written['user'] = $value;
 				return true;
 			}
