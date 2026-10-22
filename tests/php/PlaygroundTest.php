@@ -29,6 +29,7 @@ class PlaygroundTest extends Test_Case {
 	 */
 	protected function set_up() {
 		parent::set_up();
+		$this->as_network_admin();
 		$dir = get_theme_root() . '/' . $this->child;
 		wp_mkdir_p( $dir );
 		file_put_contents( $dir . '/style.css', "/*\nTheme Name: EIZ Test Child\nTemplate: " . get_template() . "\n*/\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
@@ -511,7 +512,6 @@ class PlaygroundTest extends Test_Case {
 	}
 
 	public function test_blueprint_in_a_language() {
-		$this->as_network_admin();
 		$steps = Playground\blueprint( 'site.xml', array( $this->child ), array( 'eizport/eizport.php' ) )['steps'];
 		$this->assertNotContains( 'setSiteLanguage', wp_list_pluck( $steps, 'step' ), 'English: no step.' );
 
@@ -578,7 +578,6 @@ class PlaygroundTest extends Test_Case {
 	}
 
 	public function test_must_use_plugins_offered() {
-		$this->as_network_admin();
 		$this->mu_plugin( array( 'eizport-test-single.php' => "<?php\n/* Plugin Name: EIZ Test Single */\n" ) );
 		$choices = Playground\mu_plugin_choices();
 
@@ -599,7 +598,6 @@ class PlaygroundTest extends Test_Case {
 	}
 
 	public function test_must_use_plugins_and_the_folders_they_load() {
-		$this->as_network_admin();
 		$this->mu_plugin(
 			array(
 				'eizport-test-single.php'          => "<?php\n/* Plugin Name: EIZ Test Single */\n",
