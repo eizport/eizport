@@ -634,7 +634,7 @@ function directory_plugin_zip( $plugin ) {
 	$version = (string) ( plugin_choices()[ $plugin ]['Version'] ?? '' );
 	$slug    = $item && 0 === strpos( (string) ( $item['id'] ?? '' ), 'w.org/plugins/' ) ? (string) ( $item['slug'] ?? '' ) : '';
 
-	return directory_zip( $slug, $version, 'plugin', $plugin );
+	return directory_zip( $slug, $version, 'plugin', $plugin, (string) ( $item['new_version'] ?? '' ) );
 }
 
 /**
@@ -650,20 +650,24 @@ function directory_theme_zip( $stylesheet ) {
 	$version = $theme->exists() ? (string) $theme->get( 'Version' ) : '';
 	$slug    = $item && 0 === strpos( (string) ( $item['package'] ?? '' ), 'https://downloads.wordpress.org/theme/' ) ? (string) ( $item['theme'] ?? '' ) : '';
 
-	return directory_zip( $slug, $version, 'theme', $stylesheet );
+	return directory_zip( $slug, $version, 'theme', $stylesheet, (string) ( $item['new_version'] ?? '' ) );
 }
 
 /**
- * "<slug>.<version>.zip", when both are plain enough for a download URL.
+ * "<slug>.<version>.zip", when the directory has that version: a release
+ * (numbers and dots — not "1.1.0-dev", a beta or an RC) no newer than the
+ * one the directory offers. Any other goes in the .zip.
  *
  * @param string $slug    Directory slug, or ''.
  * @param string $version Installed version.
  * @param string $type    "plugin" or "theme".
  * @param string $id      Plugin file or stylesheet.
+ * @param string $latest  The directory's version (the update check's new_version), or '' when unknown.
  * @return string
  */
-function directory_zip( $slug, $version, $type, $id ) {
-	$zip = preg_match( '/^[a-z0-9-]+$/', $slug ) && preg_match( '/^[0-9A-Za-z.+-]+$/', $version ) ? $slug . '.' . $version . '.zip' : '';
+function directory_zip( $slug, $version, $type, $id, $latest = '' ) {
+	$released = preg_match( '/^\d+(\.\d+)*$/', $version ) && ( '' === $latest || version_compare( $version, $latest, '<=' ) );
+	$zip      = preg_match( '/^[a-z0-9-]+$/', $slug ) && $released ? $slug . '.' . $version . '.zip' : '';
 
 	/**
 	 * Filters the WordPress.org file a Playground .zip installs a theme or

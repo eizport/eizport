@@ -54,7 +54,7 @@ The plugin is named after the export's file: *Import: EIZP-000* for `EIZP-000.zi
 
 The same `.zip` also imports without installing it: upload it in **Tools → Import → WordPress**, like a `.wxrz`, or give it to `wp eizport import`. Eizport takes the bundle out of the plugin.
 
-Without Eizport, the screen says how to get it: **Install Now** once Eizport is in the plugin directory — it installs and activates Eizport on the same screen, then **Continue** opens the import — until then its latest release to download and add in **Upload Plugin**.
+Without Eizport, the screen offers **Install Now**: it installs Eizport from the plugin directory and activates it on the same screen, then **Continue** opens the import.
 
 ## Safety
 

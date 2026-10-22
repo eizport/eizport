@@ -43,20 +43,24 @@ class PlaygroundTest extends Test_Case {
 	 *
 	 * @param array $plugins Plugin file => slug, from the directory.
 	 * @param array $themes  Stylesheet => slug, from the directory.
+	 * @param array $latest  Plugin file or stylesheet => the directory's version.
 	 */
-	private function directory( $plugins, $themes ) {
+	private function directory( $plugins, $themes, $latest = array() ) {
 		remove_all_filters( 'pre_site_transient_update_plugins' );
 		remove_all_filters( 'pre_site_transient_update_themes' );
 		$checked_plugins = array_fill_keys( array_keys( \Eizport\Playground\plugin_choices() ), '1' );
 		$checked_themes  = array_fill_keys( array_keys( wp_get_themes( array( 'errors' => null ) ) ), '1' );
 		add_filter(
 			'pre_site_transient_update_plugins',
-			function () use ( $plugins, $checked_plugins ) {
+			function () use ( $plugins, $checked_plugins, $latest ) {
 				$no_update = array();
 				foreach ( $plugins as $file => $slug ) {
-					$no_update[ $file ] = (object) array(
-						'id'   => 'w.org/plugins/' . $slug,
-						'slug' => $slug,
+					$no_update[ $file ] = (object) array_filter(
+						array(
+							'id'          => 'w.org/plugins/' . $slug,
+							'slug'        => $slug,
+							'new_version' => $latest[ $file ] ?? '',
+						)
 					);
 				}
 				return (object) array(
@@ -68,12 +72,15 @@ class PlaygroundTest extends Test_Case {
 		);
 		add_filter(
 			'pre_site_transient_update_themes',
-			function () use ( $themes, $checked_themes ) {
+			function () use ( $themes, $checked_themes, $latest ) {
 				$no_update = array();
 				foreach ( $themes as $stylesheet => $slug ) {
-					$no_update[ $stylesheet ] = array(
-						'theme'   => $slug,
-						'package' => 'https://downloads.wordpress.org/theme/' . $slug . '.zip',
+					$no_update[ $stylesheet ] = array_filter(
+						array(
+							'theme'       => $slug,
+							'package'     => 'https://downloads.wordpress.org/theme/' . $slug . '.zip',
+							'new_version' => $latest[ $stylesheet ] ?? '',
+						)
 					);
 				}
 				return (object) array(
@@ -221,6 +228,44 @@ class PlaygroundTest extends Test_Case {
 		// A filter puts it back in the .zip.
 		add_filter( 'eizport_playground_from_directory', '__return_empty_string' );
 		$this->assertSame( '', Playground\directory_plugin_zip( 'akismet/akismet.php' ) );
+	}
+
+	public function test_only_versions_the_directory_has_come_from_there() {
+		$this->assertSame( 'eizport.1.0.1.zip', Playground\directory_zip( 'eizport', '1.0.1', 'plugin', 'eizport/eizport.php', '1.0.1' ) );
+		$this->assertSame( 'woocommerce.11.2.1.zip', Playground\directory_zip( 'woocommerce', '11.2.1', 'plugin', 'woocommerce/woocommerce.php', '11.3' ), 'An older release: still there.' );
+		$this->assertSame( 'twentytwentyfive.1.3.zip', Playground\directory_zip( 'twentytwentyfive', '1.3', 'theme', 'twentytwentyfive' ), 'Not known: a release goes.' );
+		foreach ( array( '1.1.0-dev', '2.0-beta1', '1.0.1-RC1', '1.0+build', 'trunk' ) as $version ) {
+			$this->assertSame( '', Playground\directory_zip( 'eizport', $version, 'plugin', 'eizport/eizport.php', '1.0.1' ), $version . ': in the .zip.' );
+		}
+		$this->assertSame( '', Playground\directory_zip( 'eizport', '1.1.0', 'plugin', 'eizport/eizport.php', '1.0.1' ), 'Newer than the directory: in the .zip.' );
+		$this->assertSame( '', Playground\directory_zip( 'twentytwentyfive', '1.4', 'theme', 'twentytwentyfive', '1.3' ) );
+	}
+
+	public function test_a_version_newer_than_the_directory_goes_in_the_zip() {
+		$akismet = Playground\plugin_choices()['akismet/akismet.php']['Version'] ?? '';
+		$theme   = (string) wp_get_theme( get_template() )->get( 'Version' );
+		if ( '' === $akismet || '' === $theme ) {
+			$this->markTestSkipped( 'Akismet and a versioned theme are needed.' );
+		}
+		$this->directory(
+			array( 'akismet/akismet.php' => 'akismet' ),
+			array( get_template() => get_template() ),
+			array(
+				'akismet/akismet.php' => '0.1',
+				get_template()        => '0.1',
+			)
+		);
+
+		$steps = Playground\blueprint( 'site.wxrz', array( get_template() ), array( 'akismet/akismet.php' ) )['steps'];
+
+		$this->assertSame(
+			array(
+				'resource' => 'bundled',
+				'path'     => '/plugins/akismet.zip',
+			),
+			$steps[0]['pluginData']
+		);
+		$this->assertSame( 'bundled', $steps[1]['themeData']['resource'] );
 	}
 
 	public function test_theme_entries_and_choices() {
@@ -481,10 +526,13 @@ class PlaygroundTest extends Test_Case {
 		$this->assertNotContains( '/wordpress/wp-content/languages/plugins/eizport-pt_BR.po', $written );
 		$this->assertNotContains( '/wordpress/wp-content/languages/plugins/eizport-pt_BR_formal.mo', $written, 'Not another locale.' );
 
-		// From the directory: Playground fetches it, nothing in the .zip.
-		$this->directory( array( 'eizport/eizport.php' => 'eizport' ), array() );
+		// From the directory: Playground fetches it, nothing in the .zip (this copy is 1.1.0-dev, which the directory hasn't: the filter says it is).
+		$from_directory = function () {
+			return 'eizport.1.0.1.zip';
+		};
+		add_filter( 'eizport_playground_from_directory', $from_directory );
 		$this->assertSame( array(), Playground\language_files( array(), array( 'eizport/eizport.php' ), 'pt_BR' ) );
-		$this->directory( array(), array() );
+		remove_filter( 'eizport_playground_from_directory', $from_directory );
 
 		if ( class_exists( 'ZipArchive' ) ) {
 			$wxr = $this->temp_file( '<?xml version="1.0"?><rss version="2.0"><channel></channel></rss>' );
