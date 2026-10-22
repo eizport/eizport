@@ -18,6 +18,9 @@
  *   npm run translations                               download and lay out
  *   npm run translations -- --local br=../../eizport-ptb  use a local checkout
  *   npm run translations -- --status                   only report (npm run check)
+ *   npm run translations -- --ref site                 each language's branch or tag instead of
+ *                                                      its translations.json ref (the published
+ *                                                      site: the translation of the released version)
  */
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -28,6 +31,8 @@ const site = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const config = JSON.parse( readFileSync( join( site, 'translations.json' ), 'utf8' ) );
 const args = process.argv.slice( 2 );
 const statusOnly = args.includes( '--status' );
+const refIndex = args.indexOf( '--ref' );
+const ref = refIndex >= 0 ? args[ refIndex + 1 ] : '';
 const local = Object.fromEntries(
 	args.flatMap( ( arg, index ) => ( arg === '--local' ? [ args[ index + 1 ].split( '=' ) ] : [] ) ).map( ( [ code, path ] ) => [ code, resolve( path ) ] )
 );
@@ -79,12 +84,13 @@ const fetchRepo = ( locale ) => {
 		return local[ locale.code ];
 	}
 	const dir = join( site, '.translations', locale.code );
+	const branch = ref || locale.ref;
 	rmSync( dir, { recursive: true, force: true } );
 	try {
-		execFileSync( 'git', [ 'clone', '--quiet', '--depth', '1', '--branch', locale.ref, `https://github.com/${ locale.repo }.git`, dir ], { stdio: 'pipe', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } } );
+		execFileSync( 'git', [ 'clone', '--quiet', '--depth', '1', '--branch', branch, `https://github.com/${ locale.repo }.git`, dir ], { stdio: 'pipe', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } } );
 		return dir;
 	} catch ( error ) {
-		console.warn( `! ${ locale.code }: couldn't download ${ locale.repo }@${ locale.ref } (${ String( error.stderr ?? error.message ).trim() }); building without it.` );
+		console.warn( `! ${ locale.code }: couldn't download ${ locale.repo }@${ branch } (${ String( error.stderr ?? error.message ).trim() }); building without it.` );
 		return '';
 	}
 };

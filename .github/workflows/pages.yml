@@ -13,8 +13,11 @@ name: Site
 # publishes it; so can a run by hand, from another ref when asked.
 #
 # The translations (site/translations.json) are downloaded from their own
-# repositories at build time. Each of them sends a "translations"
-# repository_dispatch on push, which builds "latest" again with them.
+# repositories at build time: for "site", each one's "site" branch (the
+# translation of the released version, moved by a release like ours), for
+# any other ref their trunk. Each of them sends a "translations"
+# repository_dispatch when its "site" branch changes, which builds "site"
+# again with them.
 
 on:
   push:
@@ -64,7 +67,7 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
       - run: npm ci
-      - run: npm run translations
+      - run: npm run translations -- ${{ ( inputs.ref || 'site' ) == 'site' && '--ref site' || '' }}
       - run: npm run check
       - run: npm run build
       - uses: peaceiris/actions-gh-pages@v4

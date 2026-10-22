@@ -9,7 +9,9 @@
  * the zip, publishes the GitHub release and, once enabled, deploys to the
  * WordPress.org SVN. A release also moves the "site" branch, the published
  * site (.github/workflows/pages.yml), onto it, keeping the site fixes made
- * since the previous release that it doesn't bring.
+ * since the previous release that it doesn't bring, and each translation
+ * repository's "site" branch (site/translations.json) to its trunk, tagged
+ * with the version.
  *
  * Three kinds of version (the flow is in .github/CONTRIBUTING.md):
  * - X.Y.Z-dev: trunk's next version. Header and constant only; no notes,
@@ -328,6 +330,41 @@ function eizport_release_site( string $dir, string $version, string $old ): stri
 }
 
 /**
+ * Pins the site's translations to a release: each translation repository
+ * (site/translations.json) gets the version's tag on its trunk, and its
+ * "site" branch, the translation the published site downloads, moves there.
+ * Through the GitHub API (gh), since they are other repositories.
+ *
+ * @param string $dir     Plugin folder.
+ * @param string $version The release's version.
+ * @return string[] What to run by hand, for the repositories it couldn't update.
+ */
+function eizport_release_translations( string $dir, string $version ): array {
+	$config  = json_decode( (string) file_get_contents( "$dir/site/translations.json" ), true );
+	$branch  = EIZPORT_RELEASE_SITE;
+	$by_hand = array();
+	foreach ( (array) ( $config['locales'] ?? array() ) as $locale ) {
+		$repo = (string) ( $locale['repo'] ?? '' );
+		if ( '' === $repo ) {
+			continue;
+		}
+		list( $found, $sha ) = eizport_release_try_run( 'gh api repos/' . escapeshellarg( $repo ) . '/git/ref/heads/trunk --jq .object.sha', $dir );
+
+		$api  = 'gh api --silent repos/' . escapeshellarg( $repo ) . '/git/refs';
+		$sha  = trim( $sha );
+		$done = 0 === $found && '' !== $sha
+			&& 0 === eizport_release_try_run( "$api -f ref=refs/tags/" . escapeshellarg( $version ) . ' -f sha=' . escapeshellarg( $sha ), $dir )[0]
+			&& ( 0 === eizport_release_try_run( "$api/heads/$branch -X PATCH -F force=true -f sha=" . escapeshellarg( $sha ), $dir )[0]
+				|| 0 === eizport_release_try_run( "$api -f ref=refs/heads/$branch -f sha=" . escapeshellarg( $sha ), $dir )[0] );
+		if ( ! $done ) {
+			$by_hand[] = "in $repo: git tag $version trunk && git push origin $version && git push --force origin trunk:$branch";
+		}
+	}
+
+	return $by_hand;
+}
+
+/**
  * The bump the entries need: the highest Significance.
  *
  * @param array<int, array{ significance: string }> $entries Changelog entries.
@@ -546,6 +583,9 @@ class Eizport_Release_Command {
 			$by_hand = eizport_release_site( $dir, $version, $old );
 			if ( '' !== $by_hand ) {
 				WP_CLI::warning( "The site fixes since the previous release don't apply on $version; move the site branch by hand: $by_hand" );
+			}
+			foreach ( eizport_release_translations( $dir, $version ) as $translation ) {
+				WP_CLI::warning( "Couldn't pin a translation to $version; $translation" );
 			}
 		}
 		WP_CLI::success( "Released $version$tags: the version tag runs the Release workflow." );
