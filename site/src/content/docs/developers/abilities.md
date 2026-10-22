@@ -96,7 +96,7 @@ Input: `search`, `include` (only these), `page`, `per_page`. Returns `items` (`i
 | `bundle` | boolean: `false` for WordPress's plain `.xml` | `true` |
 | `zip` | boolean: `.zip` instead of `.wxrz` | *Bundle as .zip* |
 | `options` | object: `groups`, `names`, `all`, `front_pages`, `linked` | none |
-| `blueprint` | object: `themes`, `plugins` (installed active or inactive as on this site), `landing_page` (`"home"`, `"admin"`, `{ "page": ID }` or a path like `"/shop/"`), `language` (`"site"`, the default, `"user"`, `"en_US"` or an installed locale like `"pt_BR"`) — makes a Playground `.zip` | — |
+| `blueprint` | object: `themes`, `plugins` (installed active or inactive as on this site), `mu_plugins` (must-use plugin files, as `get-export-options` lists them), `landing_page` (`"home"`, `"admin"`, `{ "page": ID }` or a path like `"/shop/"`), `language` (`"site"`, the default, `"user"`, `"en_US"` or an installed locale like `"pt_BR"`) — makes a Playground `.zip` | — |
 | `as_plugin` | boolean: a plugin `.zip` that imports its bundle ([as plugin](../../exporting/as-plugin/)); not with `blueprint` | `false` |
 | `update_existing` | boolean: ask the import to update the items that already exist (same type and slug); saved in the bundle | `false` |
 | `reviews` | object: `ids` (comment IDs; `[]` for none) or `all` — WooCommerce product reviews | all of the products' reviews |

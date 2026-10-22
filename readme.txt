@@ -46,7 +46,7 @@ Built with DataViews and DataForm, it runs on the plugin's abilities:
 * **Include media:** the files of the exported attachments (images, PDFs…), so the importer doesn't download them from the old site.
 * **Content as .html files** (on by default, in Settings → Export): each post's content in its own `post_content/<slug>.html` file instead of inside the WXR — easy to read, edit and keep under version control.
 * **Include settings:** groups of options (Basics, suggested; Reading, General, Permalinks, Discussion, Media, privacy page, site logo and icon, WooCommerce pages) and any other option by name, in an `options.json`. When the homepage or the posts page is exported, they can be set as such on import. IDs in the settings (homepage, logo, menus…) are mapped to the imported items. Site URLs, the admin email, keys, active plugins, roles and transients are never exported.
-* **Include a Playground blueprint:** the download becomes a .zip ready for [WordPress Playground](https://wordpress.org/playground/): `blueprint.json`, the plain WXR (.xml), the media and content files (as checked above) and the themes and plugins you check that aren't in the WordPress.org directory (a child theme brings its parent; the directory's are installed from there, in the version this site has). Playground installs them, activates the theme, sets the language you choose (the site's by default, yours or English) and imports the content. After the download, the screen shows the command that runs it (`npx @wp-playground/cli@latest server --blueprint=./<file>.zip`).
+* **Include a Playground blueprint:** the download becomes a .zip ready for [WordPress Playground](https://wordpress.org/playground/): `blueprint.json`, the plain WXR (.xml), the media and content files (as checked above) and the themes, plugins and must-use plugins you check that aren't in the WordPress.org directory (a child theme brings its parent; the directory's are installed from there, in the version this site has). Playground installs them, activates the theme, sets the language you choose (the site's by default, yours or English) and imports the content. After the download, the screen shows the command that runs it (`npx @wp-playground/cli@latest server --blueprint=./<file>.zip`).
 * **Keep a copy to open by link:** with the blueprint, a copy of the .zip stays on the site for a while (a day by default), and a link opens it on playground.wordpress.net.
 
 **Settings**, from the plugin's row in Plugins (built with DataViews and DataForm)
@@ -78,7 +78,7 @@ The same export and import, for AI agents and scripts, through the WordPress Abi
 * `eizport/get-export-options` — what can be exported: content types with their terms, statuses and counts, settings groups, themes and plugins, the homepage and posts page.
 * `eizport/get-items` — a page of one type's items (search, sort, the same filters as the export), to pick what to export.
 * `eizport/get-options` — the site's options one by one (search, `group`, pages), with their size and whether they hold post IDs; options never exported are left out.
-* `eizport/export` — exports to a temporary copy (a .wxrz or .zip bundle, WordPress's plain .xml with `bundle: false`, or a Playground .zip with `blueprint`) and returns its link: `types` (post type => `ids` or `filters`), `media`, `media_used`, `post_content`, `zip`, `options` (`groups`, `names`, `front_pages`, `linked`, or `all`), `blueprint` (`themes`, `plugins`, `landing_page`, `language`), `filename`.
+* `eizport/export` — exports to a temporary copy (a .wxrz or .zip bundle, WordPress's plain .xml with `bundle: false`, or a Playground .zip with `blueprint`) and returns its link: `types` (post type => `ids` or `filters`), `media`, `media_used`, `post_content`, `zip`, `options` (`groups`, `names`, `front_pages`, `linked`, or `all`), `blueprint` (`themes`, `plugins`, `mu_plugins`, `landing_page`, `language`), `filename`.
 * `eizport/get-export-defaults`, `eizport/save-export-defaults` and `eizport/clear-export-defaults` — the choices saved as default (the site's need `manage_options`).
 * `eizport/get-copies` — the copies kept, with their links and expiry.
 * `eizport/delete-copies` — deletes copies by `names`, or `all`.
@@ -92,6 +92,7 @@ They follow the same rules as the screens: the `export` capability for exporting
 * `eizport_post_content` — filter the content an imported item gets from a bundle (`$content`, `$item` with original `id`, `type` and `slug`, `$dir`).
 * `eizport_wxrz_max_bytes` — the largest size a .wxrz may expand to when imported (default 512 MB).
 * `eizport_playground_blueprint` — filter the blueprint of a Playground .zip (`$blueprint`, `$wxr_name`).
+* `eizport_playground_mu_plugins` — filter the must-use plugins a Playground .zip can take (`$choices`, file => plugin data).
 * `eizport_linked_options` — options that point to a post, with its role: `option => array( 'label' => 'Shop page', 'with' => array( … ), 'when' => array( option => value ) )`. They get the imported post's ID on import, show on the items, and come with them.
 * `eizport_option_groups` — the groups of options offered (`key => array( 'label' => 'Name: what it holds', 'options' => array( … ) )`).
 * `eizport_denied_options` — more options never exported (a plugin's keys, tokens or version numbers); WordPress's own can't be removed.
@@ -145,7 +146,7 @@ Not to its authors: Eizport has no service of its own. It uses WordPress.org's p
 
 = What does the Playground blueprint do? =
 
-It installs the plugins and themes in the .zip, sets the language chosen (with its translations) and imports the WXR with Playground's own importer. With media or content files, they are written into Playground first and a temporary must-use plugin answers the importer's downloads from the media files and puts each `.html` file into its post, and a second one sets the settings when the import ends, with their IDs mapped; all of it is removed after the import. The WordPress Importer is installed by Playground itself, from WordPress.org.
+It installs the plugins and themes in the .zip, sets the language chosen (with its translations), writes the must-use plugins chosen (with the folders they load) and imports the WXR with Playground's own importer. With media or content files, they are written into Playground first and a temporary must-use plugin answers the importer's downloads from the media files and puts each `.html` file into its post, and a second one sets the settings when the import ends, with their IDs mapped; all of it is removed after the import. The WordPress Importer is installed by Playground itself, from WordPress.org.
 
 = Who can download a Playground copy? =
 
