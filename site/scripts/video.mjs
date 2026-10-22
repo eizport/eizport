@@ -14,7 +14,9 @@
  *
  * Writes public/video/demo.{mp4,webm}, demo.en.vtt, src/assets/video/demo-poster.webp
  * (the site's hero), and video/out/ (git-ignored, for YouTube): demo.mp4,
- * demo.en.vtt and thumbnail.jpg. One video, no text burned in: captions are WebVTT.
+ * demo.en.vtt and thumbnail.jpg. demo.mp4 and demo.webm aren't kept in git:
+ * they're uploaded to the repository's media-X.Y.Z release (scripts/media.mjs),
+ * and media.json points the site at it. One video, no text burned in: captions are WebVTT.
  * Everything is real (Chrome's screencast of the actual screens, with a
  * cursor drawn over them); waits are sped up where marked.
  *
@@ -42,6 +44,7 @@ import ffmpeg from 'ffmpeg-static';
 import sharp from 'sharp';
 import { exportPath, exportScreen, inLocale, l, launch, settingsPath, sites, useLocale } from './lib/demo.mjs';
 import { capturedFile, readCaptured, writeFiles } from './lib/screenshots-files.mjs';
+import { uploadVideo, useTag, versionTag } from './media.mjs';
 
 const root = new URL( '../', import.meta.url );
 // The video's output, and the screen captured for it. Every captured screen
@@ -654,6 +657,7 @@ if ( locale ) {
 	execFileSync( ffmpeg, [ '-y', '-loglevel', 'error', '-ss', String( rec.warp( rec.marks.poster ?? rec.t0 ) + 1 ), '-i', join( publicDir, 'demo.mp4' ), '-frames:v', '1', posterFrame ] );
 	await sharp( posterFrame ).webp( { quality: 90 } ).toFile( join( publicDir, 'demo-poster.webp' ) );
 	rmSync( dir, { recursive: true, force: true } );
+	uploadVideo( locale.repo, publicDir, versionTag() );
 	console.log( `Done (${ rec.warp( rec.t1 ).toFixed( 1 ) } s, ${ locale.code }): ${ publicDir }` );
 	process.exit( 0 );
 }
@@ -677,4 +681,7 @@ const captured = readCaptured();
 captured.demo = { commit: execFileSync( 'git', [ 'rev-parse', 'HEAD' ], { encoding: 'utf8' } ).trim(), date: new Date().toISOString().slice( 0, 10 ) };
 writeFileSync( capturedFile, JSON.stringify( captured, null, '\t' ) + '\n' );
 writeFiles( captured );
+if ( uploadVideo( 'eizport/eizport', publicDir, versionTag() ) ) {
+	useTag( versionTag() );
+}
 console.log( `Done (${ rec.warp( rec.t1 ).toFixed( 1 ) } s): public/video/demo.*, video/out/` );

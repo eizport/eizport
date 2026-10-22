@@ -64,6 +64,13 @@ Export navigation menus: classic menus with their theme locations, and block nav
    `-- --locale br=<eizport-ptb>`), `npm run video` when the scenes changed.
    A feature PR only updates the docs and `src/data/screenshots.ts` when a
    screen shows something new.
+   Screenshots live in git (small; the site and the WordPress.org assets
+   need them in the checkout). The demo video doesn't: `npm run video`
+   uploads `demo.mp4` and `demo.webm` to a `media-1.1.0` pre-release (never
+   "latest", it isn't a plugin release) in this repository, or in the
+   translation's for `--locale`, and points `site/media.json` at it; the
+   site downloads it (`npm run media`, and `npm run translations` for each
+   language). To upload again without recording: `npm run media -- --upload`.
    **Versions checked**, on the release branch too: `IMPORTER_TESTED` in
    `includes/import.php` is the newest WordPress Importer the tests passed
    with (CI installs the latest); `Bundle\REQUIRES` in `includes/bundle.php`
