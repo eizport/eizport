@@ -3,7 +3,7 @@ title: "ZIP bundle"
 description: "The same bundle as a plain .zip, which any computer opens — how to turn it on and how it is read."
 ---
 
-With **Settings → Export → Bundle as .zip**, bundles are plain `.zip` files instead of `.wxrz`. The entries are **exactly the same** — `manifest.json`, the WXR, `options.json`, `post_content/`, `uploads/` — so everything on the [WXRZ page](../wxrz-bundle/) applies.
+By default (**Settings → Export → Bundle as .zip**, on), bundles are plain `.zip` files instead of `.wxrz` — inside a plugin made as plugin too. The entries are **exactly the same** — `manifest.json`, the WXR, `options.json`, `post_content/`, `uploads/` — so everything on the [WXRZ page](../wxrz-bundle/) applies.
 
 ## Why
 

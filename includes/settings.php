@@ -83,7 +83,7 @@ function linked_options_choices() {
  */
 function plugin_content_choices() {
 	return array(
-		'wxrz'   => __( 'One .wxrz file', 'eizport' ),
+		'wxrz'   => __( 'One file (.zip, or .wxrz with Bundle as .zip off)', 'eizport' ),
 		'root'   => __( 'Its files, next to the plugin\'s', 'eizport' ),
 		'folder' => __( 'Its files, in a bundle/ folder', 'eizport' ),
 	);
@@ -103,7 +103,7 @@ function defaults() {
 		'import_direct'       => true,
 		'content_files'       => true,
 		'attached_only'       => false,
-		'bundle_zip'          => false,
+		'bundle_zip'          => true,
 		'plugin_content'      => 'wxrz',
 		'plugin_import_again' => false,
 		'defaults_scope'      => 'user',
@@ -144,7 +144,7 @@ function sanitize( $value ) {
 		'import_direct'       => array_key_exists( 'import_direct', $value ) ? ! empty( $value['import_direct'] ) : $defaults['import_direct'],
 		'content_files'       => array_key_exists( 'content_files', $value ) ? ! empty( $value['content_files'] ) : $defaults['content_files'],
 		'attached_only'       => ! empty( $value['attached_only'] ),
-		'bundle_zip'          => ! empty( $value['bundle_zip'] ),
+		'bundle_zip'          => array_key_exists( 'bundle_zip', $value ) ? ! empty( $value['bundle_zip'] ) : $defaults['bundle_zip'],
 		'plugin_content'      => isset( plugin_content_choices()[ $content ] ) ? $content : $defaults['plugin_content'],
 		'plugin_import_again' => ! empty( $value['plugin_import_again'] ),
 		'defaults_scope'      => isset( defaults_scope_choices()[ $scope ] ) ? $scope : $defaults['defaults_scope'],

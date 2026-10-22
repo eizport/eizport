@@ -236,8 +236,9 @@ function finish_export() {
 function write_export( $target, $wxr, $wxr_name, $options ) {
 	if ( ! empty( $options['as_plugin'] ) ) {
 		// The bundle, inside a plugin that imports it (BundlePlugin).
-		$bundle  = Files\temp_file( 'eizport-bundle' );
-		$written = write_bundle( $bundle, $wxr, $wxr_name, $options['media'], $options['options'] )
+		$bundle = Files\temp_file( 'eizport-bundle' );
+		// A .zip or a .wxrz, as Settings → Export → "Bundle as .zip" says.
+		$written = write_bundle( $bundle, $wxr, $wxr_name, $options['media'], $options['options'], \Eizport\Settings\get()['bundle_zip'] )
 			&& \Eizport\BundlePlugin\build_zip( $target, $bundle, (string) preg_replace( '/\.[a-z0-9]+$/i', '', (string) $options['download'] ) );
 		wp_delete_file( $bundle );
 

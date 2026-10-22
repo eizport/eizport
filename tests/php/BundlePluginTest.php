@@ -23,6 +23,27 @@ class BundlePluginTest extends Test_Case {
 		$this->assertSame( '', BundlePlugin\copy_hash( '/tmp/site.zip' ) );
 	}
 
+	public function test_a_zip_bundle_goes_in_as_a_zip() {
+		if ( ! class_exists( 'ZipArchive' ) ) {
+			$this->markTestSkipped( 'No ZipArchive.' );
+		}
+		$bundle = $this->temp_file() . '.zip';
+		$this->remove_later( $bundle );
+		$inner = new \ZipArchive();
+		$inner->open( $bundle, \ZipArchive::CREATE );
+		$inner->addFromString( 'manifest.json', '{}' );
+		$inner->close();
+		$target = $this->temp_file() . '-AbCdEfGh12345678.zip';
+		$this->remove_later( $target );
+
+		$this->assertTrue( BundlePlugin\build_zip( $target, $bundle, 'my.site' ) );
+		$zip = new \ZipArchive();
+		$zip->open( $target );
+		$this->assertNotFalse( $zip->locateName( 'my-site-abcdefgh12345678/my-site-abcdefgh12345678.zip' ), 'Named as it is.' );
+		$this->assertStringContainsString( 'Eizport Bundle:    my-site-abcdefgh12345678.zip', (string) $zip->getFromName( 'my-site-abcdefgh12345678/my-site-abcdefgh12345678.php' ) );
+		$zip->close();
+	}
+
 	public function test_zip_holds_the_plugin_and_the_bundle() {
 		if ( ! class_exists( 'ZipArchive' ) ) {
 			$this->markTestSkipped( 'No ZipArchive.' );

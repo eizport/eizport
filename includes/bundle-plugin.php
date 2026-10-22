@@ -123,13 +123,14 @@ function template_translations() {
 }
 
 /**
- * Writes the plugin .zip: <slug>/<slug>.php and <slug>/<slug>.wxrz — or,
+ * Writes the plugin .zip: <slug>/<slug>.php and <slug>/<slug>.zip (or .wxrz,
+ * as the bundle is: Settings → Export → "Bundle as .zip") — or,
  * as Settings → Export → "As plugin holds the bundle as" says, the bundle's
  * files (manifest.json, the WXR, uploads/…) next to <slug>.php or in
  * <slug>/bundle/ (FOLDER).
  *
  * @param string $target File to write.
- * @param string $bundle The bundle (.wxrz).
+ * @param string $bundle The bundle (.zip or .wxrz).
  * @param string $name   The export's file name, without extension.
  * @return bool
  */
@@ -139,7 +140,7 @@ function build_zip( $target, $bundle, $name ) {
 	$slug   = slug( $name, '' === $hash ? (string) ( $GLOBALS['eizport_copy_hash'] ?? '' ) : $hash );
 	$mode   = \Eizport\Settings\get()['plugin_content'];
 	$prefix = 'folder' === $mode ? FOLDER . '/' : '';
-	$file   = 'wxrz' === $mode ? $slug . '.' . \Eizport\Wxrz\EXTENSION : $prefix . \Eizport\Bundle\MANIFEST;
+	$file   = 'wxrz' === $mode ? $slug . '.' . ( \Eizport\Bundle\is_zip( $bundle ) ? 'zip' : \Eizport\Wxrz\EXTENSION ) : $prefix . \Eizport\Bundle\MANIFEST;
 	$header = get_file_data(
 		dirname( __DIR__ ) . '/eizport.php',
 		array(

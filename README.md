@@ -39,7 +39,7 @@ Built with DataViews and DataForm, it runs on the plugin's abilities:
 
 * **Several content types at once:** check pages and products, say, without posts — or keep "All content". Posts, pages, media, products and other custom post types.
 * **By filters or by selection, per type:** WordPress's filters for posts, pages and media; for products and other custom post types, the same kind (dates, status, author, and each taxonomy, like product categories). Or check the exact items in a list (a tree for pages), with a box to filter it. Selected items bring their attachments and their children of other types, like a product's variations; product reviews come with their product.
-* **Bundle (.wxrz, or .zip):** download one compressed file with the WXR and, optionally, more. Without it, the export is WordPress's usual .xml file, named as usual.
+* **Bundle (.zip, or .wxrz):** download one compressed file with the WXR and, optionally, more. Without it, the export is WordPress's usual .xml file, named as usual.
 * **Media used in content:** items exported bring their attached media and featured images, as WordPress does, and also the images, galleries, covers and files their content uses without being attached (Settings → Export → "Only attached media" turns it off).
 * **Save these choices as default,** and start with them next time.
 
@@ -72,7 +72,7 @@ A .wxrz file is a gzipped tar archive:
 * `post_content/<slug>.html` — post contents, when exported as files;
 * `options.json` — settings, set when the import ends.
 
-You can open it with any tool that reads `.tar.gz` files. With Settings → Export → "Bundle as .zip", bundles are plain .zip files with the same entries, which any computer opens.
+By default (Settings → Export → "Bundle as .zip") bundles are plain .zip files, which any computer opens; turned off, they are .wxrz files with the same entries, which any tool that reads `.tar.gz` files opens.
 
 **Abilities**
 
