@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+An attachment the site already has gets its URLs in the imported content pointed to the file here on every import, not only with "Update existing" on.

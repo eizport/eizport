@@ -63,6 +63,8 @@ function bootstrap() {
 	add_action( 'add_attachment', __NAMESPACE__ . '\record_bundle' );
 	add_action( 'delete_attachment', __NAMESPACE__ . '\delete_bundle' );
 	add_action( 'import_start', __NAMESPACE__ . '\serve_bundle' );
+	// An attachment the site already has: its old URLs point to it, whatever "Update existing" says.
+	add_filter( 'wp_import_existing_post', __NAMESPACE__ . '\existing_attachment_urls', 10, 2 );
 	add_action( 'load-importer-wordpress', __NAMESPACE__ . '\mention_wxrz' );
 	add_action( 'load-import.php', __NAMESPACE__ . '\open_wordpress_importer' );
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_steps_script' );
@@ -375,13 +377,31 @@ function update_from_import( $id, $post ) {
 }
 
 /**
- * Points the old site's URLs of an attachment that already exists to its
- * URL here, as the importer does for the ones it adds (it skips existing
- * ones, so content updated from the bundle would keep the old URLs). Its
- * resized images too, by the URL without the extension.
+ * `wp_import_existing_post`: when the importer finds an attachment the site
+ * already has, its old URLs (and the image sizes') are mapped to the file
+ * here — with or without "Update existing", so new content using it points
+ * to this site. The importer's choice (skip it, map its ID) stays as it is.
+ *
+ * @param int   $post_exists The existing post's ID, or 0.
+ * @param array $post        The imported item.
+ * @return int
+ */
+function existing_attachment_urls( $post_exists, $post ) {
+	$post = (array) $post;
+	if ( $post_exists && 'attachment' === ( $post['post_type'] ?? '' ) ) {
+		remap_existing_attachment( (int) $post_exists, $post );
+	}
+
+	return $post_exists;
+}
+
+/**
+ * Maps an existing attachment's old URLs to its URL here (the importer
+ * skips attachments that exist and never adds them to url_remap), so the
+ * content using it points to this site's file.
  *
  * @param int   $id   Existing attachment.
- * @param array $post The importer's item.
+ * @param array $post The imported item.
  */
 function remap_existing_attachment( $id, $post ) {
 	$importer = $GLOBALS['wp_import'] ?? null;
@@ -421,9 +441,6 @@ function update_existing( $on ) {
 		$type = (string) ( $post['post_type'] ?? '' );
 		if ( $id && 'attachment' !== $type && get_post_type( $id ) === $type ) {
 			update_from_import( $id, $post );
-		}
-		if ( $id && 'attachment' === $type ) {
-			remap_existing_attachment( $id, $post );
 		}
 
 		return $id;
