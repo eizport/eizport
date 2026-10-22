@@ -40,7 +40,7 @@ class SourceLinksTest extends Test_Case {
 		$out = eizport_replace_source_links(
 			'<a href="http://old.example/shop/">Shop</a> <a href="https://old.example">Home</a> '
 			. '<!-- wp:navigation-link {"url":"http:\/\/old.example\/about\/"} /--> '
-			. '<a href="https://old.example.org/">other</a> <a href="//old.example/x">x</a> old.example',
+			. '<a href="https://old.example.org/">other</a> <a href="//old.example/x">x</a> Our address is: http://old.example. old.example',
 			'http://old.example',
 			'https://new.test/site'
 		);
@@ -51,6 +51,7 @@ class SourceLinksTest extends Test_Case {
 		$this->assertStringContainsString( 'https://old.example.org/', $out, 'Another site.' );
 		$this->assertStringContainsString( 'href="//new.test/site/x"', $out );
 		$this->assertStringEndsWith( ' old.example', $out, 'A bare host, not an address.' );
+		$this->assertStringContainsString( 'Our address is: https://new.test/site. ', $out, 'A full stop ends the address.' );
 		$this->assertSame( 'same', eizport_replace_source_links( 'same', 'https://a.test', 'https://a.test/' ) );
 	}
 

@@ -18,7 +18,8 @@ if ( ! function_exists( 'eizport_replace_source_links' ) ) {
 	/**
 	 * The text with the source site's address replaced by this site's: the
 	 * plain and the JSON-escaped forms, http and https, only where the
-	 * address ends (old.example never matches old.example.org).
+	 * address ends (old.example never matches old.example.org; a sentence's
+	 * full stop after it is fine).
 	 *
 	 * @param string $text Text.
 	 * @param string $from Source site's address, without trailing slash.
@@ -40,7 +41,7 @@ if ( ! function_exists( 'eizport_replace_source_links' ) ) {
 		$scheme = (string) wp_parse_url( $to, PHP_URL_SCHEME );
 		foreach ( $pairs as $old => $new ) {
 			$text = (string) preg_replace_callback(
-				'#(https?:)?' . preg_quote( $old, '#' ) . '(?=$|[/\\\\"\'?\#<>\s)])#i',
+				'#(https?:)?' . preg_quote( $old, '#' ) . '(?=$|[/\\\\"\'?\#<>\s),]|\.(?![a-z0-9-]))#i',
 				function ( $m ) use ( $new, $scheme ) {
 					return ( '' === ( $m[1] ?? '' ) ? '' : $scheme . ':' ) . $new;
 				},
