@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T20:24:16+00:00\n"
+"POT-Creation-Date: 2026-10-21T20:29:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -59,7 +59,7 @@ msgstr ""
 msgid "File name"
 msgstr ""
 
-#: includes/bundle-plugin.php:591
+#: includes/bundle-plugin.php:592
 msgid "Media files"
 msgstr ""
 
@@ -250,7 +250,7 @@ msgstr ""
 msgid "Widgets"
 msgstr ""
 
-#: includes/bundle-plugin.php:605
+#: includes/bundle-plugin.php:606
 msgid "Options"
 msgstr ""
 
@@ -547,7 +547,7 @@ msgstr ""
 #: eizport.php
 #: includes/abilities.php:50
 #: includes/admin-app.php:158
-#: includes/bundle-plugin.php:754
+#: includes/bundle-plugin.php:755
 #: includes/settings.php:219
 #: includes/settings.php:220
 msgid "Eizport"
@@ -595,7 +595,7 @@ msgstr ""
 msgid "Bundle as .zip"
 msgstr ""
 
-msgid "Bundles are plain .zip files, which any computer opens, instead of .wxrz (a gzipped tar). Same contents; the importer takes both."
+msgid "Bundles are plain .zip files, which any computer opens (the default), instead of .wxrz (a gzipped tar) — inside a plugin made as plugin too. Same contents; the importer takes both."
 msgstr ""
 
 msgid "Mark imported CSS"
@@ -1131,29 +1131,29 @@ msgid "Activate Eizport"
 msgstr ""
 
 #: includes/bundle-plugin.php:95
-#: includes/bundle-plugin.php:629
+#: includes/bundle-plugin.php:630
 msgid "Install Now"
 msgstr ""
 
 #: includes/bundle-plugin.php:96
-#: includes/bundle-plugin.php:419
+#: includes/bundle-plugin.php:420
 msgid "Installing…"
 msgstr ""
 
 #: includes/bundle-plugin.php:97
-#: includes/bundle-plugin.php:420
+#: includes/bundle-plugin.php:421
 msgid "Activating…"
 msgstr ""
 
 #. translators: %s: error message.
 #: includes/bundle-plugin.php:99
-#: includes/bundle-plugin.php:424
+#: includes/bundle-plugin.php:425
 #, php-format
 msgid "Installation failed: %s"
 msgstr ""
 
 #: includes/bundle-plugin.php:100
-#: includes/bundle-plugin.php:613
+#: includes/bundle-plugin.php:614
 msgid "Eizport is active."
 msgstr ""
 
@@ -1190,79 +1190,79 @@ msgid "open the import screen"
 msgstr ""
 
 #. translators: %s: the export's file name.
-#: includes/bundle-plugin.php:159
+#: includes/bundle-plugin.php:160
 #, php-format
 msgid "Import: %s"
 msgstr ""
 
 #. translators: %s: site title.
-#: includes/bundle-plugin.php:167
-#: includes/bundle-plugin.php:194
+#: includes/bundle-plugin.php:168
+#: includes/bundle-plugin.php:195
 #, php-format
 msgid "The content exported from %s, with Eizport. Open its screen under Tools to import it."
 msgstr ""
 
-#: includes/bundle-plugin.php:262
-#: includes/bundle-plugin.php:349
-#: includes/bundle-plugin.php:353
+#: includes/bundle-plugin.php:263
+#: includes/bundle-plugin.php:350
+#: includes/bundle-plugin.php:354
 msgid "The plugin holds no bundle to import."
 msgstr ""
 
-#: includes/bundle-plugin.php:301
-#: includes/bundle-plugin.php:321
+#: includes/bundle-plugin.php:302
+#: includes/bundle-plugin.php:322
 msgid "The bundle could not be taken out of the plugin."
 msgstr ""
 
-#: includes/bundle-plugin.php:340
-#: includes/bundle-plugin.php:781
+#: includes/bundle-plugin.php:341
+#: includes/bundle-plugin.php:782
 msgid "This is not an installed plugin."
 msgstr ""
 
-#: includes/bundle-plugin.php:418
+#: includes/bundle-plugin.php:419
 msgid "Importing…"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/bundle-plugin.php:422
+#: includes/bundle-plugin.php:423
 #, php-format
 msgid "%s was installed and activated."
 msgstr ""
 
-#: includes/bundle-plugin.php:483
+#: includes/bundle-plugin.php:484
 msgid "Imported. This plugin did its job, and it holds a large file: you can remove it now."
 msgstr ""
 
-#: includes/bundle-plugin.php:484
+#: includes/bundle-plugin.php:485
 msgid "Imports the content this plugin holds into this site: posts, pages, media and settings, as they were exported."
 msgstr ""
 
-#: includes/bundle-plugin.php:495
-#: includes/bundle-plugin.php:611
+#: includes/bundle-plugin.php:496
+#: includes/bundle-plugin.php:612
 msgid "Import again"
 msgstr ""
 
-#: includes/bundle-plugin.php:495
+#: includes/bundle-plugin.php:496
 msgid "Run import"
 msgstr ""
 
-#: includes/bundle-plugin.php:499
+#: includes/bundle-plugin.php:500
 msgid "Deactivate and delete"
 msgstr ""
 
-#: includes/bundle-plugin.php:499
+#: includes/bundle-plugin.php:500
 msgid "Deactivate and delete this plugin"
 msgstr ""
 
-#: includes/bundle-plugin.php:507
+#: includes/bundle-plugin.php:508
 msgid "Imported"
 msgstr ""
 
-#: includes/bundle-plugin.php:507
+#: includes/bundle-plugin.php:508
 msgid "The import stopped"
 msgstr ""
 
 #. translators: %d: number of posts.
-#: includes/bundle-plugin.php:516
+#: includes/bundle-plugin.php:517
 #, php-format
 msgid "%d item imported or already there."
 msgid_plural "%d items imported or already there."
@@ -1270,111 +1270,111 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: option names.
-#: includes/bundle-plugin.php:524
+#: includes/bundle-plugin.php:525
 #, php-format
 msgid "Settings set: %s."
 msgstr ""
 
-#: includes/bundle-plugin.php:530
+#: includes/bundle-plugin.php:531
 msgid "Visit the site"
 msgstr ""
 
-#: includes/bundle-plugin.php:533
+#: includes/bundle-plugin.php:534
 #: includes/import.php:955
 msgid "Importer messages"
 msgstr ""
 
-#: includes/bundle-plugin.php:543
+#: includes/bundle-plugin.php:544
 msgid "Remove this plugin"
 msgstr ""
 
 #. translators: %s: date.
-#: includes/bundle-plugin.php:550
+#: includes/bundle-plugin.php:551
 #, php-format
 msgid "Imported on %s. Deactivate and delete removes this plugin and its file."
 msgstr ""
 
-#: includes/bundle-plugin.php:559
+#: includes/bundle-plugin.php:560
 msgid "Also delete (checked: installed for this import)"
 msgstr ""
 
-#: includes/bundle-plugin.php:573
+#: includes/bundle-plugin.php:574
 msgid "What it holds"
 msgstr ""
 
 #. translators: %d: number of items not listed.
-#: includes/bundle-plugin.php:584
+#: includes/bundle-plugin.php:585
 #, php-format
 msgid " and %d more"
 msgstr ""
 
 #. translators: 1: number of files, 2: size.
-#: includes/bundle-plugin.php:596
+#: includes/bundle-plugin.php:597
 #, php-format
 msgid "%1$d file, %2$s"
 msgid_plural "%1$d files, %2$s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/bundle-plugin.php:611
+#: includes/bundle-plugin.php:612
 msgid "Before importing"
 msgstr ""
 
-#: includes/bundle-plugin.php:617
-#: includes/bundle-plugin.php:625
+#: includes/bundle-plugin.php:618
+#: includes/bundle-plugin.php:626
 msgid "The WordPress Importer is installed."
 msgstr ""
 
-#: includes/bundle-plugin.php:621
+#: includes/bundle-plugin.php:622
 msgid "The WordPress Importer is needed."
 msgstr ""
 
-#: includes/bundle-plugin.php:629
-#: includes/bundle-plugin.php:755
+#: includes/bundle-plugin.php:630
+#: includes/bundle-plugin.php:756
 msgid "WordPress Importer"
 msgstr ""
 
 #. translators: 1: file name, 2: size, 3: date.
-#: includes/bundle-plugin.php:643
+#: includes/bundle-plugin.php:644
 #, php-format
 msgid "The bundle: %1$s, %2$s, made %3$s."
 msgstr ""
 
-#: includes/bundle-plugin.php:657
+#: includes/bundle-plugin.php:658
 #: includes/import.php:745
 msgid "Update pages, posts and products that already exist (same slug) instead of adding copies"
 msgstr ""
 
-#: includes/bundle-plugin.php:661
+#: includes/bundle-plugin.php:662
 msgid "Importing again finds the same items and doesn’t duplicate them, but settings are set again."
 msgstr ""
 
-#: includes/bundle-plugin.php:793
+#: includes/bundle-plugin.php:794
 msgid "Sorry, you are not allowed to import."
 msgstr ""
 
-#: includes/bundle-plugin.php:850
+#: includes/bundle-plugin.php:851
 msgid "Sorry, you are not allowed to delete plugins."
 msgstr ""
 
-#: includes/bundle.php:556
+#: includes/bundle.php:557
 msgid "The .wxrz bundle is damaged or incomplete."
 msgstr ""
 
-#: includes/bundle.php:611
-#: includes/bundle.php:645
+#: includes/bundle.php:612
+#: includes/bundle.php:646
 msgid "The content of the .wxrz bundle could not be merged."
 msgstr ""
 
-#: includes/bundle.php:722
+#: includes/bundle.php:723
 msgid "The .wxrz bundle has no valid manifest."
 msgstr ""
 
-#: includes/bundle.php:753
+#: includes/bundle.php:754
 msgid "Could not create a folder for the .wxrz bundle."
 msgstr ""
 
-#: includes/bundle.php:1003
+#: includes/bundle.php:1004
 msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 
@@ -1852,7 +1852,7 @@ msgid "On export"
 msgstr ""
 
 #: includes/settings.php:86
-msgid "One .wxrz file"
+msgid "One file (.zip, or .wxrz with Bundle as .zip off)"
 msgstr ""
 
 #: includes/settings.php:87

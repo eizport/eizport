@@ -203,7 +203,7 @@ export default function SettingsForm( {
 				type: 'boolean',
 				Edit: 'toggle',
 				description: __(
-					'Bundles are plain .zip files, which any computer opens, instead of .wxrz (a gzipped tar). Same contents; the importer takes both.',
+					'Bundles are plain .zip files, which any computer opens (the default), instead of .wxrz (a gzipped tar) — inside a plugin made as plugin too. Same contents; the importer takes both.',
 					'eizport'
 				),
 			},

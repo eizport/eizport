@@ -14,12 +14,12 @@ mysite-wordpress-2026-10-12.zip
 └── mysite-wordpress-2026-10-12-k3x9q2m7a1b8c4d6/
     ├── mysite-wordpress-2026-10-12-k3x9q2m7a1b8c4d6.php   the plugin: "Import: mysite-wordpress-2026-10-12"
     ├── readme.txt                                         what it is, as WordPress.org's Plugin Check asks
-    └── mysite-wordpress-2026-10-12-k3x9q2m7a1b8c4d6.wxrz  the bundle (content, media, settings, as chosen)
+    └── mysite-wordpress-2026-10-12-k3x9q2m7a1b8c4d6.zip   the bundle (content, media, settings, as chosen)
 ```
 
 The plugin's folder and file are named after the export's file name, plus the random part of the copy's name in lowercase (the same one [Copies](../../settings/copies/) shows). So no file name can turn it into another plugin: an export named `woocommerce` is still `woocommerce-<random>/`, never WooCommerce's folder. Each delivery installs as its own plugin.
 
-**Settings → Export → As plugin holds the bundle as** can put the bundle's files in the plugin instead of the `.wxrz` — the same entries, the WXR formatted line by line, to look at or change before installing. **Next to the plugin's**, the plugin's folder is the bundle:
+**Settings → Export → As plugin holds the bundle as** can put the bundle's files in the plugin instead of the bundle file — the same entries, the WXR formatted line by line, to look at or change before installing. **Next to the plugin's**, the plugin's folder is the bundle:
 
 ```
 mysite-wordpress-2026-10-12.zip
@@ -34,7 +34,7 @@ mysite-wordpress-2026-10-12.zip
 
 **In a bundle/ folder**, the same files go under `bundle/`, apart from the plugin's. The plugin's header (`Eizport Bundle:`) names `manifest.json` or `bundle/manifest.json`.
 
-The default stays one `.wxrz`: a smaller download, and the files can't be told apart from the plugin's. Either way, the files are reachable by URL while the plugin is installed — delete it after the import. It doesn't work with the Playground format: the toggle is off and disabled there.
+The default stays one file — a `.zip`, or a `.wxrz` with *Bundle as .zip* off: a smaller download, and the files can't be told apart from the plugin's. Either way, the files are reachable by URL while the plugin is installed — delete it after the import. It doesn't work with the Playground format: the toggle is off and disabled there.
 
 ## On the other site
 

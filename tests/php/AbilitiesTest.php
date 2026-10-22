@@ -420,7 +420,8 @@ class AbilitiesTest extends Test_Case {
 		$this->assertStringContainsString( 'eizport_playground=' . $copy['name'], $copy['download_url'] );
 
 		$tar = $this->temp_file();
-		$this->assertTrue( \Eizport\Wxrz\decompress( Copies\path( $copy['name'] ), $tar ) );
+		// A .zip by default (Settings → Export → Bundle as .zip), or a .wxrz.
+		$this->assertTrue( \Eizport\Folder\to_tar( Copies\path( $copy['name'] ), $tar ) );
 		$manifest = \Eizport\Bundle\read_manifest( $tar );
 		$this->assertSame( 'options.json', $manifest['options'] );
 
@@ -544,7 +545,8 @@ class AbilitiesTest extends Test_Case {
 		$this->assertIsArray( $copy, is_wp_error( $copy ) ? $copy->get_error_message() : '' );
 
 		$tar = $this->temp_file();
-		$this->assertTrue( \Eizport\Wxrz\decompress( Copies\path( $copy['name'] ), $tar ) );
+		// A .zip by default (Settings → Export → Bundle as .zip), or a .wxrz.
+		$this->assertTrue( \Eizport\Folder\to_tar( Copies\path( $copy['name'] ), $tar ) );
 		$json = '';
 		\Eizport\Tar\each_file(
 			$tar,

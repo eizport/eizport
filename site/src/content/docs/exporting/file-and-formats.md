@@ -8,8 +8,8 @@ The **Format** toggle, in the **Details** panel above the list, has two choices;
 | Shown as | File | When | Holds |
 | --- | --- | --- | --- |
 | **WXR XML** | `.xml` | Media files off and no options | WordPress's own export, unchanged |
-| **WXRZ** | `.wxrz` | Media files or options | A [bundle](../../formats/wxrz-bundle/): the WXR, media, `post_content/`, `options.json` |
-| **WXR ZIP** | `.zip` | Same, with *Bundle as .zip* on | The same [bundle as a plain .zip](../../formats/zip-bundle/) |
+| **WXR ZIP** | `.zip` | Media files or options (the default) | A [bundle as a plain .zip](../../formats/zip-bundle/): the WXR, media, `post_content/`, `options.json` |
+| **WXRZ** | `.wxrz` | Same, with *Bundle as .zip* off | The same [bundle as a gzipped tar](../../formats/wxrz-bundle/) |
 | **Playground** | `.zip` | Chosen | A [Playground blueprint bundle](../../formats/playground-zip/) with themes and plugins |
 | **As plugin** | `.zip` | *As plugin* on (not with Playground) | A plugin holding the bundle, which imports it on the other site with one click ([as plugin](../as-plugin/)) |
 
