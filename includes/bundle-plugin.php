@@ -304,9 +304,9 @@ function unwrap_zip( $path ) {
 			if ( is_wp_error( $dir ) || 0 !== strpos( $name, $prefix ) || ! \Eizport\Bundle\is_bundle_entry( $entry ) ) {
 				continue;
 			}
-			$left  -= (int) $zip->statIndex( $i )['size'];
-			$target = $dir . '/' . $entry;
-			if ( $left < 0 || ! wp_mkdir_p( dirname( $target ) ) || false === file_put_contents( $target, (string) $zip->getFromIndex( $i ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			$written = \Eizport\Bundle\copy_zip_entry( $zip, $i, $dir . '/' . $entry, $left );
+			$left   -= (int) $written;
+			if ( false === $written ) {
 				\Eizport\Bundle\delete_folder( $dir );
 				$result = new WP_Error( 'eizport_bundle_plugin', __( 'The bundle could not be taken out of the plugin.', 'eizport' ) );
 				break;
@@ -314,20 +314,8 @@ function unwrap_zip( $path ) {
 		}
 	} elseif ( preg_match( '#^[^/\\\\]+\.(wxrz|zip)$#i', $bundle ) && in_array( $slug . '/' . $bundle, $names, true ) ) {
 		// A .wxrz (or .zip) next to the main file.
-		$stat   = $zip->statIndex( (int) $zip->locateName( $slug . '/' . $bundle ) );
-		$from   = $zip->getStream( $slug . '/' . $bundle );
 		$file   = \Eizport\Files\temp_file( 'eizport-plugin-bundle' );
-		$to     = fopen( $file, 'wb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-		$copied = $from && $to && (int) $stat['size'] <= \Eizport\Wxrz\max_bytes() && false !== stream_copy_to_stream( $from, $to );
-		if ( $from ) {
-			fclose( $from ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-		}
-		if ( $to ) {
-			fclose( $to ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-		}
-		if ( ! $copied ) {
-			wp_delete_file( $file );
-		}
+		$copied = false !== \Eizport\Bundle\copy_zip_entry( $zip, (int) $zip->locateName( $slug . '/' . $bundle ), $file, \Eizport\Wxrz\max_bytes() );
 		$result = $copied ? $file : new WP_Error( 'eizport_bundle_plugin', __( 'The bundle could not be taken out of the plugin.', 'eizport' ) );
 	}
 	$zip->close();
@@ -827,7 +815,12 @@ function handle_import() {
 	if ( ! current_user_can( 'import' ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to import.', 'eizport' ), 403 );
 	}
-	$file   = requested_plugin( 'eizport_bundle_import_' );
+	$file = requested_plugin( 'eizport_bundle_import_' );
+	// Only a bundle plugin active on this site: on a network, another site's one is not this site's to import.
+	$base = plugin_basename( $file );
+	if ( ! is_plugin_active( $base ) && ! ( is_multisite() && is_plugin_active_for_network( $base ) ) ) {
+		wp_die( esc_html__( 'This plugin is not active on this site.', 'eizport' ), 403 );
+	}
 	$slug   = basename( dirname( $file ) );
 	$bundle = bundle_of( $file );
 	$result = array(

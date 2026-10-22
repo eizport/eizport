@@ -34,6 +34,7 @@ if ( ! function_exists( 'eizport_uninstall_site' ) ) {
 		delete_option( 'eizport_export_defaults' );
 		delete_option( 'eizport_bundle_plugins_before' );
 		delete_option( 'eizport_bundle_plugins_imported' );
+		delete_option( 'eizport_imported_widgets' );
 		// Each user's defaults on this site (user options carry the site's prefix).
 		delete_metadata( 'user', 0, $wpdb->get_blog_prefix() . 'eizport_export_defaults', '', true );
 	}
