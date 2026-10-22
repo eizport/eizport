@@ -116,6 +116,7 @@ export const LOOK_ROWS: Record< string, string > = {
 	__global_styles: 'global_styles',
 	__global_css: 'global_css',
 	__widgets: 'widgets',
+	'__advanced-custom-fields': 'advanced-custom-fields',
 };
 
 /** Rows that aren't a post type. */

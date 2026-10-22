@@ -40,6 +40,7 @@ require_once __DIR__ . '/includes/terms.php';
 require_once __DIR__ . '/includes/import-menus.php';
 require_once __DIR__ . '/includes/import-blocks.php';
 require_once __DIR__ . '/includes/import-links.php';
+require_once __DIR__ . '/includes/import-advanced-custom-fields.php';
 require_once __DIR__ . '/includes/appearance.php';
 require_once __DIR__ . '/includes/bundle-plugin.php';
 require_once __DIR__ . '/includes/folder.php';
@@ -47,6 +48,7 @@ require_once __DIR__ . '/includes/defaults.php';
 require_once __DIR__ . '/includes/abilities.php';
 require_once __DIR__ . '/includes/admin-app.php';
 require_once __DIR__ . '/includes/compat/woocommerce.php';
+require_once __DIR__ . '/includes/compat/advanced-custom-fields.php';
 
 Selection\bootstrap();
 Menus\bootstrap();
@@ -62,6 +64,7 @@ BundlePlugin\bootstrap();
 // Compatibilities with other plugins hook here (after every plugin loaded);
 // a plugin can remove ours and register its own.
 add_action( 'eizport_register_compat', 'Eizport\Compat\WooCommerce\register' );
+add_action( 'eizport_register_compat', 'Eizport\Compat\AdvancedCustomFields\register' );
 add_action(
 	'plugins_loaded',
 	function () {

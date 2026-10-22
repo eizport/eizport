@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T21:19:05+00:00\n"
+"POT-Creation-Date: 2026-10-21T21:52:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -244,9 +244,9 @@ msgstr[1] ""
 msgid "All options"
 msgstr ""
 
-#: includes/selection.php:227
-#: includes/selection.php:250
-#: includes/selection.php:277
+#: includes/selection.php:241
+#: includes/selection.php:264
+#: includes/selection.php:291
 msgid "All"
 msgstr ""
 
@@ -283,6 +283,9 @@ msgstr ""
 msgid "Widgets"
 msgstr ""
 
+msgid "Advanced Custom Fields (ACF)"
+msgstr ""
+
 #: includes/bundle-plugin.php:606
 msgid "Options"
 msgstr ""
@@ -310,7 +313,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:300
+#: includes/cli.php:301
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -362,6 +365,9 @@ msgid "Check the groups to export: each replaces the same group on the other sit
 msgstr ""
 
 msgid "Check the rules of the Site Editor’s Additional CSS to export; they’re added as the Customizer’s are (Details)."
+msgstr ""
+
+msgid "Check the post types, taxonomies and field groups to export, in ACF’s own export format. On import, ACF imports them before the content (one with the same key there is updated), and the fields that store IDs point to the items there."
 msgstr ""
 
 msgid "Check the widgets to export: they go at the end of the same sidebar on the other site, next to its own widgets."
@@ -871,7 +877,7 @@ msgid "The plugin's settings, with their choices: how long export copies are kep
 msgstr ""
 
 #: includes/abilities.php:536
-msgid "The Export screen's choices: \"types\" (post type => \"ids\" or \"filters\", as eizport/export takes them) and \"settings\" (format \"wxr\" or \"playground\", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, \"__options\", \"__reviews\", \"__menus\"), review_ids, review_all, menu_ids (\"c:<menu term ID>\", \"n:<navigation ID>\"), menu_all, appearance (theme_mods, custom_css, global_styles, global_css, widgets), themes, plugins)."
+msgid "The Export screen's choices: \"types\" (post type => \"ids\" or \"filters\", as eizport/export takes them) and \"settings\" (format \"wxr\" or \"playground\", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, \"__options\", \"__reviews\", \"__menus\"), review_ids, review_all, menu_ids (\"c:<menu term ID>\", \"n:<navigation ID>\"), menu_all, appearance (theme_mods, custom_css, global_styles, global_css, widgets, advanced-custom-fields), themes, plugins)."
 msgstr ""
 
 #: includes/abilities.php:542
@@ -959,7 +965,7 @@ msgid "WooCommerce product reviews to export with their products: \"ids\" (comme
 msgstr ""
 
 #: includes/abilities.php:862
-msgid "The site's look, in the bundle's options file, row => \"all\" or the keys of the items chosen (eizport/get-export-options lists them): \"theme_mods\" (the Customizer's theme mods: logo, header and background images, colors), \"custom_css\" (the Customizer's Additional CSS, rule by rule), \"global_styles\" (the Site Editor's styles, group by group) and \"global_css\" (its Additional CSS, rule by rule) — block themes — and \"widgets\" (classic and block widgets). A list of rows means each of them whole. The media they use come along. Default: none."
+msgid "The site's look, in the bundle's options file, row => \"all\" or the keys of the items chosen (eizport/get-export-options lists them): \"theme_mods\" (the Customizer's theme mods: logo, header and background images, colors), \"custom_css\" (the Customizer's Additional CSS, rule by rule), \"global_styles\" (the Site Editor's styles, group by group) and \"global_css\" (its Additional CSS, rule by rule) — block themes — \"widgets\" (classic and block widgets) and \"advanced-custom-fields\" (with Advanced Custom Fields active: its post types, taxonomies and field groups, in ACF's export format). A list of rows means each of them whole. The media they use come along. Default: none."
 msgstr ""
 
 #: includes/abilities.php:867
@@ -1048,7 +1054,7 @@ msgstr ""
 
 #. translators: %s: post type.
 #: includes/abilities.php:1208
-#: includes/selection.php:569
+#: includes/selection.php:583
 #, php-format
 msgid "\"%s\" is not a content type that can be exported."
 msgstr ""
@@ -1415,7 +1421,7 @@ msgstr ""
 msgid "Could not create a folder for the .wxrz bundle."
 msgstr ""
 
-#: includes/bundle.php:1006
+#: includes/bundle.php:1022
 msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 
@@ -1427,18 +1433,30 @@ msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:284
+#: includes/cli.php:285
 msgid "--dir writes a bundle, not a Playground .zip: leave out --playground."
 msgstr ""
 
-#: includes/cli.php:287
+#: includes/cli.php:288
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:296
+#: includes/cli.php:297
 #, php-format
 msgid "Bundle written to %s."
+msgstr ""
+
+#: includes/compat/advanced-custom-fields.php:91
+msgid "Post type"
+msgstr ""
+
+#: includes/compat/advanced-custom-fields.php:92
+msgid "Taxonomy"
+msgstr ""
+
+#: includes/compat/advanced-custom-fields.php:93
+msgid "Field group"
 msgstr ""
 
 #: includes/compat/woocommerce.php:28
@@ -1723,8 +1741,8 @@ msgid "Choose another file"
 msgstr ""
 
 #: includes/menus.php:64
-#: includes/selection.php:432
-#: includes/selection.php:907
+#: includes/selection.php:446
+#: includes/selection.php:921
 msgid "(no title)"
 msgstr ""
 
@@ -1762,12 +1780,12 @@ msgid "Basics (suggested): title, tagline, homepage, permalinks, logo and site i
 msgstr ""
 
 #: includes/options.php:94
-#: includes/selection.php:440
+#: includes/selection.php:454
 msgid "Homepage"
 msgstr ""
 
 #: includes/options.php:99
-#: includes/selection.php:442
+#: includes/selection.php:456
 msgid "Posts page"
 msgstr ""
 
@@ -1804,59 +1822,59 @@ msgid "The export could not be written to a file."
 msgstr ""
 
 #. translators: %s: post type name, like "Products".
-#: includes/selection.php:157
+#: includes/selection.php:171
 #, php-format
 msgid "Choose %s by"
 msgstr ""
 
-#: includes/selection.php:160
+#: includes/selection.php:174
 msgid "By filters"
 msgstr ""
 
-#: includes/selection.php:162
+#: includes/selection.php:176
 msgid "By selection"
 msgstr ""
 
-#: includes/selection.php:174
+#: includes/selection.php:188
 msgid "Nothing to select."
 msgstr ""
 
-#: includes/selection.php:176
+#: includes/selection.php:190
 msgid "Filter the list"
 msgstr ""
 
-#: includes/selection.php:182
+#: includes/selection.php:196
 msgid "Only the checked items are exported, with their attachments and their children of other types (like a product's variations)."
 msgstr ""
 
 #. translators: %d: number of items listed.
-#: includes/selection.php:186
+#: includes/selection.php:200
 #, php-format
 msgid "Only the latest %d are listed: use the filters for the others."
 msgstr ""
 
-#: includes/selection.php:242
+#: includes/selection.php:256
 msgid "Authors:"
 msgstr ""
 
-#: includes/selection.php:261
+#: includes/selection.php:275
 msgid "Date range:"
 msgstr ""
 
-#: includes/selection.php:262
+#: includes/selection.php:276
 msgid "Start date:"
 msgstr ""
 
-#: includes/selection.php:264
-#: includes/selection.php:269
+#: includes/selection.php:278
+#: includes/selection.php:283
 msgid "&mdash; Select &mdash;"
 msgstr ""
 
-#: includes/selection.php:267
+#: includes/selection.php:281
 msgid "End date:"
 msgstr ""
 
-#: includes/selection.php:275
+#: includes/selection.php:289
 msgid "Status:"
 msgstr ""
 

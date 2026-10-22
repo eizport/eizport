@@ -194,7 +194,8 @@ function export_input( $assoc_args ) {
  * [--appearance=<parts>]
  * : The site's look: `all`, or rows comma-separated — theme_mods
  * (Customizer), custom_css (Customizer's Additional CSS), global_styles and
- * global_css (Site Editor, block themes) and widgets — each whole, or with
+ * global_css (Site Editor, block themes), widgets and advanced-custom-fields (ACF's post
+ * types, taxonomies and field groups, with ACF active) — each whole, or with
  * the keys of its items after a colon, joined by "+"
  * (theme_mods:custom_logo+background_color). eizport/get-export-options
  * lists the items.
