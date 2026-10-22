@@ -78,7 +78,7 @@ const shots: Record< string, ImageMetadata > = {
 				<p class="hero__lead">{ hero.lead }</p>
 				<div class="hero__actions">
 					<Button href={ site.demo } icon="play" size="lg">{ hero.primary }</Button>
-					<Button href={ site.directory } icon="export" variant="light" size="lg">{ hero.secondary }</Button>
+					<Button href={ site.directory } icon="start" variant="light" size="lg">{ hero.secondary }</Button>
 					<ForAgents />
 				</div>
 				<p class="hero__note">{ hero.note }</p>
@@ -412,7 +412,7 @@ const shots: Record< string, ImageMetadata > = {
 			<h2 id="cta-title">{ finale.title }</h2>
 			<p>{ fill( s.cta.text, { finale: finale.text, requires: site.requires, version: site.version } ) }</p>
 			<div class="hero__actions">
-				<Button href={ site.directory } icon="export" variant="light" size="lg">{ hero.secondary }</Button>
+				<Button href={ site.directory } icon="start" variant="light" size="lg">{ hero.secondary }</Button>
 				<Button href={ site.demo } icon="play" variant="light" size="lg">{ hero.primary }</Button>
 			</div>
 			<p class="cta__docs"><a href={ href( locale, 'docs/getting-started/introduction/' ) }>{ s.cta.docs }</a></p>
