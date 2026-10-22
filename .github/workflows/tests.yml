@@ -87,6 +87,9 @@ jobs:
         run: npx wp-env start
 
       # The tests load the wp-env site (WP_LOAD) and never write to its database.
+      - name: PHP version (test only)
+        run: npx wp-env run tests-cli php -v
+
       - name: PHPUnit
         run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/eizport bash -c 'WP_LOAD=/var/www/html/wp-load.php vendor/bin/phpunit'
 
