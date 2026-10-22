@@ -34,6 +34,7 @@ export const DEFAULT_STATE: ExportState = {
 		language: 'site',
 		themes: [],
 		plugins: [],
+		mu_plugins: [],
 	},
 };
 
@@ -505,6 +506,7 @@ export function exportInput( state: ExportState ): Record< string, unknown > {
 		input.blueprint = {
 			themes: settings.themes,
 			plugins: settings.plugins,
+			mu_plugins: settings.mu_plugins,
 			landing_page: landing[ settings.landing ] ?? 'home',
 			language: settings.language,
 		};

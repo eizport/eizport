@@ -27,6 +27,7 @@ const THEMES_FIELD    = 'eizport_themes';
 const LANDING_FIELD   = 'eizport_landing';
 const LANGUAGE_FIELD  = 'eizport_language';
 const PLUGINS_FIELD   = 'eizport_plugins';
+const MU_FIELD        = 'eizport_mu_plugins';
 const KEEP_FIELD      = 'eizport_keep_copy';
 const SAVE_FIELD      = 'eizport_save_defaults';
 const SAVE_NONCE      = 'eizport_save_defaults_nonce';
@@ -69,6 +70,7 @@ function enqueue( $hook ) {
 			'groups'  => \Eizport\Options\GROUPS_FIELD . '[]',
 			'themes'  => THEMES_FIELD . '[]',
 			'plugins' => PLUGINS_FIELD . '[]',
+			'mu'      => MU_FIELD . '[]',
 		),
 		'texts'           => array(
 			'chooseWhat' => __( 'Choose what to export.', 'eizport' ),
@@ -228,8 +230,9 @@ function download_notice_texts() {
  * active theme comes checked.
  */
 function blueprint_options() {
-	$themes  = \Eizport\Playground\theme_choices();
-	$plugins = \Eizport\Playground\plugin_choices();
+	$themes     = \Eizport\Playground\theme_choices();
+	$plugins    = \Eizport\Playground\plugin_choices();
+	$mu_plugins = \Eizport\Playground\mu_plugin_choices();
 	?>
 	<div class="eizport-blueprint-lists">
 		<fieldset>
@@ -269,6 +272,19 @@ function blueprint_options() {
 				<?php endforeach; ?>
 			</div>
 		</fieldset>
+		<?php if ( $mu_plugins ) : ?>
+			<fieldset>
+				<legend><?php esc_html_e( 'Must-use plugins to install:', 'eizport' ); ?></legend>
+				<div class="eizport-checklist">
+					<?php foreach ( $mu_plugins as $file => $data ) : ?>
+						<label>
+							<input type="checkbox" name="<?php echo esc_attr( MU_FIELD ); ?>[]" value="<?php echo esc_attr( $file ); ?>" />
+							<?php echo esc_html( '' === $data['Name'] ? $file : $data['Name'] ); ?>
+						</label><br />
+					<?php endforeach; ?>
+				</div>
+			</fieldset>
+		<?php endif; ?>
 		<p class="description"><?php esc_html_e( 'The active theme is activated, if checked; else the first theme checked.', 'eizport' ); ?></p>
 		<p class="description"><?php esc_html_e( 'Any installed theme or plugin can go in. The ones from the WordPress.org directory are installed from there, in the version this site has; premium and custom ones are copied into the file: share it only where their licenses allow.', 'eizport' ); ?></p>
 		<p>
@@ -326,6 +342,7 @@ function file_args( $args ) {
 					'option_names'  => $bundle && isset( $_GET[ \Eizport\Options\EXTRA_FIELD ] ) ? \Eizport\Options\parse_names( sanitize_textarea_field( wp_unslash( $_GET[ \Eizport\Options\EXTRA_FIELD ] ) ) ) : array(),
 					'themes'        => $list( THEMES_FIELD ),
 					'plugins'       => $list( PLUGINS_FIELD ),
+					'mu_plugins'    => $list( MU_FIELD ),
 				),
 			)
 		);
@@ -343,6 +360,7 @@ function file_args( $args ) {
 			'options'      => $field( BUNDLE_FIELD ) ? \Eizport\Options\requested_names() : array(),
 			'themes'       => $list( THEMES_FIELD ),
 			'plugins'      => $list( PLUGINS_FIELD ),
+			'mu_plugins'   => $list( MU_FIELD ),
 			'landing'      => isset( $_GET[ LANDING_FIELD ] ) ? sanitize_text_field( wp_unslash( $_GET[ LANDING_FIELD ] ) ) : 'home',
 			'language'     => isset( $_GET[ LANGUAGE_FIELD ] ) ? sanitize_text_field( wp_unslash( $_GET[ LANGUAGE_FIELD ] ) ) : 'site',
 			'filename'     => isset( $_GET[ FILENAME_FIELD ] ) ? sanitize_file_name( wp_unslash( $_GET[ FILENAME_FIELD ] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -386,6 +404,8 @@ function bundle_settings( $in ) {
 	$out['zip']     = $out['bundle'] && ! $out['blueprint'] && ! $out['as_plugin'] && ( array_key_exists( 'zip', $in ) ? ! empty( $in['zip'] ) : \Eizport\Settings\get()['bundle_zip'] );
 	$out['themes']  = array();
 	$out['plugins'] = array();
+	// Must-use plugins: written by the blueprint, with the folders they load.
+	$out['mu_plugins'] = $out['blueprint'] ? \Eizport\Playground\mu_plugin_files( $in['mu_plugins'] ?? array() ) : array();
 	// Where the Playground .zip opens (Playground\landing_page()).
 	$out['landing'] = $out['blueprint'] ? \Eizport\Playground\landing_page( $in['landing'] ?? 'home' ) : '/';
 	// And the language it opens in, as Playground\language() resolves it (empty for English).
@@ -448,6 +468,7 @@ function file_output( $args ) {
 			'blueprint'    => $blueprint,
 			'themes'       => $args['themes'] ?? array(),
 			'plugins'      => $args['plugins'] ?? array(),
+			'mu_plugins'   => $args['mu_plugins'] ?? array(),
 			'landing'      => $args['landing'] ?? '/',
 			'language'     => $args['language'] ?? '',
 			'keep_copy'    => ! empty( $args['keep_copy'] ),

@@ -147,7 +147,7 @@ function export_input( $assoc_args ) {
 			$input[ str_replace( '-', '_', $name ) ] = true;
 		}
 	}
-	// --playground: a Playground .zip, with --themes, --plugins, --landing and --language.
+	// --playground: a Playground .zip, with --themes, --plugins, --mu-plugins, --landing and --language.
 	if ( $flag( 'playground' ) ) {
 		$list    = function ( $name ) use ( $assoc_args ) {
 			return array_values( array_filter( array_map( 'trim', explode( ',', (string) ( $assoc_args[ $name ] ?? '' ) ) ) ) );
@@ -159,6 +159,7 @@ function export_input( $assoc_args ) {
 		$input['blueprint'] = array(
 			'themes'       => $list( 'themes' ),
 			'plugins'      => $list( 'plugins' ),
+			'mu_plugins'   => $list( 'mu-plugins' ),
 			'landing_page' => $landing,
 			'language'     => (string) ( $assoc_args['language'] ?? 'site' ),
 		);
@@ -238,6 +239,10 @@ function export_input( $assoc_args ) {
  * [--plugins=<files>]
  * : With --playground: plugins to install, comma-separated plugin files
  * (woocommerce/woocommerce.php), active or inactive as on this site.
+ *
+ * [--mu-plugins=<files>]
+ * : With --playground: must-use plugins to write, comma-separated files of
+ * wp-content/mu-plugins (cpt.php), with the folders they load.
  *
  * [--landing=<where>]
  * : With --playground: where it opens — home (default), admin, page:ID (a

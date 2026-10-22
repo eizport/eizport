@@ -161,6 +161,7 @@ function sanitize( $defaults ) {
 			'landing_path'      => '/' === substr( (string) ( $in['landing_path'] ?? '' ), 0, 1 ) ? sanitize_text_field( (string) $in['landing_path'] ) : '',
 			'themes'            => array_values( array_intersect( $names( 'themes' ), array_keys( \Eizport\Playground\theme_choices() ) ) ),
 			'plugins'           => array_values( array_intersect( $names( 'plugins' ), array_keys( \Eizport\Playground\plugin_choices() ) ) ),
+			'mu_plugins'        => \Eizport\Playground\mu_plugin_files( $names( 'mu_plugins' ) ),
 		),
 	);
 }
