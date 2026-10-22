@@ -262,6 +262,37 @@ function eizport_release_compile_changelog( string $readme, string $version, arr
 }
 
 /**
+ * The manifest JSON Schema of a version's series (1.2 for 1.2.0-dev), made
+ * from the newest one when it's missing: each version has its own,
+ * schemas/<X.Y>/manifest.json, frozen once released (the site publishes
+ * them all, and trunk/ as the newest).
+ *
+ * @param string $dir     Plugin folder.
+ * @param string $version Version.
+ * @return string The new file's path, or '' when it was already there.
+ */
+function eizport_release_schema( string $dir, string $version ): string {
+	$series = implode( '.', array_slice( explode( '.', $version ), 0, 2 ) );
+	$file   = "$dir/schemas/$series/manifest.json";
+	$found  = glob( "$dir/schemas/*/manifest.json" );
+	if ( file_exists( $file ) || ! $found ) {
+		return '';
+	}
+	usort(
+		$found,
+		function ( $a, $b ) {
+			return version_compare( basename( dirname( $a ) ), basename( dirname( $b ) ) );
+		}
+	);
+	$schema = (string) file_get_contents( (string) end( $found ) );
+	$schema = (string) preg_replace( '#("id": "https://eizport\.github\.io/schemas/)[^/]+(/manifest\.json")#', '${1}' . $series . '${2}', $schema, 1 );
+	mkdir( dirname( $file ) );
+	file_put_contents( $file, $schema );
+
+	return $file;
+}
+
+/**
  * The bump the entries need: the highest Significance.
  *
  * @param array<int, array{ significance: string }> $entries Changelog entries.
@@ -425,6 +456,10 @@ class Eizport_Release_Command {
 		}
 		file_put_contents( $main, $source );
 		file_put_contents( $readme, $text );
+		$schema = eizport_release_schema( $dir, $version );
+		if ( '' !== $schema ) {
+			WP_CLI::log( '  → ' . substr( $schema, strlen( $dir ) + 1 ) . ', from the newest schema' );
+		}
 		if ( ! $pre ) {
 			foreach ( $entries as $entry ) {
 				unlink( $entry['file'] );

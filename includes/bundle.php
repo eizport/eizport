@@ -36,9 +36,7 @@ defined( 'ABSPATH' ) || exit;
 const MANIFEST       = 'manifest.json';
 const FORMAT_VERSION = 2;
 // The oldest Eizport that reads this format: it rises only when the format does.
-const REQUIRES = '1.1.0';
-// The manifest's JSON Schema (schemas/eizport-schema-2.json, published on the site), for editors.
-const SCHEMA_URL     = 'https://eizport.github.io/eizport-schema-2.json';
+const REQUIRES       = '1.1.0';
 const DIR_META       = '_eizport_bundle_dir';
 const CONTENT_FOLDER = 'post_content';
 
@@ -439,7 +437,7 @@ function print_archive( $wxr, $wxr_name, $media = true, $options = null ) {
 	$files = $media ? media_files( $wxr ) : array();
 
 	$manifest = array(
-		'$schema'   => SCHEMA_URL,
+		'$schema'   => schema_url(),
 		'format'    => Wxrz\EXTENSION,
 		'version'   => FORMAT_VERSION,
 		'requires'  => REQUIRES,
@@ -774,15 +772,36 @@ function read_manifest( $tar ) {
 }
 
 /**
- * The manifest's JSON Schema (format 2), from schemas/ — the file the site
- * publishes at SCHEMA_URL.
+ * The version whose manifest JSON Schema this Eizport writes: its major.minor
+ * ("1.1.0-dev" → "1.1"). Each version has its own, in schemas/<version>/,
+ * frozen once released, as schemas.wp.org does with theme.json.
+ *
+ * @return string
+ */
+function schema_version() {
+	return implode( '.', array_slice( explode( '.', \Eizport\VERSION ), 0, 2 ) );
+}
+
+/**
+ * The URL of the manifest's JSON Schema, published by the site: the
+ * manifest's "$schema", for editors.
+ *
+ * @return string
+ */
+function schema_url() {
+	return 'https://eizport.github.io/schemas/' . schema_version() . '/manifest.json';
+}
+
+/**
+ * The manifest's JSON Schema, from schemas/<version>/manifest.json — the file
+ * the site publishes at schema_url().
  *
  * @return array
  */
 function schema() {
 	static $schema = null;
 	if ( null === $schema ) {
-		$schema = (array) json_decode( (string) file_get_contents( dirname( __DIR__ ) . '/schemas/eizport-schema-2.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- our own file.
+		$schema = (array) json_decode( (string) file_get_contents( dirname( __DIR__ ) . '/schemas/' . schema_version() . '/manifest.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- our own file.
 	}
 
 	return $schema;

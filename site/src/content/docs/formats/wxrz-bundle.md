@@ -23,11 +23,11 @@ uploads/2026/10/photo.jpg          optional: media files, as in wp-content/uploa
 
 ## manifest.json
 
-Its [JSON Schema](https://eizport.github.io/eizport-schema-2.json) is named in the manifest's `$schema`, so a code editor (VS Code, PhpStorm…) checks a manifest edited by hand and completes its keys; Eizport checks it against the same schema before importing, and says which key is wrong. [`eizport-schema.json`](https://eizport.github.io/eizport-schema.json) is always the newest.
+Its [JSON Schema](https://eizport.github.io/schemas/1.1/manifest.json) is named in the manifest's `$schema`, so a code editor (VS Code, PhpStorm…) checks a manifest edited by hand and completes its keys; Eizport checks it against the same schema before importing, and says which key is wrong. Each version has its own, frozen once released; [`schemas/trunk/manifest.json`](https://eizport.github.io/schemas/trunk/manifest.json) is always the newest.
 
 ```json
 {
-  "$schema": "https://eizport.github.io/eizport-schema-2.json",
+  "$schema": "https://eizport.github.io/schemas/1.1/manifest.json",
   "format": "wxrz",
   "version": 2,
   "requires": "1.1.0",

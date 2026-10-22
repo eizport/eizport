@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"id": "https://eizport.github.io/eizport-schema-2.json",
+	"id": "https://eizport.github.io/schemas/1.1/manifest.json",
 	"title": "Eizport bundle manifest (format 2)",
 	"description": "manifest.json, the first entry of an Eizport .wxrz or .zip bundle. See https://eizport.github.io/docs/formats/wxrz-bundle/",
 	"type": "object",
