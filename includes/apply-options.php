@@ -450,6 +450,10 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 				$widget[ $key ] = eizport_remap_urls( $widget[ $key ], $urls );
 			}
 		}
+		// The post IDs of a block widget's blocks (import-blocks.php, when it's loaded).
+		if ( isset( $widget['content'] ) && is_string( $widget['content'] ) && function_exists( 'eizport_replace_block_ids' ) ) {
+			$widget['content'] = eizport_replace_block_ids( $widget['content'], eizport_changed_ids( $posts ) );
+		}
 
 		return $widget;
 	}
