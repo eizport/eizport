@@ -156,6 +156,14 @@ The blueprint of a Playground `.zip`, before it is written.
 | `array $blueprint` | The blueprint (`steps`, `landingPage`…) |
 | `string $wxr_name` | The WXR's name inside the `.zip` |
 
+## eizport_playground_mu_plugins
+
+The must-use plugins a Playground `.zip` can take — without the platform's (WordPress Studio, hosts) and Eizport's own. Take a host's loader out, or put back one left out.
+
+| Param | |
+| --- | --- |
+| `array $choices` | File => plugin data, as `get_mu_plugins()` gives them |
+
 ## eizport_selection_limit
 
 How many items each *By selection* list of the classic screen shows (the latest). Default `1000`.

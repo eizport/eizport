@@ -945,6 +945,11 @@ function export_input_schema() {
 						'type'  => 'array',
 						'items' => array( 'type' => 'string' ),
 					),
+					'mu_plugins'   => array(
+						'type'        => 'array',
+						'items'       => array( 'type' => 'string' ),
+						'description' => __( 'Must-use plugin files (eizport/get-export-options mu_plugins), written with the folders they load.', 'eizport' ),
+					),
 					'landing_page' => array(
 						'type'        => array( 'string', 'object' ),
 						'description' => __( 'Where Playground opens: "home" (default), "admin", { "page": ID } (a published page of this site) or a path ("/shop/").', 'eizport' ),
@@ -1111,6 +1116,13 @@ function get_export_options( $input = array() ) { // phpcs:ignore Generic.CodeAn
 			'active' => is_plugin_active( $file ),
 		);
 	}
+	$mu_plugins = array();
+	foreach ( Playground\mu_plugin_choices() as $file => $data ) {
+		$mu_plugins[] = array(
+			'file' => $file,
+			'name' => '' === $data['Name'] ? $file : $data['Name'],
+		);
+	}
 	$groups = array();
 	foreach ( Options\groups() as $key => $group ) {
 		$groups[] = array(
@@ -1126,6 +1138,7 @@ function get_export_options( $input = array() ) { // phpcs:ignore Generic.CodeAn
 		'front_pages'   => Options\front_pages(),
 		'themes'        => $themes,
 		'plugins'       => $plugins,
+		'mu_plugins'    => $mu_plugins,
 		// The languages a Playground .zip can open in.
 		'languages'     => Playground\language_choices(),
 		'copy_lifetime' => Copies\lifetime(),
@@ -1227,9 +1240,11 @@ function export( $input = array() ) {
 	$blueprint = isset( $input['blueprint'] ) && is_array( $input['blueprint'] );
 	$themes    = $blueprint ? array_map( 'strval', (array) ( $input['blueprint']['themes'] ?? array() ) ) : array();
 	$plugins   = $blueprint ? array_map( 'strval', (array) ( $input['blueprint']['plugins'] ?? array() ) ) : array();
+	$mu        = $blueprint ? array_map( 'strval', (array) ( $input['blueprint']['mu_plugins'] ?? array() ) ) : array();
 	$missing   = array_merge(
 		array_diff( $themes, array_keys( Playground\theme_choices() ) ),
-		array_diff( $plugins, array_keys( Playground\plugin_choices() ) )
+		array_diff( $plugins, array_keys( Playground\plugin_choices() ) ),
+		array_diff( $mu, array_keys( Playground\mu_plugin_choices() ) )
 	);
 	if ( $missing ) {
 		return new WP_Error(
@@ -1265,6 +1280,7 @@ function export( $input = array() ) {
 				: Options\names_for( (array) ( $options['groups'] ?? array() ), $names, ! empty( $options['front_pages'] ) ),
 			'themes'          => $themes,
 			'plugins'         => $plugins,
+			'mu_plugins'      => $mu,
 			'landing'         => $blueprint ? ( $input['blueprint']['landing_page'] ?? 'home' ) : 'home',
 			'language'        => $blueprint ? (string) ( $input['blueprint']['language'] ?? 'site' ) : 'site',
 			'filename'        => (string) ( $input['filename'] ?? '' ),

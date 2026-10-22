@@ -27,6 +27,8 @@ export interface ExportOptions {
 		active: boolean;
 	}[];
 	plugins: { plugin: string; name: string; active: boolean }[];
+	/** Must-use plugins a Playground .zip can take (not the platform's). */
+	mu_plugins: { file: string; name: string }[];
 	/** The languages a Playground .zip can open in: the site's, the user's (when it's another one) and English. */
 	languages: {
 		value: 'site' | 'user' | 'en_US';
@@ -187,6 +189,8 @@ export interface FileSettings {
 	language: 'site' | 'user' | 'en_US';
 	themes: string[];
 	plugins: string[];
+	/** Must-use plugin files, written by the blueprint with the folders they load. */
+	mu_plugins: string[];
 }
 
 export interface ExportState {

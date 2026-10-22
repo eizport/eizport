@@ -33,6 +33,8 @@ The language Playground opens in — **Site language** (the default), **Your lan
 
 Any **installed** theme or plugin can go in. Plugins are installed **active or inactive as they are on this site**; of the themes, this site's is activated (when chosen), and a child theme brings its parent. The ones from the WordPress.org directory aren't copied: the blueprint installs them from the directory, **in the version this site has** (`woocommerce.11.2.1.zip`). The others — premium, custom, in-house — are zipped from the site into the bundle, and Playground installs them from there. WordPress's own update check says which ones are from the directory.
 
+**Must-use plugins** (`wp-content/mu-plugins/`) are listed too, when the site has any: each one chosen goes inside the `.zip`, with the folder it loads (`require __DIR__ . '/<folder>/…'`, or a `<name>/` folder next to `<name>.php`). The ones the platform puts there — WordPress Studio's SQLite loader, hosts' loaders — and Eizport's own temporary ones aren't offered; the [`eizport_playground_mu_plugins`](../../developers/hooks/#eizport_playground_mu_plugins) filter changes the list.
+
 > **Use it responsibly.** Premium and custom themes and plugins are copied into the file. Share a Playground `.zip` only where their licenses allow — keep the ones with paid licenses to yourself or your team.
 
 ## Inside
@@ -45,6 +47,8 @@ post_content/…                     content files, when Content as .html files 
 themes/<stylesheet>.zip            each theme chosen that isn't in the directory (a child brings its parent)
 plugins/<slug>.zip                 each plugin chosen that isn't in the directory
 languages/plugins|themes/…         their translations, in a language other than English
+mu-plugins/<file>.php              each must-use plugin chosen
+mu-plugins/<folder>.zip            each folder they load
 ```
 
 ## What the blueprint does
@@ -52,8 +56,9 @@ languages/plugins|themes/…         their translations, in a language other tha
 1. Installs the themes (parents first) — from the directory or from the bundle — and activates the active one, if chosen, else the first.
 2. Installs and activates the plugins, the same way.
 3. In another language: sets it (`setSiteLanguage`, which fetches the directory's translations) and writes the bundled ones.
-4. Writes the media and content files and two temporary must-use plugins: one answers the importer's media downloads from the files and puts each `.html` back into its post (`wp_import_post_data_raw`); the other sets the options when the import ends, with IDs mapped.
-5. Runs `importWxr` (Playground installs the WordPress Importer itself).
-6. Removes the temporary plugins and files.
+4. Writes the must-use plugins and unzips their folders into `wp-content/mu-plugins/`, before the import: the post types and taxonomies they register are there for it.
+5. Writes the media and content files and two temporary must-use plugins: one answers the importer's media downloads from the files and puts each `.html` back into its post (`wp_import_post_data_raw`); the other sets the options when the import ends, with IDs mapped.
+6. Runs `importWxr` (Playground installs the WordPress Importer itself).
+7. Removes the temporary plugins and files.
 
 The [`eizport_playground_blueprint`](../../developers/hooks/#eizport_playground_blueprint) filter changes the blueprint before it is written.

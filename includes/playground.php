@@ -19,6 +19,8 @@
  *     plugins/<slug>.zip  optional: plugins to install and activate, same
  *     languages/…         optional: this site's translations of those themes
  *                         and plugins, in the language Playground opens in
+ *     mu-plugins/…        optional: must-use plugins to write, each file as
+ *                         is and each folder one loads as <folder>.zip
  *
  * Themes and plugins from the WordPress.org directory aren't in the .zip:
  * the blueprint installs them from there, in the version this site has.
@@ -59,6 +61,49 @@ const CONTENT_FOLDER = \Eizport\Bundle\CONTENT_FOLDER;
 const OPTIONS_PLUGIN = '/wordpress/wp-content/mu-plugins/eizport-options.php';
 
 /**
+ * Folder of the must-use plugins, in the .zip and in Playground.
+ */
+const MU_FOLDER = 'mu-plugins';
+
+/**
+ * Must-use plugins the platform puts there (WordPress Studio, hosts), never
+ * offered: file or folder names in WPMU_PLUGIN_DIR.
+ */
+const PLATFORM_MU_PLUGINS = array(
+	'99-studio-loader.php',
+	'sqlite-database-integration',
+	'eizport-media.php',
+	'eizport-options.php',
+	'wpcomsh-loader.php',
+	'wpcomsh',
+	'wpcom-vip-loader.php',
+	'mu-plugin.php',
+	'wpengine-common',
+	'wpe-wp-sign-on-plugin.php',
+	'wpe-wp-sign-on-plugin',
+	'wpe-elasticpress-autosuggest-logger.php',
+	'force-strong-passwords',
+	'slt-force-strong-passwords.php',
+	'wpe-cache-plugin.php',
+	'wpe-cache-plugin',
+	'kinsta-mu-plugins.php',
+	'kinsta-mu-plugins',
+	'pantheon.php',
+	'pantheon',
+	'pantheon-mu-plugin',
+	'pressable-cache-management.php',
+	'pressable-onboarding.php',
+	'sg-security.php',
+	'sg-cachepress.php',
+	'gd-system-plugin.php',
+	'gd-system-plugin',
+	'endurance-page-cache.php',
+	'endurance-php-edge.php',
+	'endurance-browser-cache.php',
+	'bluehost-sso.php',
+);
+
+/**
  * Builds the Playground .zip in a temporary file, for the caller to send
  * (and delete).
  *
@@ -72,9 +117,10 @@ const OPTIONS_PLUGIN = '/wordpress/wp-content/mu-plugins/eizport-options.php';
  * @param array    $options  The options file's data, or null.
  * @param string   $landing  Where Playground opens (landing_page()'s path).
  * @param string   $language Its language (language()'s locale), or '' for English.
+ * @param string[] $mu_plugins Must-use plugin files (as get_mu_plugins() keys) to add.
  * @return string|false The .zip.
  */
-function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $media = false, $content = array(), $options = null, $landing = '/', $language = '' ) {
+function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $media = false, $content = array(), $options = null, $landing = '/', $language = '', $mu_plugins = array() ) {
 	$files = array();
 	if ( $media ) {
 		$handle = Files\open_read( $wxr );
@@ -88,7 +134,7 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
 	$entries = array(
 		BLUEPRINT => array(
 			'data' => wp_json_encode(
-				blueprint( $wxr_name, $themes, $plugins, wp_list_pluck( $files, 'entry' ), wp_list_pluck( $content, 'item' ), $options, $landing, $language ),
+				blueprint( $wxr_name, $themes, $plugins, wp_list_pluck( $files, 'entry' ), wp_list_pluck( $content, 'item' ), $options, $landing, $language, $mu_plugins ),
 				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
 			),
 		),
@@ -99,6 +145,9 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
 	}
 	foreach ( language_files( $themes, $plugins, $language ) as $entry => $path ) {
 		$entries[ $entry ] = array( 'path' => $path );
+	}
+	foreach ( mu_plugin_files( $mu_plugins ) as $file ) {
+		$entries[ MU_FOLDER . '/' . $file ] = array( 'path' => WPMU_PLUGIN_DIR . '/' . $file );
 	}
 	foreach ( $content as $name => $file ) {
 		rewind( $file['stream'] );
@@ -116,6 +165,9 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
 		if ( '' === directory_plugin_zip( $plugin ) ) {
 			$parts[ plugin_zip( $plugin ) ] = other_plugin_entries( $plugin );
 		}
+	}
+	foreach ( mu_plugin_folders_of( $mu_plugins ) as $folder ) {
+		$parts[ MU_FOLDER . '/' . $folder . '.zip' ] = folder_entries( WPMU_PLUGIN_DIR . '/' . $folder, $folder );
 	}
 
 	$ok    = true;
@@ -285,9 +337,10 @@ function language_files( $themes, $plugins, $language ) {
  * @param array    $options  The options file's data, or null.
  * @param string   $landing  Where Playground opens (landing_page()'s path).
  * @param string   $language Its language (language()'s locale), or '' for English.
+ * @param string[] $mu_plugins Must-use plugin files to write (with the folders they load).
  * @return array
  */
-function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = array(), $content = array(), $options = null, $landing = '/', $language = '' ) {
+function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = array(), $content = array(), $options = null, $landing = '/', $language = '', $mu_plugins = array() ) {
 	$steps = array();
 	foreach ( $plugins as $plugin ) {
 		$directory = directory_plugin_zip( $plugin );
@@ -359,11 +412,41 @@ function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = a
 		}
 	}
 
+	// Must-use plugins before the import: what they register (post types, taxonomies) is there for it.
+	$mu_files   = mu_plugin_files( $mu_plugins );
+	$mu_folders = mu_plugin_folders_of( $mu_plugins );
+	if ( $mu_files || $mu_folders ) {
+		$steps[] = array(
+			'step' => 'mkdir',
+			'path' => '/wordpress/wp-content/' . MU_FOLDER,
+		);
+	}
+	foreach ( $mu_folders as $folder ) {
+		$steps[] = array(
+			'step'          => 'unzip',
+			'zipFile'       => array(
+				'resource' => 'bundled',
+				'path'     => '/' . MU_FOLDER . '/' . $folder . '.zip',
+			),
+			'extractToPath' => '/wordpress/wp-content/' . MU_FOLDER,
+		);
+	}
+	foreach ( $mu_files as $file ) {
+		$steps[] = array(
+			'step' => 'writeFile',
+			'path' => '/wordpress/wp-content/' . MU_FOLDER . '/' . $file,
+			'data' => array(
+				'resource' => 'bundled',
+				'path'     => '/' . MU_FOLDER . '/' . $file,
+			),
+		);
+	}
+
 	$entries = array_merge( array_values( $files ), preg_filter( '#^#', CONTENT_FOLDER . '/', array_keys( $content ) ) );
 	$temp    = $entries || $options;
 	if ( $temp ) {
-		// writeFile doesn't create folders.
-		$folders = array_unique( array_merge( array( dirname( MEDIA_PLUGIN ) ), array_map( 'dirname', preg_filter( '#^#', MEDIA_DIR . '/', $entries ) ) ) );
+		// writeFile doesn't create folders (mu-plugins/ may be made already, for the must-use plugins).
+		$folders = array_unique( array_merge( $mu_files || $mu_folders ? array() : array( dirname( MEDIA_PLUGIN ) ), array_map( 'dirname', preg_filter( '#^#', MEDIA_DIR . '/', $entries ) ) ) );
 		foreach ( $folders as $folder ) {
 			$steps[] = array(
 				'step' => 'mkdir',
@@ -659,6 +742,81 @@ function plugin_choices() {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	return get_plugins();
+}
+
+/**
+ * Must-use plugins that can go in the .zip: the site's, without the ones the
+ * platform (WordPress Studio, hosts) and Eizport put there.
+ *
+ * @return array<string, array> File => plugin data, as get_mu_plugins() gives them.
+ */
+function mu_plugin_choices() {
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+	$choices = array_diff_key( get_mu_plugins(), array_flip( PLATFORM_MU_PLUGINS ) );
+
+	/**
+	 * Filters the must-use plugins a Playground .zip can take (a platform's
+	 * loader out, say).
+	 *
+	 * @param array $choices File => plugin data.
+	 */
+	return (array) apply_filters( 'eizport_playground_mu_plugins', $choices );
+}
+
+/**
+ * The folders of WPMU_PLUGIN_DIR a must-use plugin loads: the ones its code
+ * requires or includes from its own folder (`__DIR__ . '/<folder>/…'`,
+ * `dirname( __FILE__ ) . '/<folder>/…'`, `WPMU_PLUGIN_DIR . '/<folder>/…'`),
+ * and `<name>/` next to `<name>.php`. A platform's folder never goes.
+ *
+ * @param string $file Must-use plugin file.
+ * @return string[] Folder names.
+ */
+function mu_plugin_folders( $file ) {
+	$path = WPMU_PLUGIN_DIR . '/' . $file;
+	if ( ! is_file( $path ) ) {
+		return array();
+	}
+	$code = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+	$folders = array( basename( $file, '.php' ) );
+	preg_match_all( '#\b(?:require|include)(?:_once)?\s*\(?\s*(?:__DIR__|dirname\s*\(\s*__FILE__\s*\)|WPMU_PLUGIN_DIR)\s*\.\s*[\'"]/([^/\'"]+)/#', $code, $m );
+	$folders = array_merge( $folders, $m[1] );
+
+	return array_values(
+		array_filter(
+			array_unique( $folders ),
+			function ( $folder ) {
+				return '' !== $folder && '.' !== $folder[0] && ! in_array( $folder, PLATFORM_MU_PLUGINS, true ) && is_dir( WPMU_PLUGIN_DIR . '/' . $folder );
+			}
+		)
+	);
+}
+
+/**
+ * The must-use plugin files chosen that exist.
+ *
+ * @param string[] $mu_plugins Files chosen.
+ * @return string[]
+ */
+function mu_plugin_files( $mu_plugins ) {
+	return array_values( array_intersect( array_map( 'strval', (array) $mu_plugins ), array_keys( mu_plugin_choices() ) ) );
+}
+
+/**
+ * The folders the must-use plugins chosen load, once each.
+ *
+ * @param string[] $mu_plugins Files chosen.
+ * @return string[]
+ */
+function mu_plugin_folders_of( $mu_plugins ) {
+	$folders = array();
+	foreach ( mu_plugin_files( $mu_plugins ) as $file ) {
+		$folders = array_merge( $folders, mu_plugin_folders( $file ) );
+	}
+
+	return array_values( array_unique( $folders ) );
 }
 
 /**

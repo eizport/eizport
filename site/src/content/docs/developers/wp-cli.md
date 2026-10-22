@@ -29,6 +29,7 @@ wp eizport export --types=page --menus=classic:18 --filename=header
 | `--playground` | A [Playground .zip](../../formats/playground-zip/) instead of a bundle (not with `--as-plugin`, `--update-existing` or `--dir`) |
 | `--themes=<stylesheets>` | With `--playground`: themes to install, comma-separated (a child theme brings its parent) |
 | `--plugins=<files>` | With `--playground`: plugin files to install, comma-separated (`woocommerce/woocommerce.php`), active or inactive as on this site |
+| `--mu-plugins=<files>` | With `--playground`: must-use plugins to write, comma-separated files of `wp-content/mu-plugins` (`cpt.php`), with the folders they load |
 | `--landing=<where>` | With `--playground`: where it opens — `home` (default), `admin`, `page:ID` (saved as `/?pagename=<its path>`) or a path (`/shop/`) |
 | `--language=<language>` | With `--playground`: the language it opens in — `site` (default), `user`, `en_US` or an installed locale (`pt_BR`) |
 | `--filename=<name>` | File name, without extension |

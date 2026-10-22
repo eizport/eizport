@@ -497,4 +497,89 @@ class PlaygroundTest extends Test_Case {
 			$archive->close();
 		}
 	}
+
+	/**
+	 * Writes a must-use plugin (and files under it) into WPMU_PLUGIN_DIR,
+	 * removed after the test.
+	 *
+	 * @param array<string, string> $files Path under WPMU_PLUGIN_DIR => code.
+	 */
+	private function mu_plugin( $files ) {
+		$tops = array_unique( array_map( fn( $file ) => WPMU_PLUGIN_DIR . '/' . strtok( $file, '/' ), array_keys( $files ) ) );
+		foreach ( $tops as $top ) {
+			$this->assertFileDoesNotExist( $top, 'Never over a real one.' );
+			$this->remove_later( $top );
+		}
+		foreach ( $files as $file => $code ) {
+			wp_mkdir_p( dirname( WPMU_PLUGIN_DIR . '/' . $file ) );
+			file_put_contents( WPMU_PLUGIN_DIR . '/' . $file, $code ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		}
+	}
+
+	public function test_must_use_plugins_offered() {
+		$this->mu_plugin( array( 'eizport-test-single.php' => "<?php\n/* Plugin Name: EIZ Test Single */\n" ) );
+		$choices = Playground\mu_plugin_choices();
+
+		$this->assertArrayHasKey( 'eizport-test-single.php', $choices );
+		$this->assertSame( 'EIZ Test Single', $choices['eizport-test-single.php']['Name'] );
+		foreach ( array( '99-studio-loader.php', 'eizport-media.php', 'eizport-options.php' ) as $platform ) {
+			$this->assertArrayNotHasKey( $platform, $choices, 'The platform\'s and Eizport\'s own aren\'t offered.' );
+		}
+
+		$hide = function ( $choices ) {
+			unset( $choices['eizport-test-single.php'] );
+			return $choices;
+		};
+		add_filter( 'eizport_playground_mu_plugins', $hide );
+		$this->assertArrayNotHasKey( 'eizport-test-single.php', Playground\mu_plugin_choices() );
+		remove_filter( 'eizport_playground_mu_plugins', $hide );
+		$this->assertSame( array( 'eizport-test-single.php' ), Playground\mu_plugin_files( array( 'eizport-test-single.php', 'nope.php', '99-studio-loader.php' ) ) );
+	}
+
+	public function test_must_use_plugins_and_the_folders_they_load() {
+		$this->mu_plugin(
+			array(
+				'eizport-test-single.php'          => "<?php\n/* Plugin Name: EIZ Test Single */\n",
+				'eizport-test-loader.php'          => "<?php\n/* Plugin Name: EIZ Test Loader */\nrequire_once __DIR__ . '/eizport-test-lib/load.php';\ninclude WPMU_PLUGIN_DIR . '/eizport-test-missing/x.php';\n",
+				'eizport-test-lib/load.php'        => "<?php\n",
+				'eizport-test-lib/inc/more.php'    => "<?php\n",
+				'eizport-test-same.php'            => "<?php\n/* Plugin Name: EIZ Test Same */\n",
+				'eizport-test-same/assets/app.css' => 'a{}',
+			)
+		);
+
+		$this->assertSame( array(), Playground\mu_plugin_folders( 'eizport-test-single.php' ) );
+		$this->assertSame( array( 'eizport-test-lib' ), Playground\mu_plugin_folders( 'eizport-test-loader.php' ), 'Required from its folder; a folder that isn\'t there doesn\'t count.' );
+		$this->assertSame( array( 'eizport-test-same' ), Playground\mu_plugin_folders( 'eizport-test-same.php' ), 'name.php next to name/.' );
+
+		$chosen = array( 'eizport-test-single.php', 'eizport-test-loader.php', 'eizport-test-same.php' );
+		$steps  = Playground\blueprint( 'site.xml', array(), array(), array(), array(), null, '/', '', $chosen )['steps'];
+		$names  = wp_list_pluck( $steps, 'step' );
+		$unzips = array_values( array_filter( $steps, fn( $step ) => 'unzip' === $step['step'] ) );
+
+		$this->assertSame( array( '/mu-plugins/eizport-test-lib.zip', '/mu-plugins/eizport-test-same.zip' ), wp_list_pluck( wp_list_pluck( $unzips, 'zipFile' ), 'path' ) );
+		$this->assertSame( '/wordpress/wp-content/mu-plugins', $unzips[0]['extractToPath'] );
+		$written = array_column( $steps, 'path' );
+		foreach ( $chosen as $file ) {
+			$this->assertContains( '/wordpress/wp-content/mu-plugins/' . $file, $written );
+		}
+		$this->assertLessThan( array_search( 'importWxr', $names, true ), array_search( 'unzip', $names, true ), 'Before the import: what they register is there for it.' );
+		$this->assertCount( 1, array_keys( array_column( $steps, 'path' ), '/wordpress/wp-content/mu-plugins', true ), 'mu-plugins/ made once.' );
+
+		if ( class_exists( 'ZipArchive' ) ) {
+			$wxr = $this->temp_file( '<?xml version="1.0"?><rss version="2.0"><channel></channel></rss>' );
+			$zip = Playground\build_zip( $wxr, 'site.xml', array(), array(), false, array(), null, '/', '', $chosen );
+			$this->remove_later( $zip );
+			$archive = new \ZipArchive();
+			$archive->open( $zip );
+			$this->assertNotFalse( $archive->locateName( 'mu-plugins/eizport-test-single.php' ) );
+			$this->assertNotFalse( $archive->locateName( 'mu-plugins/eizport-test-lib.zip' ) );
+			$inner = $this->temp_file( (string) $archive->getFromName( 'mu-plugins/eizport-test-lib.zip' ) );
+			$archive->close();
+			$folder = new \ZipArchive();
+			$folder->open( $inner );
+			$this->assertNotFalse( $folder->locateName( 'eizport-test-lib/inc/more.php' ), 'The folder, as it is.' );
+			$folder->close();
+		}
+	}
 }

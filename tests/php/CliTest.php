@@ -42,11 +42,12 @@ class CliTest extends Test_Case {
 	public function test_no_flags_export_everything_with_media() {
 		$this->assertSame( array( 'media' => true ), Cli\export_input( array() ) );
 
-		// A Playground .zip: themes, plugins, where it opens and its language.
+		// A Playground .zip: themes, plugins, must-use plugins, where it opens and its language.
 		$this->assertSame(
 			array(
 				'themes'       => array( 'twentytwentyfive' ),
 				'plugins'      => array( 'akismet/akismet.php', 'hello.php' ),
+				'mu_plugins'   => array( 'cpt.php' ),
 				'landing_page' => array( 'page' => 43 ),
 				'language'     => 'pt_BR',
 			),
@@ -55,6 +56,7 @@ class CliTest extends Test_Case {
 					'playground' => true,
 					'themes'     => 'twentytwentyfive',
 					'plugins'    => 'akismet/akismet.php, hello.php',
+					'mu-plugins' => 'cpt.php',
 					'landing'    => 'page:43',
 					'language'   => 'pt_BR',
 				)

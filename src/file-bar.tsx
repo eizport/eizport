@@ -90,10 +90,10 @@ const PLAYGROUND_GROUPS: {
 		id: 'themes',
 		title: __( 'Themes and plugins', 'eizport' ),
 		help: __(
-			'What the WordPress Playground .zip installs — any installed theme or plugin, active or inactive as on this site; a child theme brings its parent, and the active theme is activated if chosen. The ones from the WordPress.org directory are installed from there, in the version this site has; premium and custom ones go inside the file: share it only where their licenses allow.',
+			'What the WordPress Playground .zip installs — any installed theme or plugin, active or inactive as on this site, and must-use plugins (with the folders they load; not the ones the host puts there); a child theme brings its parent, and the active theme is activated if chosen. The ones from the WordPress.org directory are installed from there, in the version this site has; premium and custom ones go inside the file: share it only where their licenses allow.',
 			'eizport'
 		),
-		form: { fields: [ 'themes', 'plugins' ] },
+		form: { fields: [ 'themes', 'plugins', 'mu_plugins' ] },
 	},
 ];
 
@@ -562,6 +562,17 @@ function useFields(
 					})`,
 				} ) ),
 			},
+			{
+				id: 'mu_plugins',
+				label: __( 'Must-use plugins to install', 'eizport' ),
+				type: 'array',
+				elements: ( options?.mu_plugins || [] ).map( ( plugin ) => ( {
+					value: plugin.file,
+					label: plugin.name,
+				} ) ),
+				// Only when the site has some.
+				isVisible: () => ( options?.mu_plugins || [] ).length > 0,
+			},
 		],
 		[ options, bundle, pages ]
 	);
@@ -655,7 +666,7 @@ function languageWords(
  * @return Words.
  */
 function themesAndPlugins( settings: FileSettings ): string {
-	return sprintf(
+	const words = sprintf(
 		/* translators: 1: number of themes, 2: number of plugins. */
 		__( '%1$s, %2$s', 'eizport' ),
 		sprintf(
@@ -667,6 +678,24 @@ function themesAndPlugins( settings: FileSettings ): string {
 			/* translators: %d: number of plugins. */
 			_n( '%d plugin', '%d plugins', settings.plugins.length, 'eizport' ),
 			settings.plugins.length
+		)
+	);
+	if ( ! settings.mu_plugins.length ) {
+		return words;
+	}
+	return sprintf(
+		/* translators: 1: themes and plugins ("1 theme, 2 plugins"), 2: number of must-use plugins ("1 must-use plugin"). */
+		__( '%1$s, %2$s', 'eizport' ),
+		words,
+		sprintf(
+			/* translators: %d: number of must-use plugins. */
+			_n(
+				'%d must-use plugin',
+				'%d must-use plugins',
+				settings.mu_plugins.length,
+				'eizport'
+			),
+			settings.mu_plugins.length
 		)
 	);
 }
@@ -753,6 +782,7 @@ function playgroundCount( settings: FileSettings ): number {
 	return (
 		settings.themes.length +
 		settings.plugins.length +
+		settings.mu_plugins.length +
 		( landingWords( settings ) ? 1 : 0 ) +
 		( settings.language !== 'site' ? 1 : 0 )
 	);

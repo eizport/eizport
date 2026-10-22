@@ -300,6 +300,9 @@
 			( settings.plugins || [] ).forEach( function ( plugin ) {
 				set( named( config.fields.plugins, plugin ), true );
 			} );
+			( settings.mu_plugins || [] ).forEach( function ( file ) {
+				set( named( config.fields.mu, file ), true );
+			} );
 		} );
 	}
 } )();
