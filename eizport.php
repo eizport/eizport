@@ -36,6 +36,7 @@ require_once __DIR__ . '/includes/import.php';
 require_once __DIR__ . '/includes/runner.php';
 require_once __DIR__ . '/includes/suggestions.php';
 require_once __DIR__ . '/includes/menus.php';
+require_once __DIR__ . '/includes/terms.php';
 require_once __DIR__ . '/includes/import-menus.php';
 require_once __DIR__ . '/includes/import-blocks.php';
 require_once __DIR__ . '/includes/import-links.php';
@@ -49,6 +50,7 @@ require_once __DIR__ . '/includes/compat/woocommerce.php';
 
 Selection\bootstrap();
 Menus\bootstrap();
+Terms\bootstrap();
 Export\bootstrap();
 Import\bootstrap();
 Copies\bootstrap();

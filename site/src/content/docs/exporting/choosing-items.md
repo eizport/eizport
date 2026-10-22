@@ -38,6 +38,7 @@ Exporting by filters (status, author, dates, terms) stays on the [classic screen
 | --- | --- |
 | Any item | Its attached media and featured image (WordPress does this) |
 | Any item | Media used in its content without being attached ([media](../media/)) |
+| Any item | Its categories, tags and other terms in full — description, parent categories and term meta (a product category's thumbnail and display type) — not only their names |
 | A product | Its variations. Its reviews only with the **Product reviews** row (they are suggested) — on the classic screen and in the ability without `reviews`, all of them |
 | A page | Its child pages only if they are chosen too |
 | An item with a role | The settings that point to it, suggested in the Options row ([linked settings](../options/#linked-settings)) |

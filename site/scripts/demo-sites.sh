@@ -141,17 +141,6 @@ foreach ( get_posts( array( "post_type" => array( "wp_template", "wp_template_pa
 		wp_update_post( wp_slash( array( "ID" => $post->ID, "post_content" => $content ) ) );
 	}
 }'
-# An export of chosen types carries the products' categories by name only (core
-# WXR; see BACKLOG): their descriptions come from the development site.
-wp "$DEV_SITE" eval 'echo wp_json_encode( wp_list_pluck( get_terms( array( "taxonomy" => "product_cat", "hide_empty" => false ) ), "description", "slug" ) );' > "$SOURCE/terms.json"
-wp "$SOURCE" eval '
-foreach ( json_decode( file_get_contents( ABSPATH . "terms.json" ), true ) as $slug => $description ) {
-	$term = get_term_by( "slug", $slug, "product_cat" );
-	if ( $term ) {
-		wp_update_term( $term->term_id, "product_cat", array( "description" => $description ) );
-	}
-}'
-rm -f "$SOURCE/terms.json"
 # The logo and the site icon: imported with the media, under the same IDs.
 set_option "$SOURCE" site_logo "$(wp "$DEV_SITE" option get site_logo)"
 set_option "$SOURCE" site_icon "$(wp "$DEV_SITE" option get site_icon)"
