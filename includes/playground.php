@@ -207,7 +207,8 @@ function landing_page( $choice ) {
 	if ( 'admin' === $choice ) {
 		return '/wp-admin/';
 	}
-	if ( is_string( $choice ) && 0 === strpos( $choice, '/' ) && 0 !== strpos( $choice, '//' ) ) {
+	// A path of this site: a backslash (/\host) or a control character opens another host in a browser.
+	if ( is_string( $choice ) && preg_match( '#^/(?![/\\\\])[^\\\\\x00-\x1f]*$#', $choice ) ) {
 		$path  = (string) wp_parse_url( $choice, PHP_URL_PATH );
 		$query = (string) wp_parse_url( $choice, PHP_URL_QUERY );
 		return '' === $path ? '/' : $path . ( '' === $query ? '' : '?' . $query );
