@@ -7,7 +7,7 @@ description: "How a bundle is imported with the WordPress Importer, what happens
 
 Upload a `.wxrz` or `.zip` bundle on **Tools → Import → WordPress**, like any WXR file. Gzipped WXR files (`.xml.gz`) and plain `.xml` files work too.
 
-Exported [as plugin](../../exporting/as-plugin/)? Install the `.zip` in **Plugins → Add Plugin → Upload Plugin** and use its **Run import** under Tools instead.
+Exported [as plugin](../../exporting/as-plugin/)? Install the `.zip` in **Plugins → Add Plugin → Upload Plugin** and click **Run import** on its row on the Plugins screen instead.
 
 **Tools → Import** opens the WordPress Importer directly, and its screen links to **All importers** ([Settings → General](../../settings/general/) turns this off).
 

@@ -15,7 +15,7 @@ The **Format** toggle, in the **Details** panel above the list, has two choices;
 
 ## As plugin
 
-The **As plugin** toggle, next to *Media files* (its ⓘ explains it), wraps the bundle in a plugin `.zip`. Install it on the other site like any plugin and click **Run import** on its screen under Tools: no file to upload. See [as plugin](../as-plugin/).
+The **As plugin** toggle, next to *Media files* (its ⓘ explains it), wraps the bundle in a plugin `.zip`. Install it on the other site like any plugin and click **Run import** on its row on the Plugins screen: no file to upload. See [as plugin](../as-plugin/).
 
 ## Update existing
 
