@@ -7,7 +7,9 @@
  * tags (the version, "latest" and "stable", moved from the previous release) and
  * pushes. The version tag runs .github/workflows/release.yml, which builds
  * the zip, publishes the GitHub release and, once enabled, deploys to the
- * WordPress.org SVN.
+ * WordPress.org SVN. A release also moves the "site" branch, the published
+ * site (.github/workflows/pages.yml), onto it, keeping the site fixes made
+ * since the previous release that it doesn't bring.
  *
  * Three kinds of version (the flow is in .github/CONTRIBUTING.md):
  * - X.Y.Z-dev: trunk's next version. Header and constant only; no notes,
@@ -43,6 +45,7 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 
 const EIZPORT_RELEASE_LATEST_TAG = 'latest';
 const EIZPORT_RELEASE_STABLE_TAG = 'stable';
+const EIZPORT_RELEASE_SITE       = 'site';
 
 /**
  * Runs a shell command; prints its output; stops the release on failure.
@@ -293,6 +296,38 @@ function eizport_release_schema( string $dir, string $version ): string {
 }
 
 /**
+ * Moves the "site" branch onto a release: the site fixes on it since the
+ * previous release are replayed on the new one (git rebase drops those the
+ * release already brings), in a temporary worktree, and pushed — which
+ * publishes the site. Without the branch, it starts at the release.
+ *
+ * @param string $dir     Plugin folder (a git checkout with origin).
+ * @param string $version The release's tag.
+ * @param string $old     The previous release's commit ("latest" before it moved), or ''.
+ * @return string '' when done, else what to run by hand.
+ */
+function eizport_release_site( string $dir, string $version, string $old ): string {
+	$branch  = EIZPORT_RELEASE_SITE;
+	$by_hand = "git fetch origin && git switch $branch && git reset --hard origin/$branch && git rebase --onto $version $old && git push --force origin $branch";
+	if ( 0 !== eizport_release_try_run( "git fetch origin $branch --quiet", $dir )[0] || '' === $old ) {
+		eizport_release_run( 'git push --force origin ' . escapeshellarg( "$version^{commit}:refs/heads/$branch" ) . ' --quiet', $dir, true );
+		return '';
+	}
+
+	$tree = sys_get_temp_dir() . '/eizport-site-' . getmypid();
+	eizport_release_run( 'git worktree add --detach --quiet ' . escapeshellarg( $tree ) . " origin/$branch", $dir, true );
+	$rebased = 0 === eizport_release_try_run( 'git rebase --quiet --onto ' . escapeshellarg( $version ) . ' ' . escapeshellarg( $old ), $tree )[0];
+	if ( $rebased ) {
+		$rebased = 0 === eizport_release_try_run( "git push --force origin HEAD:refs/heads/$branch --quiet", $tree )[0];
+	} else {
+		eizport_release_try_run( 'git rebase --abort', $tree );
+	}
+	eizport_release_try_run( 'git worktree remove --force ' . escapeshellarg( $tree ), $dir );
+
+	return $rebased ? '' : $by_hand;
+}
+
+/**
  * The bump the entries need: the highest Significance.
  *
  * @param array<int, array{ significance: string }> $entries Changelog entries.
@@ -492,6 +527,8 @@ class Eizport_Release_Command {
 			return;
 		}
 		eizport_release_run( 'git tag ' . escapeshellarg( $version ), $dir, true );
+		// The previous release, before "latest" moves: where the site fixes on the site branch start.
+		$old = trim( eizport_release_try_run( 'git rev-parse --verify --quiet ' . EIZPORT_RELEASE_LATEST_TAG . '^{commit}', $dir )[1] );
 		// "latest" and "stable" move with final releases only: a pre-release is GitHub-only and never the download.
 		$moved = $pre ? array() : array( EIZPORT_RELEASE_LATEST_TAG, EIZPORT_RELEASE_STABLE_TAG );
 		foreach ( $moved as $name ) {
@@ -499,13 +536,17 @@ class Eizport_Release_Command {
 		}
 		$tags = $moved ? ' (also tagged ' . implode( ' and ', $moved ) . ')' : ' (pre-release)';
 		if ( ! $push || 0 !== $has_remote ) {
-			WP_CLI::success( "Released $version locally (not pushed)$tags. Push with: git push origin $branch $version" . ( $moved ? ' && git push --force origin ' . implode( ' ', $moved ) : '' ) );
+			WP_CLI::success( "Released $version locally (not pushed)$tags. Push with: git push origin $branch $version" . ( $moved ? ' && git push --force origin ' . implode( ' ', $moved ) . " — then move the site branch: git rebase --onto $version $old " . EIZPORT_RELEASE_SITE : '' ) );
 			return;
 		}
 		eizport_release_run( 'git push origin ' . escapeshellarg( $branch ) . ' --quiet', $dir, true );
 		eizport_release_run( 'git push origin ' . escapeshellarg( $version ) . ' --quiet', $dir, true );
 		if ( $moved ) {
 			eizport_release_run( 'git push --force origin ' . implode( ' ', $moved ) . ' --quiet', $dir, true );
+			$by_hand = eizport_release_site( $dir, $version, $old );
+			if ( '' !== $by_hand ) {
+				WP_CLI::warning( "The site fixes since the previous release don't apply on $version; move the site branch by hand: $by_hand" );
+			}
 		}
 		WP_CLI::success( "Released $version$tags: the version tag runs the Release workflow." );
 	}

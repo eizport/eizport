@@ -5,10 +5,12 @@ name: Site
 # Pages repository, served from its main branch) with a deploy key, the
 # SITE_DEPLOY_KEY secret. Edit the site here, never there.
 #
-# The site shows the released plugin: it is built from the "latest" tag,
-# which a release moves (bin/release.php), never from trunk, where docs of
-# unreleased changes wait. A release publishes it; so can a run by hand,
-# from another ref when asked.
+# The site shows the released plugin: it is built from the "site" branch,
+# the latest release plus the site fixes made after it, never from trunk,
+# where docs of unreleased changes wait. A site fix is merged into trunk,
+# then cherry-picked onto "site"; a release moves "site" onto itself
+# (bin/release.php), keeping the fixes it doesn't bring. Pushing "site"
+# publishes it; so can a run by hand, from another ref when asked.
 #
 # The translations (site/translations.json) are downloaded from their own
 # repositories at build time. Each of them sends a "translations"
@@ -16,14 +18,14 @@ name: Site
 
 on:
   push:
-    tags: [ latest ]
+    branches: [ site ]
   repository_dispatch:
     types: [ translations ]
   workflow_dispatch:
     inputs:
       ref:
         description: Tag, branch or commit to build
-        default: latest
+        default: site
 
 permissions:
   contents: read
@@ -41,10 +43,21 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ inputs.ref || 'latest' }}
+          ref: ${{ inputs.ref || 'site' }}
           # The whole history: a translated page is outdated when its English
           # page changed after the commit it was translated from.
           fetch-depth: 0
+      - name: Only the site changed since the release
+        # What the site says of the plugin must be what was released.
+        if: ( inputs.ref || 'site' ) == 'site'
+        run: |
+          git fetch --force origin 'refs/tags/latest:refs/tags/latest'
+          changed=$(git diff --name-only latest...HEAD | grep -Ev '^(site/|\.github/workflows/pages\.yml$)' || true)
+          if [ -n "$changed" ]; then
+            echo "::error::Only site/ may change on the site branch after a release:"
+            echo "$changed"
+            exit 1
+          fi
       - uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -63,4 +76,4 @@ jobs:
           force_orphan: true
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
-          full_commit_message: Site from eizport/eizport@${{ inputs.ref || 'latest' }}
+          full_commit_message: Site from eizport/eizport@${{ inputs.ref || 'site' }}
