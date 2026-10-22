@@ -14,7 +14,7 @@ export const GET: APIRoute = async ( { site: origin } ) => {
 		'',
 		`> ${ site.description }`,
 		'',
-		`WordPress plugin, version ${ site.version }, for WordPress ${ site.requires }+ and PHP ${ site.requiresPhp }+, GPL. Source: ${ site.repo }. Download: ${ site.download }. Every page below is Markdown; the whole documentation is in one file at ${ new URL( url( 'llms-full.txt' ), origin ) }.`,
+		`WordPress plugin, version ${ site.version }, for WordPress ${ site.requires }+ and PHP ${ site.requiresPhp }+, GPL. Source: ${ site.repo }. Install: ${ site.directory } (or \`wp plugin install eizport\`). Every page below is Markdown; the whole documentation is in one file at ${ new URL( url( 'llms-full.txt' ), origin ) }.`,
 		'',
 		'The plugin itself is agent-ready: every export, import and setting is an ability of the WordPress Abilities API (REST, PHP, MCP) — see Developers → Abilities.',
 		'',

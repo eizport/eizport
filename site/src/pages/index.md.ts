@@ -14,7 +14,7 @@ export const GET: APIRoute = ( { site: origin } ) => {
 		`> ${ hero.lead }`,
 		hero.note,
 		`Version ${ site.version} · WordPress ${ site.requires }+ · PHP ${ site.requiresPhp }+ · ${ site.license }`,
-		`${ existsSync( resolve( process.cwd(), 'public/video/demo.mp4' ) ) ? `- Demo video (captions in ${ abs( 'video/demo.en.vtt' ) }): ${ abs( 'video/demo.mp4' ) }\n` : '' }- Try it in WordPress Playground: ${ site.demo }\n- Download: ${ site.download }\n- Source: ${ site.repo }\n- Docs: ${ abs( 'docs/' ) } (all as Markdown: ${ abs( 'llms-full.txt' ) })`,
+		`${ existsSync( resolve( process.cwd(), 'public/video/demo.mp4' ) ) ? `- Demo video (captions in ${ abs( 'video/demo.en.vtt' ) }): ${ abs( 'video/demo.mp4' ) }\n` : '' }- Try it in WordPress Playground: ${ site.demo }\n- Install: ${ site.directory } (or \`wp plugin install eizport\`)\n- Source: ${ site.repo }\n- Docs: ${ abs( 'docs/' ) } (all as Markdown: ${ abs( 'llms-full.txt' ) })`,
 		`## What's new in ${ site.version }`,
 		whatsNew().map( ( change ) => `- ${ change }` ).join( '\n' ),
 		'## Sound familiar?',
@@ -52,7 +52,7 @@ export const GET: APIRoute = ( { site: origin } ) => {
 		'## Questions people ask',
 		objections.map( ( item ) => `### ${ item.question }\n\n${ item.answer }` ).join( '\n\n' ),
 		`## ${ finale.title }`,
-		`${ finale.text } Download: ${ site.download }`,
+		`${ finale.text } Install: ${ site.directory }`,
 		'## FAQ',
 		faq()
 			.map( ( item ) => `### ${ item.question }\n\n${ item.answer.map( text ).join( '\n\n' ) }` )
