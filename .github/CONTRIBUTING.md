@@ -68,7 +68,9 @@ Export navigation menus: classic menus with their theme locations, and block nav
    `includes/import.php` is the newest WordPress Importer the tests passed
    with (CI installs the latest); `Bundle\REQUIRES` in `includes/bundle.php`
    rises, with `FORMAT_VERSION`, only when the bundle layout changes in a way
-   an older Eizport would read wrong.
+   an older Eizport would read wrong; a new layout brings its numbered schema
+   (`schemas/eizport-schema-N.json`, `Bundle\SCHEMA_URL`) and
+   `schemas/eizport-schema.json` becomes a copy of it.
 4. **Optional pre-release** for testing, on GitHub only (not the latest
    release, not on WordPress.org): write the `= 1.1.0 =` Upgrade Notice in
    readme.txt (the Changelog comes from `changelog/`), then

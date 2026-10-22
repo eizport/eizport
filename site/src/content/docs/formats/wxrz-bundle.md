@@ -23,8 +23,11 @@ uploads/2026/10/photo.jpg          optional: media files, as in wp-content/uploa
 
 ## manifest.json
 
+Its [JSON Schema](https://eizport.github.io/eizport-schema-2.json) is named in the manifest's `$schema`, so a code editor (VS Code, PhpStorm…) checks a manifest edited by hand and completes its keys; Eizport checks it against the same schema before importing, and says which key is wrong. [`eizport-schema.json`](https://eizport.github.io/eizport-schema.json) is always the newest.
+
 ```json
 {
+  "$schema": "https://eizport.github.io/eizport-schema-2.json",
   "format": "wxrz",
   "version": 2,
   "requires": "1.1.0",
@@ -48,6 +51,7 @@ uploads/2026/10/photo.jpg          optional: media files, as in wp-content/uploa
 
 | Key | Meaning |
 | --- | --- |
+| `$schema` | The schema's URL, for editors |
 | `format`, `version` | Always `"wxrz"`; the layout's version — `2` since Eizport 1.1.0, `1` before. A reader takes the versions it knows and refuses newer ones |
 | `requires` | The oldest Eizport that reads it (`1.1.0`); rises only when the layout does. An older Eizport refuses the bundle and says to update — Eizport 1.0.x refuses it as having no valid manifest |
 | `generator`, `site`, `created` | Who made it (`Eizport <version>`, shown on a bundle plugin's screen), from where, when |
