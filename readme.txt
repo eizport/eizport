@@ -97,7 +97,10 @@ They follow the same rules as the screens: the `export` capability for exporting
 * `eizport_option_groups` — the groups of options offered (`key => array( 'label' => 'Name: what it holds', 'options' => array( … ) )`).
 * `eizport_denied_options` — more options never exported (a plugin's keys, tokens or version numbers); WordPress's own can't be removed.
 * `eizport_media_used` — attachments a post uses beyond its content (`$used`, `$post`), like a product gallery.
-* `eizport_register_compat` — action, after all plugins load, where compatibilities hook those filters. The WooCommerce one ships with the plugin (`includes/compat/woocommerce.php`: pages, a group, version options, product galleries); a plugin can replace it with its own: `remove_action( 'eizport_register_compat', 'Eizport\Compat\WooCommerce\register' );`.
+* `eizport_content_types` — the post types the Export screen offers as rows (a plugin takes out its own internal types).
+* `eizport_look_items`, `eizport_look_data`, `eizport_look_suggested` — a row of a plugin's own next to the look's: its items, its entry in the options file, and what the posts chosen suggest.
+* `eizport_advanced_custom_fields_id_types` — the ACF field types whose values are IDs an import maps (type => post, term or user).
+* `eizport_register_compat` — action, after all plugins load, where compatibilities hook those filters. The WooCommerce and Advanced Custom Fields ones ship with the plugin (`includes/compat/woocommerce.php`: pages, a group, version options, product galleries; `includes/compat/advanced-custom-fields.php`: the ACF row); a plugin can replace one with its own: `remove_action( 'eizport_register_compat', 'Eizport\Compat\WooCommerce\register' );`.
 * `eizport_post_id_options` — options that hold a post ID (by default the linked options), mapped to the imported post on import.
 * `eizport_selection_limit` — how many items each "By selection" list shows (default 1000, the latest).
 * `eizport_copy_lifetime` — how long a Playground copy lasts, in seconds (default: the one chosen in the settings; 0 keeps copies until deleted).
@@ -126,7 +129,7 @@ Only import files you trust, as with any WXR file. When a bundle is opened, only
 
 = Which plugins are supported? =
 
-WooCommerce, with its own support: products, orders and coupons, its pages as linked settings, product galleries, the products its blocks show (suggested) and product reviews. Advanced Custom Fields and Elementor aren't officially supported yet and weren't tested: their data travels in custom fields, which the export carries, but IDs inside them aren't remapped on import. The docs explain what to expect: https://eizport.github.io/docs/developers/compatibilities/
+WooCommerce, with its own support: products, orders and coupons, its pages as linked settings, product galleries, the products its blocks show (suggested) and product reviews. Advanced Custom Fields (ACF), with its own support too: its post types, taxonomies and field groups on a row of their own, in ACF's export format, imported before the content, and the fields that store IDs (image, file, post object, relationship, page link, taxonomy, user) remapped on import. Elementor isn't officially supported yet and wasn't tested: its data travels in custom fields, which the export carries, but IDs inside them aren't remapped on import. The docs explain what to expect: https://eizport.github.io/docs/developers/compatibilities/
 
 = What is an "as plugin" file? =
 

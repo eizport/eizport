@@ -57,7 +57,7 @@ if ( ! is_wp_error( $copy ) ) {
 
 ## eizport/get-export-options
 
-No input. Returns `types` (each with `type`, `label`, `count`, `hierarchical`, `statuses` and `taxonomies` with their terms), `option_groups` (`group`, `label`, `options`), `front_pages` (`front`, `posts` IDs), `themes`, `plugins`, `copy_lifetime` (seconds), `filename` (today's default name), `linked` (the linked settings mode), `bundle_zip`, `review_count` (approved product reviews; 0 without WooCommerce) `appearance` (`theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets` → their items: `key`, `label`, `details`, `preview`; see [Appearance](../../exporting/appearance/)) and `menus`: `classic` (`id`, `name`, `slug`, `items`, `locations` — the labels of the theme locations it sits in) and `navigation` (`id`, `title`, `links`) — see [Menus](../../exporting/menus/).
+No input. Returns `types` (each with `type`, `label`, `count`, `hierarchical`, `statuses` and `taxonomies` with their terms), `option_groups` (`group`, `label`, `options`), `front_pages` (`front`, `posts` IDs), `themes`, `plugins`, `copy_lifetime` (seconds), `filename` (today's default name), `linked` (the linked settings mode), `bundle_zip`, `review_count` (approved product reviews; 0 without WooCommerce) `appearance` (`theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets`, `advanced-custom-fields` → their items: `key`, `label`, `details`, `preview`; see [Appearance](../../exporting/appearance/)) and `menus`: `classic` (`id`, `name`, `slug`, `items`, `locations` — the labels of the theme locations it sits in) and `navigation` (`id`, `title`, `links`) — see [Menus](../../exporting/menus/).
 
 ## eizport/get-items
 
@@ -100,7 +100,7 @@ Input: `search`, `include` (only these), `page`, `per_page`. Returns `items` (`i
 | `as_plugin` | boolean: a plugin `.zip` that imports its bundle ([as plugin](../../exporting/as-plugin/)); not with `blueprint` | `false` |
 | `update_existing` | boolean: ask the import to update the items that already exist (same type and slug); saved in the bundle | `false` |
 | `reviews` | object: `ids` (comment IDs; `[]` for none) or `all` — WooCommerce product reviews | all of the products' reviews |
-| `appearance` | object: row (`theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets`) → `"all"` or the keys of its items (from `eizport/get-export-options`); a list of rows means each whole — the site's [look](../../exporting/appearance/), with the media it uses; needs `bundle` | none |
+| `appearance` | object: row (`theme_mods`, `custom_css`, `global_styles`, `global_css`, `widgets`, and [`advanced-custom-fields`](../../exporting/advanced-custom-fields/) with ACF active) → `"all"` or the keys of its items (from `eizport/get-export-options`); a list of rows means each whole — the site's [look](../../exporting/appearance/), with the media it uses; needs `bundle` | none |
 | `css_mode` | `end`, `start`, `replace` (the head/tail blocks of the same name the other site has; at the end with none) or `replace_all`: how the CSS rules are added on import; whoever imports can change it | `end` |
 | `css_markers` | head/tail comments around the CSS rules | Settings → Export |
 | `menus` | object: `classic` (menu term IDs, with their items and theme locations), `navigation` (`wp_navigation` IDs), or `all` — [menus](../../exporting/menus/) | none (*all content* has them) |
