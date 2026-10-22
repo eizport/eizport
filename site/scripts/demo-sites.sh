@@ -146,9 +146,6 @@ rm -f "$SOURCE/terms.json"
 # The logo and the site icon: imported with the media, under the same IDs.
 set_option "$SOURCE" site_logo "$(wp "$DEV_SITE" option get site_logo)"
 set_option "$SOURCE" site_icon "$(wp "$DEV_SITE" option get site_icon)"
-# Links to other pages, products and categories still point at the
-# development site (the import remaps media URLs only; see BACKLOG).
-wp "$SOURCE" search-replace "$(wp "$DEV_SITE" option get siteurl)" "$(wp "$SOURCE" option get siteurl)" "$(wp "$SOURCE" db prefix)posts" --quiet
 images=$(wp "$SOURCE" eval '
 	foreach ( get_posts( array( "post_type" => "attachment", "post_mime_type" => "image", "numberposts" => -1 ) ) as $image ) {
 		echo $image->ID, " ", get_attached_file( $image->ID ), "\n";

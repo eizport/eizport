@@ -302,7 +302,7 @@ function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = a
 function media_plugin_code() {
 	// With the menus' import code (import-menus.php) after it: one must-use plugin, one PHP file.
 	$code = (string) file_get_contents( __DIR__ . '/playground-media.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	foreach ( array( 'import-menus.php', 'import-blocks.php' ) as $file ) {
+	foreach ( array( 'import-menus.php', 'import-blocks.php', 'import-links.php' ) as $file ) {
 		$code .= "\n" . preg_replace( '/^<\?php\s*/', '', (string) file_get_contents( __DIR__ . '/' . $file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	}
 

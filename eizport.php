@@ -38,6 +38,7 @@ require_once __DIR__ . '/includes/suggestions.php';
 require_once __DIR__ . '/includes/menus.php';
 require_once __DIR__ . '/includes/import-menus.php';
 require_once __DIR__ . '/includes/import-blocks.php';
+require_once __DIR__ . '/includes/import-links.php';
 require_once __DIR__ . '/includes/appearance.php';
 require_once __DIR__ . '/includes/bundle-plugin.php';
 require_once __DIR__ . '/includes/folder.php';
