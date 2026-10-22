@@ -27,7 +27,7 @@ if ( ! function_exists( 'eizport_never_set_option' ) ) {
 	function eizport_never_set_option( $name ) {
 		global $wpdb;
 
-		$never = array( 'siteurl', 'home', 'admin_email', 'new_admin_email', 'active_plugins', 'active_sitewide_plugins', 'recently_activated', 'uninstall_plugins', 'template', 'stylesheet', 'cron', 'rewrite_rules', 'db_version', 'initial_db_version', 'db_upgraded', 'auth_key', 'auth_salt', 'logged_in_key', 'logged_in_salt', 'nonce_key', 'nonce_salt', 'secure_auth_key', 'secure_auth_salt', 'recovery_keys', 'mailserver_url', 'mailserver_login', 'mailserver_pass', 'mailserver_port', 'users_can_register', 'default_role', $wpdb->prefix . 'user_roles', 'eizport_settings' );
+		$never = array( 'siteurl', 'home', 'admin_email', 'new_admin_email', 'active_plugins', 'active_sitewide_plugins', 'recently_activated', 'uninstall_plugins', 'template', 'stylesheet', 'cron', 'rewrite_rules', 'db_version', 'initial_db_version', 'db_upgraded', 'auth_key', 'auth_salt', 'logged_in_key', 'logged_in_salt', 'nonce_key', 'nonce_salt', 'secure_auth_key', 'secure_auth_salt', 'recovery_keys', 'mailserver_url', 'mailserver_login', 'mailserver_pass', 'mailserver_port', 'users_can_register', 'default_role', 'upload_path', 'upload_url_path', $wpdb->prefix . 'user_roles', 'eizport_settings' );
 
 		return in_array( $name, $never, true ) || (bool) preg_match( '/^_(site_)?transient_/', $name );
 	}

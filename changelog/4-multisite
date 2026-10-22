@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Multisite: each site of a network exports and imports on its own — saved defaults per site, files in the site's uploads, links mapped between subsites — and uninstalling cleans every site.

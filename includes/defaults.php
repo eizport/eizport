@@ -43,9 +43,35 @@ function can_save() {
  * @return array{types?: array, settings?: array}
  */
 function get() {
-	$saved = site_wide() ? get_option( KEY, array() ) : get_user_meta( get_current_user_id(), KEY, true );
+	$saved = site_wide() ? get_option( KEY, array() ) : user_defaults();
 
 	return is_array( $saved ) && $saved ? sanitize( $saved ) : array();
+}
+
+/**
+ * The current user's defaults on this site: a user option, one per site of
+ * a network (users are shared, their defaults aren't). Defaults saved
+ * before as user meta are moved there once, on a single site or the
+ * network's main site only.
+ *
+ * @return mixed
+ */
+function user_defaults() {
+	global $wpdb;
+
+	$user = get_current_user_id();
+	// Not get_user_option(): without this site's key it falls back to the unprefixed one, every site's.
+	$saved = get_user_meta( $user, $wpdb->get_blog_prefix() . KEY, true );
+	if ( ! $saved && is_main_site() ) {
+		$old = get_user_meta( $user, KEY, true );
+		if ( is_array( $old ) && $old ) {
+			update_user_option( $user, KEY, $old );
+			delete_user_meta( $user, KEY );
+			$saved = $old;
+		}
+	}
+
+	return $saved;
 }
 
 /**
@@ -59,7 +85,7 @@ function save( $defaults ) {
 	if ( site_wide() ) {
 		update_option( KEY, $defaults, false );
 	} else {
-		update_user_meta( get_current_user_id(), KEY, $defaults );
+		update_user_option( get_current_user_id(), KEY, $defaults );
 	}
 
 	return $defaults;
@@ -72,7 +98,7 @@ function clear() {
 	if ( site_wide() ) {
 		delete_option( KEY );
 	} else {
-		delete_user_meta( get_current_user_id(), KEY );
+		delete_user_option( get_current_user_id(), KEY );
 	}
 }
 

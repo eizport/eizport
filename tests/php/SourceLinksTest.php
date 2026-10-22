@@ -55,6 +55,35 @@ class SourceLinksTest extends Test_Case {
 		$this->assertSame( 'same', eizport_replace_source_links( 'same', 'https://a.test', 'https://a.test/' ) );
 	}
 
+	public function test_on_a_network_this_sites_addresses_are_never_touched() {
+		// From the main site (http://net.test) to a subsite (http://net.test/b): its uploads and home start with the source.
+		$keep = array( 'http://net.test/b', 'http://net.test/wp-content/uploads/sites/3' );
+		$out  = eizport_replace_source_links(
+			'<img src="http://net.test/wp-content/uploads/sites/3/red.png"/><a href="http://net.test/about/">About</a><a href="http://net.test/b/contact/">Here</a>',
+			'http://net.test',
+			'http://net.test/b',
+			$keep
+		);
+		$this->assertSame( '<img src="http://net.test/wp-content/uploads/sites/3/red.png"/><a href="http://net.test/b/about/">About</a><a href="http://net.test/b/contact/">Here</a>', $out );
+
+		// From a subsite (http://net.test/a) to the main site (http://net.test): the shorter home isn't held back.
+		$this->assertSame(
+			'<a href="http://net.test/hello/">x</a>',
+			eizport_replace_source_links( '<a href="http://net.test/a/hello/">x</a>', 'http://net.test/a', 'http://net.test', array( 'http://net.test' ) )
+		);
+	}
+
+	public function test_the_source_home_is_the_files_blog_url() {
+		$file = $this->temp_file();
+		file_put_contents( $file, "<rss>\n<channel>\n\t<wp:base_site_url>http://net.test</wp:base_site_url>\n\t<wp:base_blog_url>http://net.test/a</wp:base_blog_url>\n<item>\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_put_contents_file_put_contents, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- a test fixture.
+		$GLOBALS['eizport_wxr_file'] = $file;
+		$home                        = eizport_source_home( (object) array( 'base_url' => 'http://net.test' ) );
+		unset( $GLOBALS['eizport_wxr_file'] );
+
+		$this->assertSame( 'http://net.test/a', $home );
+		$this->assertSame( 'http://net.test', eizport_source_home( (object) array( 'base_url' => 'http://net.test' ) ), 'No file: the importer\'s base URL.' );
+	}
+
 	public function test_imported_items_and_menu_links_when_the_import_ends() {
 		$page                 = (int) wp_insert_post(
 			array(

@@ -117,9 +117,16 @@ class ExportImportTest extends Test_Case {
 		$this->assertSame( admin_url( 'admin.php?import=' . Import\IMPORTER_ID ), Import\importer_url() );
 		remove_filter( 'option_active_plugins', $active );
 
+		// On a network, a plugin can also be active network-wide.
+		$network = function ( $plugins ) {
+			unset( $plugins[ Import\IMPORTER_PLUGIN ] );
+			return $plugins;
+		};
 		add_filter( 'option_active_plugins', $inactive );
+		add_filter( 'site_option_active_sitewide_plugins', $network );
 		$this->assertFalse( Import\importer_active() );
 		$this->assertSame( admin_url( 'import.php' ), Import\importer_url() );
 		remove_filter( 'option_active_plugins', $inactive );
+		remove_filter( 'site_option_active_sitewide_plugins', $network );
 	}
 }

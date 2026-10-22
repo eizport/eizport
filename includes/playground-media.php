@@ -108,7 +108,7 @@ add_action(
 				$data,
 				is_object( $importer ) ? (array) $importer->processed_posts : array(),
 				is_object( $importer ) ? (array) $importer->processed_terms : array(),
-				is_object( $importer ) ? eizport_urls_with_source( (array) $importer->url_remap, (string) $importer->base_url ) : array()
+				is_object( $importer ) ? eizport_urls_with_source( (array) $importer->url_remap, function_exists( 'eizport_source_home' ) ? eizport_source_home( $importer ) : (string) $importer->base_url ) : array()
 			);
 		}
 	}
