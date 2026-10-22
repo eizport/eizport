@@ -8,7 +8,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import config from '../../translations.json';
 import { en, type Strings } from '../i18n/en';
-import { url } from './site';
+import { site, url } from './site';
 
 export interface Locale {
 	code: string;
@@ -17,6 +17,8 @@ export interface Locale {
 	og: string;
 	/** Its name, in it: the translation's strings.json `language` (English's here). */
 	label: string;
+	/** WordPress's locale, like pt_BR: the Playground demo opens in it. */
+	wp?: string;
 	repo?: string;
 	ref?: string;
 }
@@ -99,6 +101,9 @@ export const fill = ( text: string, values: Record< string, string | number > ):
 /** A page's URL in a language (files such as llms.txt or the video stay where they are: use url()). */
 export const href = ( locale: Locale, path = '' ): string =>
 	locale.code === defaultLocale.code ? url( path ) : url( `${ locale.code }/${ path.replace( /^\//, '' ) }` );
+
+/** The Playground demo in a language: Playground sets the site language and downloads the plugin's language pack. */
+export const demo = ( locale: Locale ): string => ( locale.wp ? `${ site.demo }&language=${ locale.wp }` : site.demo );
 
 /** The path of a page without its language prefix: "/br/docs/" → "docs/". */
 export const pathWithoutLocale = ( pathname: string ): string => {

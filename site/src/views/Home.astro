@@ -14,7 +14,7 @@ import Icon from '@components/Icon.astro';
 import DemoVideo from '@components/DemoVideo.astro';
 import ForAgents from '@components/ForAgents.astro';
 import Screenshot from '@components/Screenshot.astro';
-import { defaultLocale, fill, href, localeOf, t } from '@libs/i18n';
+import { defaultLocale, demo, fill, href, localeOf, t } from '@libs/i18n';
 import { site, url } from '@libs/site';
 import { abilityExample, hookExample } from '../data/landing';
 import exportScreen from '@assets/screenshots/export-screen.webp';
@@ -77,7 +77,7 @@ const shots: Record< string, ImageMetadata > = {
 				<h1 id="hero-title">{ hero.title }</h1>
 				<p class="hero__lead">{ hero.lead }</p>
 				<div class="hero__actions">
-					<Button href={ site.demo } icon="play" size="lg">{ hero.primary }</Button>
+					<Button href={ demo( locale ) } icon="play" size="lg">{ hero.primary }</Button>
 					<Button href={ site.directory } icon="start" variant="light" size="lg">{ hero.secondary }</Button>
 					<ForAgents />
 				</div>
@@ -253,7 +253,7 @@ const shots: Record< string, ImageMetadata > = {
 				}
 			</ul>
 			<p class="audiences__cta">
-				<Button href={ site.demo } icon="play">{ hero.primary }</Button>
+				<Button href={ demo( locale ) } icon="play">{ hero.primary }</Button>
 			</p>
 		</div>
 	</section>
@@ -413,7 +413,7 @@ const shots: Record< string, ImageMetadata > = {
 			<p>{ fill( s.cta.text, { finale: finale.text, requires: site.requires, version: site.version } ) }</p>
 			<div class="hero__actions">
 				<Button href={ site.directory } icon="start" variant="light" size="lg">{ hero.secondary }</Button>
-				<Button href={ site.demo } icon="play" variant="light" size="lg">{ hero.primary }</Button>
+				<Button href={ demo( locale ) } icon="play" variant="light" size="lg">{ hero.primary }</Button>
 			</div>
 			<p class="cta__docs"><a href={ href( locale, 'docs/getting-started/introduction/' ) }>{ s.cta.docs }</a></p>
 		</div>

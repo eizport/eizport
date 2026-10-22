@@ -1,7 +1,7 @@
 ---
 /** The site footer: what it is, links, license. */
 import Logo from './Logo.astro';
-import { fill, href, localeOf, t } from '@libs/i18n';
+import { demo, fill, href, localeOf, t } from '@libs/i18n';
 import { site } from '@libs/site';
 
 const locale = localeOf( Astro.url.pathname );
@@ -11,7 +11,7 @@ const groups = [
 	{
 		title: s.product,
 		links: [
-			{ label: s.playground, href: site.demo },
+			{ label: s.playground, href: demo( locale ) },
 			{ label: s.download, href: site.directory },
 			{ label: s.changelog, href: href( locale, 'docs/reference/changelog/' ) },
 		],
