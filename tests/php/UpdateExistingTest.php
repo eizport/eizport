@@ -140,7 +140,9 @@ class UpdateExistingTest extends Test_Case {
 
 	public function test_update_existing_hooks_only_when_on() {
 		$off = Import\update_existing( false );
-		$this->assertFalse( has_filter( 'wp_import_existing_post' ) );
+		// The plugin's own filter (existing attachments' URLs) is always there: only the update's ones are checked.
+		$this->assertSame( 10, has_filter( 'wp_import_existing_post', 'Eizport\\Import\\existing_attachment_urls' ) );
+		$this->assertFalse( has_filter( 'eizport_menus_update_existing' ) );
 		$off();
 
 		$slug   = 'eizport-test-' . wp_generate_password( 8, false, false );
@@ -160,7 +162,7 @@ class UpdateExistingTest extends Test_Case {
 		);
 		$this->assertSame( 'Theme ' . $slug, get_post( $id )->post_title, 'No title: kept as the item had it.' );
 		$remove();
-		$this->assertFalse( has_filter( 'wp_import_existing_post' ) );
+		$this->assertFalse( has_filter( 'eizport_menus_update_existing' ), 'The update\'s filters are gone.' );
 	}
 
 	public function test_term_media_is_mapped_to_the_imported_attachments() {
@@ -224,6 +226,36 @@ class UpdateExistingTest extends Test_Case {
 		$new = wp_get_attachment_url( $id );
 		$this->assertSame( $new, $remap['https://old.example/wp-content/uploads/2026/10/hero.jpg'] );
 		$this->assertSame( substr( $new, 0, -4 ), $remap['https://old.example/wp-content/uploads/2026/10/hero'], 'Resized images too.' );
+	}
+
+	public function test_existing_attachments_are_remapped_without_update_existing() {
+		$id = (int) wp_insert_attachment(
+			array(
+				'post_title'     => 'kept',
+				'post_mime_type' => 'image/jpeg',
+			),
+			'2026/10/kept.jpg'
+		);
+		update_post_meta( $id, '_wp_attached_file', '2026/10/kept.jpg' );
+		$saved                = $GLOBALS['wp_import'] ?? null;
+		$GLOBALS['wp_import'] = (object) array( 'url_remap' => array() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- the importer's, restored below.
+
+		// "Update existing" off: only the plugin's own filter runs.
+		$found                = apply_filters(
+			'wp_import_existing_post', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- the WordPress Importer's.
+			$id,
+			array(
+				'post_type'      => 'attachment',
+				'attachment_url' => 'https://old.example/wp-content/uploads/2026/10/kept.jpg',
+			)
+		);
+		$remap                = $GLOBALS['wp_import']->url_remap;
+		$none                 = apply_filters( 'wp_import_existing_post', 0, array( 'post_type' => 'attachment' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- the WordPress Importer's.
+		$GLOBALS['wp_import'] = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+
+		$this->assertSame( $id, $found, 'The importer still skips it.' );
+		$this->assertSame( wp_get_attachment_url( $id ), $remap['https://old.example/wp-content/uploads/2026/10/kept.jpg'] );
+		$this->assertSame( 0, $none, 'A new attachment is left to the importer.' );
 	}
 
 	public function test_term_media_of_lists_the_items_terms() {

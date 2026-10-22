@@ -49,7 +49,7 @@ Copies made by the Export screen are listed in the plugin's **Settings → Copie
 
 | In the file | On import |
 | --- | --- |
-| Attachment URLs | Files come from the bundle; the importer creates the attachments and image sizes as usual |
+| Attachment URLs | Files come from the bundle; the importer creates the attachments and image sizes as usual. An attachment the site already has is reused, with or without *Update existing*: its URLs (and its image sizes') in the imported content point to the file here |
 | `post_content/<slug>.html` | Put back into the item's content |
 | `options.json` | Set at the end; options listed in `post_ids` get the imported post's ID |
 | `term_media` in the manifest | Term meta holding an attachment ID get the imported attachment's ID |
