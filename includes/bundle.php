@@ -1205,61 +1205,76 @@ function zip_to_tar( $zip, $tar ) {
 }
 
 /**
- * Extracts a .zip's bundle entries into a folder, with ZipArchive or else
- * core's PclZip.
+ * Copies a .zip entry to a file in blocks, counting the bytes it really
+ * inflates to: an entry can declare any size, so the budget is checked on
+ * what is written, never on what the archive says. Never loads it whole.
+ *
+ * @param \ZipArchive $zip    Open archive.
+ * @param int         $index  Entry.
+ * @param string      $target File to write.
+ * @param int         $budget Bytes left for the whole extraction.
+ * @return int|false Bytes written, or false when it failed or went over the budget (the file is removed).
+ */
+function copy_zip_entry( $zip, $index, $target, $budget ) {
+	$from = $zip->getStream( (string) $zip->getNameIndex( $index ) );
+	$to   = $from && wp_mkdir_p( dirname( $target ) ) ? fopen( $target, 'wb' ) : false; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- a file in our own folder.
+	if ( ! $from || ! $to ) {
+		return false;
+	}
+	$written = 0;
+	while ( ! feof( $from ) ) {
+		$block = fread( $from, 1048576 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
+		if ( false === $block ) {
+			break;
+		}
+		$written += strlen( $block );
+		if ( $written > $budget || false === fwrite( $to, $block ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+			$written = -1;
+			break;
+		}
+	}
+	fclose( $from ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+	fclose( $to ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+	if ( $written < 0 ) {
+		wp_delete_file( $target );
+		return false;
+	}
+
+	return $written;
+}
+
+/**
+ * Extracts a .zip's bundle entries into a folder, with ZipArchive — none
+ * without it: core's PclZip inflates a whole entry in memory, whatever size
+ * the archive declares.
  *
  * @param string $zip .zip file.
  * @param string $dir Folder.
  * @return string[] Names extracted.
  */
 function unzip_entries( $zip, $dir ) {
+	if ( ! class_exists( 'ZipArchive' ) ) {
+		return array();
+	}
+	$archive = new \ZipArchive();
+	if ( true !== $archive->open( $zip ) ) {
+		return array();
+	}
 	$names = array();
 	$left  = Wxrz\max_bytes();
-	$save  = function ( $name, $data ) use ( $dir, &$names ) {
-		$path = $dir . '/' . $name;
-		if ( wp_mkdir_p( dirname( $path ) ) && false !== file_put_contents( $path, $data ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			$names[] = $name;
-		}
-	};
-
-	if ( class_exists( 'ZipArchive' ) ) {
-		$archive = new \ZipArchive();
-		if ( true !== $archive->open( $zip ) ) {
-			return array();
-		}
-		for ( $i = 0; $i < $archive->numFiles; $i++ ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive's.
-			$stat = $archive->statIndex( $i );
-			$name = (string) ( $stat['name'] ?? '' );
-			if ( ! is_bundle_entry( $name ) ) {
-				continue;
-			}
-			$left -= (int) $stat['size'];
-			if ( $left < 0 ) {
-				break;
-			}
-			$save( $name, (string) $archive->getFromIndex( $i ) );
-		}
-		$archive->close();
-
-		return $names;
-	}
-
-	require_once ABSPATH . 'wp-admin/includes/class-pclzip.php';
-	$archive = new \PclZip( $zip );
-	foreach ( (array) $archive->listContent() as $entry ) {
-		$name = (string) ( $entry['filename'] ?? '' );
+	for ( $i = 0; $i < $archive->numFiles; $i++ ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive's.
+		$name = (string) $archive->getNameIndex( $i );
 		if ( ! is_bundle_entry( $name ) ) {
 			continue;
 		}
-		$left -= (int) $entry['size'];
-		if ( $left < 0 ) {
+		$written = copy_zip_entry( $archive, $i, $dir . '/' . $name, $left );
+		if ( false === $written ) {
 			break;
 		}
-		$found = $archive->extractByIndex( (int) $entry['index'], PCLZIP_OPT_EXTRACT_AS_STRING );
-		if ( is_array( $found ) && isset( $found[0]['content'] ) ) {
-			$save( $name, $found[0]['content'] );
-		}
+		$left   -= $written;
+		$names[] = $name;
 	}
+	$archive->close();
 
 	return $names;
 }
