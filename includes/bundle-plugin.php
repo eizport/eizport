@@ -110,6 +110,7 @@ function template_translations() {
 		'Updating…'                            => __( 'Updating…', 'eizport' ),
 		/* translators: %s: error message. */
 		'It didn’t work: %s'                   => __( 'It didn’t work: %s', 'eizport' ),
+		'The content this plugin holds, exported with Eizport from another site.' => __( 'The content this plugin holds, exported with Eizport from another site.', 'eizport' ),
 		'open the import screen'               => __( 'open the import screen', 'eizport' ),
 	);
 	if ( $switched ) {

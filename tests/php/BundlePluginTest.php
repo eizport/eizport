@@ -298,6 +298,46 @@ class BundlePluginTest extends Test_Case {
 		$this->assertMatchesRegularExpression( "/plugin_action_links_.*?__\\( 'Run import', 'EIZPORT_TEXT_DOMAIN' \\)/s", $template, 'Run import on its row on Plugins.' );
 	}
 
+	public function test_tools_import_lists_it_set_apart() {
+		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->assertStringContainsString( 'register_importer( $page, $title,', $template, 'An entry in Tools → Import.' );
+		$this->assertStringContainsString( "'load-importer-' . \$page", $template, 'Its entry opens its screen.' );
+		$this->assertStringContainsString( '\'import.php\' !== $hook', $template, 'Set apart from the others (its own style on Tools → Import).' );
+		$this->assertStringContainsString( '\'import.php\' === ( $GLOBALS[\'pagenow\'] ?? \'\' )', $template, 'No notice there: its entry already stands out.' );
+
+		// While one waits, Tools → Import shows the list instead of going straight to the WordPress Importer.
+		require_once ABSPATH . 'wp-admin/includes/import.php';
+		$admin = get_users(
+			array(
+				'role'   => 'administrator',
+				'number' => 1,
+			)
+		);
+		wp_set_current_user( $admin[0]->ID );
+		$redirected = false;
+		$catch      = function ( $location ) use ( &$redirected ) {
+			$redirected = $location;
+			throw new \RuntimeException( 'redirect' );
+		};
+		add_filter( 'wp_redirect', $catch );
+		register_importer( \Eizport\Import\IMPORTER_ID, 'WordPress', '', '__return_null' );
+		register_importer( 'eizport-bundle-test', 'Import: test', '', '__return_null' );
+		\Eizport\Import\open_wordpress_importer();
+		$this->assertFalse( $redirected, 'The list, with the bundle in it.' );
+
+		unset( $GLOBALS['wp_importers']['eizport-bundle-test'] );
+		try {
+			\Eizport\Import\open_wordpress_importer();
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		}
+		remove_filter( 'wp_redirect', $catch );
+		unset( $GLOBALS['wp_importers'][ \Eizport\Import\IMPORTER_ID ] );
+		wp_set_current_user( 0 );
+		$this->assertStringContainsString( 'import=' . \Eizport\Import\IMPORTER_ID, (string) $redirected, 'Without one, straight to the WordPress Importer as before.' );
+	}
+
 	public function test_without_eizport_its_screen_is_eizport_s_frame() {
 		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$fallback = substr( $template, (int) strpos( $template, '$screen = static function' ), (int) strpos( $template, 'register_activation_hook' ) - (int) strpos( $template, '$screen = static function' ) );

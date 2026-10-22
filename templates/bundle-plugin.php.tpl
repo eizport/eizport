@@ -153,6 +153,34 @@ defined( 'ABSPATH' ) || exit;
 			remove_submenu_page( 'tools.php', $page );
 		}
 	);
+	// Tools → Import lists it too, set apart from the others: its entry opens its screen.
+	add_action(
+		'admin_init',
+		static function () use ( $page, $title ) {
+			if ( function_exists( 'register_importer' ) ) {
+				register_importer( $page, $title, __( 'The content this plugin holds, exported with Eizport from another site.', 'EIZPORT_TEXT_DOMAIN' ), '__return_null' );
+			}
+		}
+	);
+	add_action(
+		'load-importer-' . $page,
+		static function () use ( $page ) {
+			wp_safe_redirect( admin_url( 'tools.php?page=' . $page ) );
+			exit;
+		}
+	);
+	add_action(
+		'admin_enqueue_scripts',
+		static function ( $hook ) use ( $page ) {
+			if ( 'import.php' !== $hook ) {
+				return;
+			}
+			$row = '.importers tr:has(a[href*="import=' . sanitize_key( $page ) . '"])';
+			wp_register_style( 'eizport-bundle-' . $page, false, array(), '1.0.0' );
+			wp_enqueue_style( 'eizport-bundle-' . $page );
+			wp_add_inline_style( 'eizport-bundle-' . $page, $row . ' td{background:#f0f6fc}' . $row . ' td:first-child{box-shadow:inset 4px 0 #3858e9}' . $row . ' .importer-title{font-weight:600}' );
+		}
+	);
 	// Out of the menu, WordPress has no title for it: the plugin's name, in the window's title too.
 	add_action(
 		'load-tools_page_' . $page,
@@ -286,7 +314,8 @@ defined( 'ABSPATH' ) || exit;
 		'admin_notices',
 		static function () use ( $slug, $page, $title ) {
 			$imported = (array) get_option( 'eizport_bundle_plugins_imported', array() );
-			if ( ! current_user_can( 'import' ) || isset( $imported[ $slug ] ) || ( isset( $_GET['page'] ) && $page === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only picks the screen.
+			// Not on its screen, nor on Tools → Import, where its entry already stands out.
+			if ( ! current_user_can( 'import' ) || isset( $imported[ $slug ] ) || 'import.php' === ( $GLOBALS['pagenow'] ?? '' ) || ( isset( $_GET['page'] ) && $page === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only picks the screen.
 				return;
 			}
 			echo '<div class="notice notice-info"><p>' . esc_html( $title ) . ': <a href="' . esc_url( admin_url( 'tools.php?page=' . $page ) ) . '">' . esc_html( __( 'open the import screen', 'EIZPORT_TEXT_DOMAIN' ) ) . '</a></p></div>';

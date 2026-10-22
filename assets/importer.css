@@ -346,12 +346,12 @@ body.eizport-import .eizport-import__moved {
 }
 
 /* A bundle plugin's checks: ✓ green, ✗ red, like WordPress's notices. */
-/* One gap between lines: every line is at least a button high, so two buttons in a row never touch. */
+/* One gap between lines: every line is at least a button high, so two buttons in a row never touch. A larger one before what follows the list (the Update existing box), so it doesn't read as one more line. */
 .eizport-checks {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	margin: 0 0 12px;
+	margin: 0 0 24px;
 }
 
 /* One height for every line, the one with a button too. No wrapping of the items: a long text wraps inside itself, next to its ✓ or ✗, and a button keeps its width. */

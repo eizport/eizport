@@ -975,8 +975,15 @@ function open_wordpress_importer() {
 	if ( ! function_exists( 'get_importers' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/import.php';
 	}
-	if ( ! isset( get_importers()[ IMPORTER_ID ] ) ) {
+	$importers = get_importers();
+	if ( ! isset( $importers[ IMPORTER_ID ] ) ) {
 		return;
+	}
+	// A bundle plugin waiting to be imported: the list, where its entry stands out.
+	foreach ( array_keys( $importers ) as $id ) {
+		if ( 0 === strpos( (string) $id, 'eizport-bundle-' ) ) {
+			return;
+		}
 	}
 	wp_safe_redirect( add_query_arg( 'import', IMPORTER_ID, admin_url( 'admin.php' ) ) );
 	exit;
