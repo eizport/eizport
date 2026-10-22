@@ -678,6 +678,15 @@ function render( $plugin_file ) {
 						</label>
 					</p>
 				<?php endif; ?>
+				<?php $other_options = Import\options_to_approve( array( 'options' => array_fill_keys( (array) ( $holds['options'] ?? array() ), true ) ) ); ?>
+				<?php if ( $other_options ) : ?>
+					<fieldset>
+						<legend><?php esc_html_e( 'The file also holds these options, outside the usual groups. Check the ones to set on this site:', 'eizport' ); ?></legend>
+						<?php foreach ( $other_options as $other_option ) : ?>
+							<label style="display:block"><input type="checkbox" form="eizport-bundle-import-form" name="<?php echo esc_attr( Import\OPTIONS_FIELD ); ?>[]" value="<?php echo esc_attr( $other_option ); ?>" /> <code><?php echo esc_html( $other_option ); ?></code></label>
+						<?php endforeach; ?>
+					</fieldset>
+				<?php endif; ?>
 				<?php if ( $imported ) : ?>
 					<p class="description"><?php esc_html_e( 'Importing again finds the same items and doesn’t duplicate them, but settings are set again.', 'eizport' ); ?></p>
 				<?php endif; ?>
@@ -832,7 +841,13 @@ function handle_import() {
 		$result['error'] = $bundle->get_error_message();
 	} else {
 		$GLOBALS['eizport_applied_options'] = array();
-		$imported                           = Import\import_file( $bundle, array( 'update_existing' => ! empty( $_POST[ Import\UPDATE_FIELD ] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked in requested_plugin().
+		$imported                           = Import\import_file(
+			$bundle,
+			array(
+				'update_existing' => ! empty( $_POST[ Import\UPDATE_FIELD ] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked in requested_plugin().
+				'options'         => Import\approved_options(),
+			)
+		);
 		if ( is_wp_error( $imported ) ) {
 			$result['error'] = $imported->get_error_message();
 		} else {

@@ -48,6 +48,16 @@ add_filter( 'eizport_denied_options', function ( array $names ) {
 } );
 ```
 
+## eizport_is_secret
+
+Whether a name — an option, a theme mod, a widget field — holds a secret, so it's never exported nor listed. By default: names with `secret`, `password`, `token`, `api_key`, `license`, `private`, `credential`, `access_key`, `auth_key` or `webhook`, and plugins' known stores of them (WP Mail SMTP, payment gateways). Mark your own, or let one through:
+
+```php
+add_filter( 'eizport_is_secret', function ( bool $secret, string $name ) {
+	return 'my_plugin_connection' === $name ? true : $secret;
+}, 10, 2 );
+```
+
 ## eizport_media_used
 
 Attachments a post uses beyond what its content names, like a gallery stored in meta. Runs when some items are exported and *Only attached media* is off.

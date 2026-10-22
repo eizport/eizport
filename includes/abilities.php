@@ -685,7 +685,12 @@ function register() {
 					),
 					'update_existing' => array(
 						'type'        => 'boolean',
-						'description' => __( 'Update the posts that already exist (same type and slug) with the imported content instead of adding copies. Default: as the bundle asks (exported with update_existing), else no.', 'eizport' ),
+						'description' => __( 'Update the posts that already exist (same type and slug) with the imported content instead of adding copies. Default: no — a file never decides it on its own.', 'eizport' ),
+					),
+					'options'         => array(
+						'type'        => 'array',
+						'items'       => array( 'type' => 'string' ),
+						'description' => __( 'Options the file holds outside the option groups to set too (by name): only these are; the groups\' options and the look are set anyway. On a network, only for who may manage the network\'s options. Default: none.', 'eizport' ),
 					),
 					'css_mode'        => array(
 						'type'        => 'string',
@@ -1374,7 +1379,7 @@ function import( $input = array() ) {
 	}
 
 	$GLOBALS['eizport_applied_options'] = array();
-	$result                             = \Eizport\Import\import_file( $file, array_intersect_key( (array) $input, array_flip( array( 'update_existing', 'css_mode', 'css_markers' ) ) ) );
+	$result                             = \Eizport\Import\import_file( $file, array_intersect_key( (array) $input, array_flip( array( 'update_existing', 'options', 'css_mode', 'css_markers' ) ) ) );
 	if ( is_wp_error( $result ) ) {
 		if ( 'eizport_no_importer' === $result->get_error_code() ) {
 			return new WP_Error( 'eizport_not_initialized', $result->get_error_message() );

@@ -58,7 +58,8 @@ wp eizport import site.wxrz --user=admin
 | --- | --- |
 | `<file>` | The file or bundle folder to import |
 | `--user=<login>` | Who the posts go to; default: the first administrator |
-| `--[no-]update-existing` | Update the items that already exist (same type and slug) instead of adding copies; default: what the bundle asks |
+| `--[no-]update-existing` | Update the items that already exist (same type and slug) instead of adding copies; default: no — the bundle never decides it on its own |
+| `--options=<names>` | The bundle's options outside the [option groups](../../exporting/options/#options-outside-the-groups-on-import) to set too, comma-separated; default: none |
 | `--css-mode=<mode>` | How the bundle's CSS rules are added: `end`, `start`, `replace` (the head/tail blocks of the same name this site has; with none, at the end) or `replace_all`; default: what the bundle asks |
 | `--[no-]css-markers` | Head/tail comments around them; default: what the bundle asks |
 

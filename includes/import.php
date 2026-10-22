@@ -41,6 +41,8 @@ const IMPORTER_TESTED   = '0.9.7';
  * Step 1's "Update items that already exist" field.
  */
 const UPDATE_FIELD = 'eizport_update_existing';
+// Options outside the groups a file holds, approved on step 1 (or on a bundle plugin's screen).
+const OPTIONS_FIELD = 'eizport_import_options';
 
 /**
  * Fields of the importer's step 1: how the look's CSS is added, and whether it's marked.
@@ -348,8 +350,9 @@ function prepare_wxr( $source, $wxr_target ) {
  *
  * @param string $file File to import.
  * @param array  $args `update_existing` (bool): update the items that
- *                     already exist (same slug); null or missing: as the
- *                     bundle asks. `css_mode` (end, start, replace) and
+ *                     already exist (same slug); missing: no, whatever the
+ *                     bundle asks. `options` (string[]): options outside the
+ *                     groups to set too. `css_mode` (end, start, replace) and
  *                     `css_markers` (bool): how the look's CSS is added;
  *                     missing, as the bundle asks.
  * @return array{log: string, posts: int}|\WP_Error The importer's messages and how many posts it created or found.
@@ -386,12 +389,13 @@ function import_file( $file, $args = array() ) {
 		return $dir;
 	}
 	$serve = $dir ? Bundle\serve_files( $dir ) : null;
-	$apply = $dir ? Bundle\apply_options_at_end( Bundle\read_options( $dir ) ) : null;
+	$apply = $dir ? Bundle\apply_options_at_end( Bundle\read_options( $dir ), array_map( 'strval', (array) ( $args['options'] ?? array() ) ) ) : null;
 	if ( $dir ) {
 		Bundle\keep_designs( $dir );
 	}
-	$media  = $dir ? term_media_at_end( $dir ) : null;
-	$update = update_existing( isset( $args['update_existing'] ) ? (bool) $args['update_existing'] : bundle_updates_existing( (string) $dir ) );
+	$media = $dir ? term_media_at_end( $dir ) : null;
+	// Only when whoever imports asks: the file's own update_existing only pre-checks the box on the importer's screen.
+	$update = update_existing( ! empty( $args['update_existing'] ) );
 
 	// The importer deletes its upload attachment ($id) at the end: there is none.
 	$importer->id                = 0;
@@ -849,7 +853,7 @@ function serve_bundle() {
 
 	if ( $dir && is_dir( $dir ) ) {
 		Bundle\serve_files( $dir );
-		Bundle\apply_options_at_end( Bundle\read_options( $dir ) );
+		Bundle\apply_options_at_end( Bundle\read_options( $dir ), approved_options() );
 		Bundle\keep_designs( $dir );
 		term_media_at_end( $dir );
 	}
@@ -931,6 +935,52 @@ function update_existing_field() {
 			'checked' => bundle_updates_existing( $dir ),
 			'heading' => __( 'Existing items', 'eizport' ),
 			'label'   => $label,
+		)
+	);
+}
+
+/**
+ * The options outside the groups whoever imports approved, from the form
+ * (the importer's step 1, a bundle plugin's screen) whose nonce was checked.
+ *
+ * @return string[]
+ */
+function approved_options() {
+	// phpcs:disable WordPress.Security.NonceVerification.Missing -- the importer's or the bundle plugin's nonce was checked.
+	$names = isset( $_POST[ OPTIONS_FIELD ] ) && is_array( $_POST[ OPTIONS_FIELD ] ) ? wp_unslash( $_POST[ OPTIONS_FIELD ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below.
+	// phpcs:enable
+
+	return array_values( array_filter( array_map( 'sanitize_text_field', array_map( 'strval', $names ) ) ) );
+}
+
+/**
+ * The options a file holds outside the groups, for whoever imports to
+ * approve (none to show on a network for who can't set them).
+ *
+ * @param array|null $data The options file's data.
+ * @return string[]
+ */
+function options_to_approve( $data ) {
+	return is_multisite() && ! current_user_can( 'manage_network_options' ) ? array() : Bundle\other_options( $data );
+}
+
+/**
+ * Step 1: the options outside the groups the bundle holds, each to check
+ * to set it (none checked: a file is someone else's).
+ */
+function options_field() {
+	$dir   = $GLOBALS['eizport_bundle_import_id'] ? (string) get_post_meta( $GLOBALS['eizport_bundle_import_id'], Bundle\DIR_META, true ) : '';
+	$names = $dir ? options_to_approve( Bundle\read_options( $dir ) ) : array();
+	if ( ! $names ) {
+		return;
+	}
+	steps_script(
+		'options',
+		array(
+			'name'    => OPTIONS_FIELD . '[]',
+			'heading' => __( 'Other options', 'eizport' ),
+			'intro'   => __( 'The file also holds these options, outside the usual groups. Check the ones to set on this site:', 'eizport' ),
+			'names'   => $names,
 		)
 	);
 }
@@ -1049,6 +1099,7 @@ function mention_wxrz() {
 	if ( isset( $_GET['step'] ) && 1 === absint( $_GET['step'] ) ) {
 		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\update_existing_field', 5 );
 		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\css_field', 5 );
+		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\options_field', 5 );
 	}
 	add_filter(
 		'gettext_wordpress-importer',

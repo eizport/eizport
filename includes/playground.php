@@ -735,18 +735,43 @@ function plugin_slug( $plugin ) {
  * @return \WP_Theme[]
  */
 function theme_choices() {
-	return wp_get_themes( array( 'errors' => false ) );
+	// On a network, a site admin takes only the themes this site may use: the others' code isn't theirs to read.
+	return wp_get_themes(
+		array(
+			'errors'  => false,
+			'allowed' => network_code_limited() ? true : null,
+		)
+	);
 }
 
 /**
- * Plugins that can go in the .zip: every installed plugin.
+ * Whether the code a Playground .zip takes is limited to this site's: on a
+ * network, for who can't manage its plugins (a site admin) — the network's
+ * plugins, themes and must-use plugins are the super admin's.
+ *
+ * @return bool
+ */
+function network_code_limited() {
+	return is_multisite() && ! current_user_can( 'manage_network_plugins' );
+}
+
+/**
+ * Plugins that can go in the .zip: every installed plugin (on a network, for
+ * a site admin, the ones active on this site, network-activated ones too).
  *
  * @return array<string, array> Plugin file => plugin data.
  */
 function plugin_choices() {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	return get_plugins();
+	$plugins = get_plugins();
+	if ( network_code_limited() ) {
+		// The plugins active on this site only (network-activated ones too: they run here).
+		$active  = array_merge( (array) get_option( 'active_plugins', array() ), array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+		$plugins = array_intersect_key( $plugins, array_flip( $active ) );
+	}
+
+	return $plugins;
 }
 
 /**
@@ -758,7 +783,8 @@ function plugin_choices() {
 function mu_plugin_choices() {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$choices = array_diff_key( get_mu_plugins(), array_flip( PLATFORM_MU_PLUGINS ) );
+	// None on a network for a site admin: must-use plugins run for every site.
+	$choices = network_code_limited() ? array() : array_diff_key( get_mu_plugins(), array_flip( PLATFORM_MU_PLUGINS ) );
 
 	/**
 	 * Filters the must-use plugins a Playground .zip can take (a platform's

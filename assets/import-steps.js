@@ -1,6 +1,7 @@
 /**
  * Step 1 of the WordPress Importer (includes/import.php): "Update items
- * that already exist" and, when the bundle has CSS rules, how they're added
+ * that already exist", the options outside the groups to approve ("Other
+ * options") and, when the bundle has CSS rules, how they're added
  * ("Additional CSS"), added to the form, and, for a bundle, "Download
  * and import file attachments" checked, since the files are in the bundle
  * and nothing is downloaded. Data from PHP in window.eizportImportSteps;
@@ -30,6 +31,36 @@
 			form.insertBefore( heading, submit );
 			form.insertBefore( row, submit );
 		} )( config.updateExisting );
+	}
+
+	// Options outside the groups the file holds: each set only when checked.
+	if ( config.options ) {
+		( function ( field ) {
+			var form = document.querySelector( 'form[action*="step=2"]' );
+			var submit = form && form.querySelector( 'p.submit' );
+			if ( ! submit ) {
+				return;
+			}
+			var heading = document.createElement( 'h3' );
+			heading.textContent = field.heading;
+			var intro = document.createElement( 'p' );
+			intro.textContent = field.intro;
+			form.insertBefore( heading, submit );
+			form.insertBefore( intro, submit );
+			field.names.forEach( function ( name ) {
+				var row = document.createElement( 'p' );
+				var label = document.createElement( 'label' );
+				var box = document.createElement( 'input' );
+				var code = document.createElement( 'code' );
+				box.type = 'checkbox';
+				box.name = field.name;
+				box.value = name;
+				code.textContent = name;
+				label.append( box, ' ', code );
+				row.append( label );
+				form.insertBefore( row, submit );
+			} );
+		} )( config.options );
 	}
 
 	// How the bundle's CSS rules are added, and whether they're marked.
