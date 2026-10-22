@@ -34,7 +34,13 @@ The setting decides when they are suggested or added:
 
 Site URLs (`siteurl`, `home`), the admin email, keys and salts, `active_plugins`, roles (`<prefix>user_roles`), who may register and as what (`users_can_register`, `default_role`), `cron`, `rewrite_rules`, database versions, mail server credentials, the plugin's own settings, and every transient. Plugins add theirs with [`eizport_denied_options`](../../developers/hooks/#eizport_denied_options); WordPress's own can't be removed.
 
+**Secrets** aren't exported nor listed either: an option, a theme mod or a widget field whose name says it holds one — `secret`, `password`, `token`, `api_key`, `license`, `private`, `credential`… — and plugins' known stores of them (WP Mail SMTP, payment gateways' settings). A plugin marks its own, or lets one through, with [`eizport_is_secret`](../../developers/hooks/#eizport_is_secret).
+
 An import never sets WordPress's own either, whatever the bundle holds: a bundle is a file anyone could have written.
+
+## Options outside the groups, on import
+
+An import sets the options of the groups (with the ones plugins add), the options pointing to a post, the theme mods and the widgets. Any other option the bundle holds — exported **by name** — waits for whoever imports: step 1 of the importer lists them under **Other options**, unchecked, and only the ones checked are set (on a [bundle plugin](../as-plugin/)'s screen too). With [WP-CLI](../../developers/wp-cli/) and the [`eizport/import`](../../developers/abilities/#eizportimport) ability, only the ones named in `--options` / `options`. On a network, only for who may manage the network's options.
 
 ## IDs on import
 

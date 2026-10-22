@@ -32,7 +32,12 @@ function bootstrap() {
  *
  * [--[no-]update-existing]
  * : Update the posts that already exist (same type and slug) instead of
- * adding copies. Default: as the bundle asks, else no.
+ * adding copies. Default: no — a file never decides it on its own.
+ *
+ * [--options=<names>]
+ * : Options the file holds outside the option groups to set too,
+ * comma-separated (the groups' options and the look are set anyway). On a
+ * network, only for who may manage the network's options. Default: none.
  *
  * [--css-mode=<mode>]
  * : How the bundle's CSS rules are added: at the end of this site's CSS,
@@ -63,6 +68,9 @@ function import_command( $args, $assoc_args = array() ) {
 	$import = array();
 	if ( array_key_exists( 'update-existing', $assoc_args ) ) {
 		$import['update_existing'] = (bool) \WP_CLI\Utils\get_flag_value( $assoc_args, 'update-existing' );
+	}
+	if ( isset( $assoc_args['options'] ) ) {
+		$import['options'] = array_values( array_filter( array_map( 'trim', explode( ',', (string) $assoc_args['options'] ) ) ) );
 	}
 	if ( isset( $assoc_args['css-mode'] ) ) {
 		$import['css_mode'] = (string) $assoc_args['css-mode'];

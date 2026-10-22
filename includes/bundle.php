@@ -992,18 +992,92 @@ function keep_designs( $dir ) {
 }
 
 /**
+ * The options an import sets without asking: the ones of the option groups
+ * (with the ones plugins add), the options pointing to a post and what goes
+ * with them, the active theme's theme mods and the widgets. Any other one
+ * in a file (exported by name) is someone else's choice: it waits for
+ * whoever imports to approve it (other_options()).
+ *
+ * @param string $name Option name.
+ * @return bool
+ */
+function is_known_option( $name ) {
+	static $known = null;
+	if ( null === $known ) {
+		$known = array( 'theme_mods_' . get_stylesheet(), 'sidebars_widgets' );
+		foreach ( \Eizport\Options\groups() as $group ) {
+			$known = array_merge( $known, (array) ( $group['options'] ?? array() ) );
+		}
+		foreach ( \Eizport\Options\linked_options() as $option => $linked ) {
+			$known = array_merge( $known, array( (string) $option ), (array) ( $linked['with'] ?? array() ) );
+		}
+		$known = array_flip( array_merge( $known, \Eizport\Options\FRONT_OPTIONS ) );
+	}
+
+	return isset( $known[ $name ] ) || 0 === strpos( $name, 'widget_' );
+}
+
+/**
+ * The options of a file that wait for approval: not known (is_known_option())
+ * and not one an import never sets.
+ *
+ * @param array|null $data The options file's data.
+ * @return string[] Names.
+ */
+function other_options( $data ) {
+	require_once __DIR__ . '/apply-options.php';
+	$names = array_keys( is_array( $data ) && isset( $data['options'] ) && is_array( $data['options'] ) ? $data['options'] : array() );
+
+	return array_values(
+		array_filter(
+			array_map( 'strval', $names ),
+			function ( $name ) {
+				return ! is_known_option( $name ) && ! eizport_never_set_option( $name );
+			}
+		)
+	);
+}
+
+/**
+ * The options file's data with only the options this import may set: the
+ * known ones and, of the others, the ones whoever imports approved — on a
+ * network, only for who may manage the network's options (a site admin
+ * can't set any option there otherwise).
+ *
+ * @param array    $data     The options file's data.
+ * @param string[] $approved Other options approved.
+ * @return array
+ */
+function with_allowed_options( $data, $approved = array() ) {
+	if ( ! isset( $data['options'] ) || ! is_array( $data['options'] ) ) {
+		return $data;
+	}
+	$may      = ! is_multisite() || current_user_can( 'manage_network_options' );
+	$approved = $may ? array_map( 'strval', (array) $approved ) : array();
+	foreach ( array_keys( $data['options'] ) as $name ) {
+		if ( ! is_known_option( (string) $name ) && ! in_array( (string) $name, $approved, true ) ) {
+			unset( $data['options'][ $name ] );
+		}
+	}
+
+	return $data;
+}
+
+/**
  * Sets a bundle's options when the import ends, with the IDs they hold
  * mapped to the imported items. The data is read before: the importer
  * deletes the bundle folder before `import_end`.
  *
- * @param array|null $data The options file's data.
+ * @param array|null $data     The options file's data.
+ * @param string[]   $approved Options outside the groups whoever imports approved (with_allowed_options()).
  * @return callable|null The action added, to remove it later.
  */
-function apply_options_at_end( $data ) {
+function apply_options_at_end( $data, $approved = array() ) {
 	if ( ! $data ) {
 		return null;
 	}
 	require_once __DIR__ . '/apply-options.php';
+	$data = with_allowed_options( $data, $approved );
 
 	// ACF's post types, taxonomies and field groups before the items that use them (import-advanced-custom-fields.php).
 	// And Elementor's templates and site settings, applied when it ends (import-elementor.php).
