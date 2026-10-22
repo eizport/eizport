@@ -78,8 +78,8 @@ copy=$(wp "$DEV_SITE" eval '
 		"options"  => array( "groups" => array( "basics", "reading", "woocommerce" ), "front_pages" => true ),
 		// The header menu: the navigations (the header block shows the newest one).
 		"menus"    => array( "navigation" => get_posts( array( "post_type" => "wp_navigation", "numberposts" => -1, "fields" => "ids" ) ) ),
-		// The store styles: colors, fonts and the Site Editor CSS.
-		"appearance" => array( "global_styles", "global_css" ),
+		// The store look: colors, fonts, the Site Editor CSS, and the templates and parts edited there (the header with the logo).
+		"appearance" => array( "global_styles", "global_css", "templates", "template_parts" ),
 		"filename" => "eizport-demo-seed",
 	) );
 	echo is_wp_error( $out ) ? "ERROR " . $out->get_error_message() : $out["name"];
@@ -112,35 +112,6 @@ set_option "$SOURCE" woocommerce_permalinks '{"product_base":"product","category
 # The development site's content predates the plugin's name: the demo shows
 # the name it has now, in the text and on the images.
 wp "$SOURCE" search-replace 'Exporter Importer Z' 'Eizport' "$(wp "$SOURCE" db prefix)posts" --quiet
-# The store's look: the theme's customized templates and template parts (the
-# header with the logo) aren't exportable types; its styles come with the export.
-wp "$DEV_SITE" eval '
-$posts = get_posts( array( "post_type" => array( "wp_template", "wp_template_part" ), "post_status" => "publish", "numberposts" => -1, "tax_query" => array( array( "taxonomy" => "wp_theme", "field" => "slug", "terms" => get_stylesheet() ) ) ) );
-echo wp_json_encode( array_map( function ( $post ) {
-	return array( "post_type" => $post->post_type, "post_name" => $post->post_name, "post_title" => $post->post_title, "post_content" => $post->post_content, "area" => wp_get_object_terms( $post->ID, "wp_template_part_area", array( "fields" => "slugs" ) ) );
-}, $posts ) );' > "$SOURCE/theme-posts.json"
-wp "$SOURCE" eval '
-kses_remove_filters();
-foreach ( get_posts( array( "post_type" => array( "wp_template", "wp_template_part" ), "post_status" => "any", "numberposts" => -1, "fields" => "ids" ) ) as $old ) {
-	wp_delete_post( $old, true );
-}
-foreach ( json_decode( file_get_contents( ABSPATH . "theme-posts.json" ), true ) as $post ) {
-	$id = wp_insert_post( wp_slash( array_intersect_key( $post, array_flip( array( "post_type", "post_name", "post_title", "post_content" ) ) ) + array( "post_status" => "publish" ) ) );
-	wp_set_object_terms( $id, get_stylesheet(), "wp_theme" );
-	if ( $post["area"] ) {
-		wp_set_object_terms( $id, $post["area"], "wp_template_part_area" );
-	}
-}'
-rm -f "$SOURCE/theme-posts.json"
-# The copied templates link to the development site: the import points only the imported items at this site.
-wp "$SOURCE" eval '
-foreach ( get_posts( array( "post_type" => array( "wp_template", "wp_template_part" ), "post_status" => "any", "numberposts" => -1 ) ) as $post ) {
-	$content = str_replace( "'"$(wp "$DEV_SITE" option get siteurl)"'", home_url(), $post->post_content );
-	if ( $content !== $post->post_content ) {
-		kses_remove_filters();
-		wp_update_post( wp_slash( array( "ID" => $post->ID, "post_content" => $content ) ) );
-	}
-}'
 # The logo and the site icon: imported with the media, under the same IDs.
 set_option "$SOURCE" site_logo "$(wp "$DEV_SITE" option get site_logo)"
 set_option "$SOURCE" site_icon "$(wp "$DEV_SITE" option get site_icon)"

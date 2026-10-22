@@ -438,7 +438,7 @@ function import_file( $file, $args = array() ) {
 function update_existing_label( $types ) {
 	$names = array();
 	foreach ( array_unique( array_map( 'strval', (array) $types ) ) as $type ) {
-		$object = in_array( $type, array( 'attachment', 'nav_menu_item', 'wp_navigation' ), true ) ? null : get_post_type_object( $type );
+		$object = in_array( $type, array( 'attachment', 'nav_menu_item', 'wp_navigation', 'wp_template', 'wp_template_part' ), true ) ? null : get_post_type_object( $type );
 		if ( $object ) {
 			$names[] = $object->labels->name;
 		}
@@ -619,6 +619,10 @@ function update_existing( $on ) {
 		$post = (array) $post;
 		$id   = $post_exists ? (int) $post_exists : existing_by_slug( $post );
 		$type = (string) ( $post['post_type'] ?? '' );
+		// Templates and template parts match by slug and theme instead (import-templates.php).
+		if ( in_array( $type, array( 'wp_template', 'wp_template_part' ), true ) ) {
+			return $post_exists;
+		}
 		if ( $id && 'attachment' !== $type && get_post_type( $id ) === $type ) {
 			update_from_import( $id, $post );
 		}

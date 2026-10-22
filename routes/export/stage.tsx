@@ -357,6 +357,9 @@ function Stage() {
 			custom_css: __( 'Customizer custom CSS', 'eizport' ),
 			global_styles: __( 'Editor global styles', 'eizport' ),
 			global_css: __( 'Editor global CSS', 'eizport' ),
+			// The active block theme's templates and parts edited in the Site Editor.
+			templates: __( 'Editor templates', 'eizport' ),
+			template_parts: __( 'Editor template parts', 'eizport' ),
 			widgets: __( 'Widgets', 'eizport' ),
 			// ACF's post types, taxonomies and field groups (with ACF active).
 			'advanced-custom-fields': __( 'Advanced Custom Fields (ACF)', 'eizport' ),

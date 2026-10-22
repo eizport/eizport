@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T13:15:15+00:00\n"
+"POT-Creation-Date: 2026-10-22T18:44:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -296,6 +296,12 @@ msgstr ""
 msgid "Editor global CSS"
 msgstr ""
 
+msgid "Editor templates"
+msgstr ""
+
+msgid "Editor template parts"
+msgstr ""
+
 msgid "Widgets"
 msgstr ""
 
@@ -332,7 +338,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:304
+#: includes/cli.php:305
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -384,6 +390,12 @@ msgid "Check the groups to export: each replaces the same group on the other sit
 msgstr ""
 
 msgid "Check the rules of the Site Editor’s Additional CSS to export; they’re added as the Customizer’s are (Details)."
+msgstr ""
+
+msgid "Check the active theme’s templates edited in the Site Editor to export. On import, each replaces the same template of the same theme on the other site; the images and navigations they use point to the ones there."
+msgstr ""
+
+msgid "Check the active theme’s template parts (header, footer…) edited in the Site Editor to export. On import, each replaces the same part of the same theme on the other site; the images and navigations they use point to the ones there."
 msgstr ""
 
 msgid "Check the post types, taxonomies and field groups to export, in ACF’s own export format. On import, ACF imports them before the content (one with the same key there is updated), and the fields that store IDs point to the items there."
@@ -986,7 +998,7 @@ msgid "WooCommerce product reviews to export with their products: \"ids\" (comme
 msgstr ""
 
 #: includes/abilities.php:862
-msgid "The site's look, in the bundle's options file, row => \"all\" or the keys of the items chosen (eizport/get-export-options lists them): \"theme_mods\" (the Customizer's theme mods: logo, header and background images, colors), \"custom_css\" (the Customizer's Additional CSS, rule by rule), \"global_styles\" (the Site Editor's styles, group by group) and \"global_css\" (its Additional CSS, rule by rule) — block themes — \"widgets\" (classic and block widgets) and \"advanced-custom-fields\" (with Advanced Custom Fields active: its post types, taxonomies and field groups, in ACF's export format). A list of rows means each of them whole. The media they use come along. Default: none."
+msgid "The site's look, in the bundle's options file, row => \"all\" or the keys of the items chosen (eizport/get-export-options lists them): \"theme_mods\" (the Customizer's theme mods: logo, header and background images, colors), \"custom_css\" (the Customizer's Additional CSS, rule by rule), \"global_styles\" (the Site Editor's styles, group by group), \"global_css\" (its Additional CSS, rule by rule), \"templates\" and \"template_parts\" (the active theme's templates and parts edited in the Site Editor, by slug: they travel in the WXR and replace the same template of the same theme on import) — block themes — \"widgets\" (classic and block widgets) and \"advanced-custom-fields\" (with Advanced Custom Fields active: its post types, taxonomies and field groups, in ACF's export format). A list of rows means each of them whole. The media they use come along. Default: none."
 msgstr ""
 
 #: includes/abilities.php:867
@@ -1112,72 +1124,82 @@ msgstr ""
 msgid "This .zip is a plugin: install it in Plugins → Add Plugin → Upload Plugin, then click Run import on its row on the Plugins screen."
 msgstr ""
 
-#: includes/appearance.php:100
+#: includes/appearance.php:152
+msgid "Template"
+msgstr ""
+
+#. translators: 1: where a template or part goes (Template, Header, Footer…), 2: its slug.
+#: includes/appearance.php:163
+#, php-format
+msgid "%1$s · %2$s"
+msgstr ""
+
+#: includes/appearance.php:218
 msgid "Color palette"
 msgstr ""
 
-#: includes/appearance.php:104
+#: includes/appearance.php:222
 msgid "Site colors"
 msgstr ""
 
-#: includes/appearance.php:108
+#: includes/appearance.php:226
 msgid "Typography"
 msgstr ""
 
-#: includes/appearance.php:112
+#: includes/appearance.php:230
 msgid "Spacing and layout"
 msgstr ""
 
-#: includes/appearance.php:116
+#: includes/appearance.php:234
 msgid "Elements: links, buttons, headings"
 msgstr ""
 
 #. translators: %s: a block's name, like "Button".
-#: includes/appearance.php:124
+#: includes/appearance.php:242
 #, php-format
 msgid "Block: %s"
 msgstr ""
 
-#: includes/appearance.php:147
+#: includes/appearance.php:265
 msgid "Other styles"
 msgstr ""
 
-#: includes/appearance.php:235
+#: includes/appearance.php:353
 msgid "Logo"
 msgstr ""
 
-#: includes/appearance.php:236
+#: includes/appearance.php:354
 msgid "Header image"
 msgstr ""
 
-#: includes/appearance.php:237
+#: includes/appearance.php:355
 msgid "Header image details"
 msgstr ""
 
-#: includes/appearance.php:238
+#: includes/appearance.php:356
 msgid "Header text color"
 msgstr ""
 
-#: includes/appearance.php:239
+#: includes/appearance.php:357
 msgid "Background image"
 msgstr ""
 
-#: includes/appearance.php:240
+#: includes/appearance.php:358
 msgid "Background color"
 msgstr ""
 
-#: includes/appearance.php:295
+#: includes/appearance.php:413
 msgid "Comment"
 msgstr ""
 
 #. translators: 1: a CSS rule's position, 2: how many rules there are.
-#: includes/appearance.php:297
+#: includes/appearance.php:415
 #, php-format
 msgid "Rule %1$d of %2$d (the last)"
 msgstr ""
 
 #. translators: 1: a CSS rule's position, 2: how many rules there are.
-#: includes/appearance.php:297
+#: includes/appearance.php:415
 #, php-format
 msgid "Rule %1$d of %2$d"
 msgstr ""
@@ -1375,7 +1397,7 @@ msgid "Visit the site"
 msgstr ""
 
 #: includes/bundle-plugin.php:549
-#: includes/import.php:1147
+#: includes/import.php:1151
 msgid "Importer messages"
 msgstr ""
 
@@ -1431,41 +1453,41 @@ msgstr ""
 msgid "Sorry, you are not allowed to delete plugins."
 msgstr ""
 
-#: includes/bundle.php:585
+#: includes/bundle.php:583
 msgid "The .wxrz bundle is damaged or incomplete."
 msgstr ""
 
-#: includes/bundle.php:640
-#: includes/bundle.php:674
+#: includes/bundle.php:638
+#: includes/bundle.php:672
 msgid "The content of the .wxrz bundle could not be merged."
 msgstr ""
 
-#: includes/bundle.php:759
+#: includes/bundle.php:757
 msgid "The .wxrz bundle has no valid manifest."
 msgstr ""
 
 #. translators: %s: what the schema found wrong, e.g. "manifest.json[requires] does not match pattern …".
-#: includes/bundle.php:768
+#: includes/bundle.php:766
 #, php-format
 msgid "The .wxrz bundle has no valid manifest: %s"
 msgstr ""
 
 #. translators: 1: Eizport version that made the bundle, 2: the oldest Eizport that reads it, 3: this site's Eizport version.
-#: includes/bundle.php:825
+#: includes/bundle.php:844
 #, php-format
 msgid "This bundle was made with Eizport %1$s and needs Eizport %2$s or newer; this site has %3$s. Update Eizport, then import again."
 msgstr ""
 
-#: includes/bundle.php:826
-#: includes/bundle.php:827
+#: includes/bundle.php:845
+#: includes/bundle.php:846
 msgid "a newer version"
 msgstr ""
 
-#: includes/bundle.php:858
+#: includes/bundle.php:877
 msgid "Could not create a folder for the .wxrz bundle."
 msgstr ""
 
-#: includes/bundle.php:1146
+#: includes/bundle.php:1165
 msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 
@@ -1477,16 +1499,16 @@ msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:288
+#: includes/cli.php:289
 msgid "--dir writes a bundle, not a Playground .zip: leave out --playground."
 msgstr ""
 
-#: includes/cli.php:291
+#: includes/cli.php:292
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:300
+#: includes/cli.php:301
 #, php-format
 msgid "Bundle written to %s."
 msgstr ""
@@ -1725,80 +1747,80 @@ msgstr ""
 msgid "Update the items that already exist (same type and slug) instead of adding copies: %s"
 msgstr ""
 
-#: includes/import.php:758
+#: includes/import.php:762
 msgid "The WordPress Importer plugin is not installed."
 msgstr ""
 
-#: includes/import.php:774
+#: includes/import.php:778
 msgid "The WordPress Importer could not be loaded."
 msgstr ""
 
-#: includes/import.php:928
+#: includes/import.php:932
 msgid "Existing items"
 msgstr ""
 
-#: includes/import.php:950
+#: includes/import.php:954
 msgid "Additional CSS"
 msgstr ""
 
-#: includes/import.php:952
+#: includes/import.php:956
 msgid "The file's CSS rules"
 msgstr ""
 
-#: includes/import.php:959
+#: includes/import.php:963
 msgid "Add at the end of this site's CSS"
 msgstr ""
 
-#: includes/import.php:963
+#: includes/import.php:967
 msgid "Add at the start of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name of the CSS block, the file's name, like "delivery".
-#: includes/import.php:971
+#: includes/import.php:975
 #, php-format
 msgid "Replace the \"%s\" block this site already has"
 msgstr ""
 
-#: includes/import.php:977
+#: includes/import.php:981
 msgid "Replace all of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name the CSS rules are marked with: the file's name, like "delivery".
-#: includes/import.php:984
+#: includes/import.php:988
 #, php-format
 msgid "Between \"head\" and \"tail\" comments with the file's name (%s)"
 msgstr ""
 
-#: includes/import.php:1053
+#: includes/import.php:1057
 msgid ".wxrz bundles, the .zip of a bundle exported as plugin and gzipped WXR files are accepted too: their attachment files come from the bundle."
 msgstr ""
 
-#: includes/import.php:1112
-#: includes/import.php:1156
+#: includes/import.php:1116
+#: includes/import.php:1160
 msgid "All importers"
 msgstr ""
 
-#: includes/import.php:1141
+#: includes/import.php:1145
 msgid "Choose file"
 msgstr ""
 
-#: includes/import.php:1142
+#: includes/import.php:1146
 msgid "Change file"
 msgstr ""
 
-#: includes/import.php:1144
+#: includes/import.php:1148
 msgid "Choose who the imported items belong to and whether their attachments come along."
 msgstr ""
 
-#: includes/import.php:1145
+#: includes/import.php:1149
 msgid "What was imported, and the importer’s messages."
 msgstr ""
 
-#: includes/import.php:1150
+#: includes/import.php:1154
 msgid "The file could not be imported."
 msgstr ""
 
-#: includes/import.php:1151
+#: includes/import.php:1155
 msgid "Choose another file"
 msgstr ""
 
