@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T20:16:34+00:00\n"
+"POT-Creation-Date: 2026-10-21T20:24:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -277,7 +277,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:255
+#: includes/cli.php:290
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -1386,12 +1386,16 @@ msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:242
+#: includes/cli.php:274
+msgid "--dir writes a bundle, not a Playground .zip: leave out --playground."
+msgstr ""
+
+#: includes/cli.php:277
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:251
+#: includes/cli.php:286
 #, php-format
 msgid "Bundle written to %s."
 msgstr ""
