@@ -39,12 +39,12 @@ The default stays one file — a `.zip`, or a `.wxrz` with *Bundle as .zip* off:
 ## On the other site
 
 1. **Plugins → Add Plugin → Upload Plugin**, choose the `.zip`, **Install Now**, **Activate**.
-2. A notice and an **Import** link in the plugin's row lead to its screen, **Tools → Import: EIZP-000**. Nothing redirects you on activation.
+2. **Run import** on the plugin's row on the Plugins screen — or its entry in **Tools → Import**, set apart from the other importers, and a notice until it's imported — opens its screen. It isn't in the menu (a one-off import has no place there); on it, *Tools → Import* shows as the current item. While it waits, Tools → Import shows the importers' list instead of going straight to the WordPress Importer. Nothing redirects you on activation.
 3. The screen lists what it needs, each with a ✓ or a link:
-   - **Eizport**, active — it draws the screen and runs the import. Without it, the plugin shows how to activate or install it;
+   - **Eizport**, active — it draws the screen and runs the import. Without it, or with a version older than the bundle needs, the same screen shows ✗ and **Install Now**, **Activate** or **Update now**, done right there; then the page reloads with what Eizport reads. Until then **What it holds** is dimmed and closed, and *Update existing* and **Run import** are disabled;
    - **the WordPress Importer**, installed — with an *Install Now* button that installs and activates it right there, like Tools → Import installs an importer (*Installing…*, *Activating…*, then ✓ and **Run import** ready);
    - **the bundle**, with its size and date;
-   - **Update pages, posts and products that already exist (same slug)**, checked when the export had *Update existing* on (the plugin's `Eizport Update:` header). See [updating items that already exist](../../getting-started/importing/#updating-items-that-already-exist).
+   - **Update the items that already exist (same type and slug) instead of adding copies: Pages and Posts** — it names the content types the bundle holds, and isn't shown when it holds none — checked when the export had *Update existing* on (the plugin's `Eizport Update:` header). See [updating items that already exist](../../getting-started/importing/#updating-items-that-already-exist).
 4. **Run import** imports the bundle the plugin holds. The page waits while it runs (the WordPress Importer doesn't report progress), then shows how many items were imported, the settings set and the importer's messages.
 5. Once imported, the screen's main button is **Deactivate and delete**: it did its job and holds a large file. Under **Also delete**, Eizport and the WordPress Importer can go in the same action — checked when they were installed for this import (the plugin notes, when activated, which were already there), unchecked otherwise. Where WordPress asks for FTP credentials to delete files, it is deactivated and you delete it from the Plugins screen.
 
@@ -54,7 +54,6 @@ The plugin is named after the export's file: *Import: EIZP-000* for `EIZP-000.zi
 
 The same `.zip` also imports without installing it: upload it in **Tools → Import → WordPress**, like a `.wxrz`, or give it to `wp eizport import`. Eizport takes the bundle out of the plugin.
 
-Without Eizport, the screen offers **Install Now**: it installs Eizport from the plugin directory and activates it on the same screen, then **Continue** opens the import.
 
 ## Safety
 

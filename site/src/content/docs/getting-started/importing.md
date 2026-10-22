@@ -7,7 +7,7 @@ description: "How a bundle is imported with the WordPress Importer, what happens
 
 Upload a `.wxrz` or `.zip` bundle on **Tools → Import → WordPress**, like any WXR file. Gzipped WXR files (`.xml.gz`) and plain `.xml` files work too.
 
-Exported [as plugin](../../exporting/as-plugin/)? Install the `.zip` in **Plugins → Add Plugin → Upload Plugin** and use its **Run import** under Tools instead.
+Exported [as plugin](../../exporting/as-plugin/)? Install the `.zip` in **Plugins → Add Plugin → Upload Plugin** and click **Run import** on its row on the Plugins screen instead.
 
 **Tools → Import** opens the WordPress Importer directly, and its screen links to **All importers** ([Settings → General](../../settings/general/) turns this off).
 
@@ -15,7 +15,7 @@ The importer looks like the plugin's Export screen: a header with the step's mai
 
 ## Updating items that already exist
 
-The WordPress Importer skips an item that already exists, and adds a copy when only the slug matches: a theme's *Home* page becomes `home-2`, and a second delivery of the same bundle changes nothing. **Update pages, posts and products that already exist (same slug) instead of adding copies**, on the importer's step 1 (and on the screen of a plugin exported [as plugin](../../exporting/as-plugin/)), changes that:
+The WordPress Importer skips an item that already exists, and adds a copy when only the slug matches: a theme's *Home* page becomes `home-2`, and a second delivery of the same bundle changes nothing. **Update the items that already exist (same type and slug) instead of adding copies: Pages and Posts** — it names the content types the file holds, and isn't shown when it holds none — on the importer's step 1 (and on the screen of a plugin exported [as plugin](../../exporting/as-plugin/)), changes that:
 
 - an item of the same type and slug is **the** item: it gets the bundle's title, content, excerpt, order, custom fields and terms, and keeps its ID;
 - settings that point to it (the homepage, the shop page…) point to it, so the theme's *Home* becomes the homepage with the bundle's content;

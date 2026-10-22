@@ -138,7 +138,7 @@ WooCommerce, with its own support: products, orders and coupons, its pages as li
 
 ### What is an "as plugin" file? ###
 
-A plugin .zip that holds the bundle. Install it on the other site (Plugins → Add Plugin → Upload Plugin) and open its screen under Tools: it checks that Eizport and the WordPress Importer are there, imports the bundle with one click, and then offers to delete itself.
+A plugin .zip that holds the bundle. Install it on the other site (Plugins → Add Plugin → Upload Plugin) and click **Run import** on its row on the Plugins screen: it checks that Eizport and the WordPress Importer are there, imports the bundle with one click, and then offers to delete itself.
 
 ### Does it work on multisite? ###
 

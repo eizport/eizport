@@ -66,7 +66,9 @@ class BundlePluginTest extends Test_Case {
 		$zip->open( $target );
 		$code = (string) $zip->getFromName( 'my-site-abcdefgh12345678/my-site-abcdefgh12345678.php' );
 		$this->assertSame( 'bundle', $zip->getFromName( 'my-site-abcdefgh12345678/my-site-abcdefgh12345678.wxrz' ) );
+		$css = $zip->getFromName( 'my-site-abcdefgh12345678/screen.css' );
 		$zip->close();
+		$this->assertSame( file_get_contents( dirname( __DIR__, 2 ) . '/assets/importer.css' ), $css, 'Its screen looks like Eizport\'s while Eizport is missing.' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$this->assertStringContainsString( 'Eizport Bundle:    my-site-abcdefgh12345678.wxrz', $code );
 		$this->assertStringContainsString( 'Plugin Name:       Import: my.site', $code );
@@ -286,6 +288,103 @@ class BundlePluginTest extends Test_Case {
 
 		$this->assertSame( array( 'b' => array() ), $before );
 		$this->assertSame( 'gone', $imported, 'Left empty: deleted.' );
+	}
+
+	public function test_its_screen_is_out_of_the_menu_and_on_its_row() {
+		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->assertStringContainsString( "remove_submenu_page( 'tools.php', \$page );", $template, 'No Import: … item under Tools.' );
+		$this->assertStringContainsString( "'submenu_file'", $template, 'Tools → Import shown as current on it.' );
+		$this->assertMatchesRegularExpression( "/plugin_action_links_.*?__\\( 'Run import', 'EIZPORT_TEXT_DOMAIN' \\)/s", $template, 'Run import on its row on Plugins.' );
+	}
+
+	public function test_tools_import_lists_it_set_apart() {
+		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->assertStringContainsString( 'register_importer( $page, $title,', $template, 'An entry in Tools → Import.' );
+		$this->assertStringContainsString( "'load-importer-' . \$page", $template, 'Its entry opens its screen.' );
+		$this->assertStringContainsString( '\'import.php\' !== $hook', $template, 'Set apart from the others (its own style on Tools → Import).' );
+		$this->assertStringContainsString( '\'import.php\' === ( $GLOBALS[\'pagenow\'] ?? \'\' )', $template, 'No notice there: its entry already stands out.' );
+
+		// While one waits, Tools → Import shows the list instead of going straight to the WordPress Importer.
+		require_once ABSPATH . 'wp-admin/includes/import.php';
+		$admin = get_users(
+			array(
+				'role'   => 'administrator',
+				'number' => 1,
+			)
+		);
+		wp_set_current_user( $admin[0]->ID );
+		$redirected = false;
+		$catch      = function ( $location ) use ( &$redirected ) {
+			$redirected = $location;
+			throw new \RuntimeException( 'redirect' );
+		};
+		add_filter( 'wp_redirect', $catch );
+		register_importer( \Eizport\Import\IMPORTER_ID, 'WordPress', '', '__return_null' );
+		register_importer( 'eizport-bundle-test', 'Import: test', '', '__return_null' );
+		\Eizport\Import\open_wordpress_importer();
+		$this->assertFalse( $redirected, 'The list, with the bundle in it.' );
+
+		unset( $GLOBALS['wp_importers']['eizport-bundle-test'] );
+		try {
+			\Eizport\Import\open_wordpress_importer();
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		}
+		remove_filter( 'wp_redirect', $catch );
+		unset( $GLOBALS['wp_importers'][ \Eizport\Import\IMPORTER_ID ] );
+		wp_set_current_user( 0 );
+		$this->assertStringContainsString( 'import=' . \Eizport\Import\IMPORTER_ID, (string) $redirected, 'Without one, straight to the WordPress Importer as before.' );
+	}
+
+	public function test_without_eizport_its_screen_is_eizport_s_frame() {
+		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$fallback = substr( $template, (int) strpos( $template, '$screen = static function' ), (int) strpos( $template, 'register_activation_hook' ) - (int) strpos( $template, '$screen = static function' ) );
+
+		// What waits for Eizport.
+		$this->assertStringContainsString( '<button type="button" class="button button-primary" disabled>', $fallback, 'Run import, disabled.' );
+		$this->assertStringContainsString( 'eizport-import__waiting" aria-disabled="true"><summary tabindex="-1">', $fallback, 'What it holds, dimmed and closed.' );
+		$this->assertStringContainsString( '<input type="checkbox" disabled', $fallback, 'Update existing, disabled.' );
+		// Eizport as one more line: install, activate or update.
+		foreach ( array( 'install', 'activate', 'update' ) as $mode ) {
+			$this->assertStringContainsString( "\$get( '" . $mode . "', \$main, 'eizport'", $fallback );
+		}
+		$this->assertStringNotContainsString( 'class="card"', $fallback, 'No screen of its own any more.' );
+
+		// The same frame as Eizport's screen, class by class, in the same order.
+		$admin = get_users(
+			array(
+				'role'   => 'administrator',
+				'number' => 1,
+			)
+		);
+		wp_set_current_user( $admin[0]->ID );
+		ob_start();
+		// A plugin file outside wp-content/plugins: no bundle, the frame all the same.
+		BundlePlugin\render( $this->temp_file( "<?php\n/**\n * Plugin Name: Import: test\n */\n" ) );
+		$html = (string) ob_get_clean();
+		wp_set_current_user( 0 );
+		$frame = array( 'wrap', 'eizport-import__header', 'eizport-import__heading', 'eizport-import__title', 'eizport-import__subtitle', 'eizport-import__actions', 'wp-header-end', 'eizport-import__body', 'eizport-import__card', 'eizport-checks', 'eizport-requirement', 'eizport-requirement' );
+		foreach ( array( $fallback, $html ) as $markup ) {
+			$at = 0;
+			foreach ( $frame as $class ) {
+				$found = strpos( $markup, $class, $at );
+				$this->assertNotFalse( $found, $class );
+				$at = $found + strlen( $class );
+			}
+		}
+	}
+
+	public function test_every_text_of_the_template_is_translated_with_it() {
+		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$source   = (string) file_get_contents( dirname( __DIR__, 2 ) . '/includes/bundle-plugin.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		preg_match_all( "/__\\( '((?:[^'\\\\]|\\\\.)*)', 'EIZPORT_TEXT_DOMAIN' \\)/", $template, $texts );
+		$this->assertNotEmpty( $texts[1] );
+		foreach ( array_unique( $texts[1] ) as $text ) {
+			$this->assertStringContainsString( "=> __( '" . $text . "', 'eizport' )", $source, 'template_translations() has ' . $text );
+		}
 	}
 
 	public function test_without_eizport_the_plugin_installs_it_from_the_directory() {

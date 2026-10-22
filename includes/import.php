@@ -365,6 +365,53 @@ function import_file( $file, $args = array() ) {
 }
 
 /**
+ * The text of "Update items that already exist", naming the content types a
+ * bundle holds (by their names on this site), or '' when it holds none that
+ * the update reaches — attachments and menu items keep the importer's own
+ * matching, and a type this site doesn't have can't be updated.
+ *
+ * @param string[] $types Post types.
+ * @return string
+ */
+function update_existing_label( $types ) {
+	$names = array();
+	foreach ( array_unique( array_map( 'strval', (array) $types ) ) as $type ) {
+		$object = in_array( $type, array( 'attachment', 'nav_menu_item', 'wp_navigation' ), true ) ? null : get_post_type_object( $type );
+		if ( $object ) {
+			$names[] = $object->labels->name;
+		}
+	}
+	if ( ! $names ) {
+		return '';
+	}
+
+	/* translators: %s: content types, e.g. "Pages and Posts". */
+	return sprintf( __( 'Update the items that already exist (same type and slug) instead of adding copies: %s', 'eizport' ), wp_sprintf_l( '%l', $names ) );
+}
+
+/**
+ * The post types of a WXR's items, read line by line.
+ *
+ * @param string $file WXR.
+ * @return string[]
+ */
+function wxr_types( $file ) {
+	$types  = array();
+	$handle = is_file( $file ) ? fopen( $file, 'rb' ) : false; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+	if ( ! $handle ) {
+		return $types;
+	}
+	while ( false !== ( $line = fgets( $handle ) ) ) { // phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		if ( preg_match( '#<wp:post_type>(?:<!\[CDATA\[)?([a-z0-9_-]+)#', $line, $match ) ) {
+			$types[ $match[1] ] = true;
+		}
+	}
+	fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+	return array_keys( $types );
+}
+
+/**
  * The post of the same type and slug as an imported item, for "Update items
  * that already exist". Attachments and menu items keep the importer's own
  * matching.
@@ -805,13 +852,19 @@ function steps_script( $key, $value ) {
  */
 function update_existing_field() {
 	$dir = $GLOBALS['eizport_bundle_import_id'] ? (string) get_post_meta( $GLOBALS['eizport_bundle_import_id'], Bundle\DIR_META, true ) : '';
+	// The uploaded file (the WXR, a bundle's taken out): which of its items an update reaches.
+	$id    = (int) ( $GLOBALS['wp_import']->id ?? 0 );
+	$label = update_existing_label( wxr_types( (string) get_attached_file( $id ? $id : (int) $GLOBALS['eizport_bundle_import_id'] ) ) );
+	if ( '' === $label ) {
+		return;
+	}
 	steps_script(
 		'updateExisting',
 		array(
 			'name'    => UPDATE_FIELD,
 			'checked' => bundle_updates_existing( $dir ),
 			'heading' => __( 'Existing items', 'eizport' ),
-			'label'   => __( 'Update pages, posts and products that already exist (same slug) instead of adding copies', 'eizport' ),
+			'label'   => $label,
 		)
 	);
 }
@@ -975,8 +1028,15 @@ function open_wordpress_importer() {
 	if ( ! function_exists( 'get_importers' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/import.php';
 	}
-	if ( ! isset( get_importers()[ IMPORTER_ID ] ) ) {
+	$importers = get_importers();
+	if ( ! isset( $importers[ IMPORTER_ID ] ) ) {
 		return;
+	}
+	// A bundle plugin waiting to be imported: the list, where its entry stands out.
+	foreach ( array_keys( $importers ) as $id ) {
+		if ( 0 === strpos( (string) $id, 'eizport-bundle-' ) ) {
+			return;
+		}
 	}
 	wp_safe_redirect( add_query_arg( 'import', IMPORTER_ID, admin_url( 'admin.php' ) ) );
 	exit;

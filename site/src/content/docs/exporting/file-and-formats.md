@@ -15,11 +15,11 @@ The **Format** toggle, in the **Details** panel above the list, has two choices;
 
 ## As plugin
 
-The **As plugin** toggle, next to *Media files* (its ⓘ explains it), wraps the bundle in a plugin `.zip`. Install it on the other site like any plugin and click **Run import** on its screen under Tools: no file to upload. See [as plugin](../as-plugin/).
+The **As plugin** toggle, next to *Media files* (its ⓘ explains it), wraps the bundle in a plugin `.zip`. Install it on the other site like any plugin and click **Run import** on its row on the Plugins screen: no file to upload. See [as plugin](../as-plugin/).
 
 ## Update existing
 
-**Update existing**, in the **Details** panel, asks the import to update the pages, posts and products that already exist on the other site (same type and slug) instead of adding copies. It's saved in the bundle (`update_existing` in the manifest), and the importer's box comes checked. Not with WXR XML or Playground. See [updating items that already exist](../../getting-started/importing/#updating-items-that-already-exist).
+**Update existing**, in the **Details** panel, asks the import to update the items of the chosen content types that already exist on the other site (same type and slug) instead of adding copies — its ⓘ names those types (all of them with nothing checked), and it is disabled when only rows without content are checked: menus, options, the look. It's saved in the bundle (`update_existing` in the manifest), and the importer's box comes checked. Not with WXR XML or Playground. See [updating items that already exist](../../getting-started/importing/#updating-items-that-already-exist).
 
 ## File name
 

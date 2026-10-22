@@ -1355,7 +1355,7 @@ function import_source( $input ) {
 function import_file_of( $input ) {
 	$path = import_source( $input );
 	if ( ! is_wp_error( $path ) && \Eizport\BundlePlugin\is_plugin_zip( $path ) ) {
-		return new WP_Error( 'eizport_plugin_zip', __( 'This .zip is a plugin: install it in Plugins → Add Plugin → Upload Plugin, then run its import screen under Tools.', 'eizport' ) );
+		return new WP_Error( 'eizport_plugin_zip', __( 'This .zip is a plugin: install it in Plugins → Add Plugin → Upload Plugin, then click Run import on its row on the Plugins screen.', 'eizport' ) );
 	}
 
 	return $path;
