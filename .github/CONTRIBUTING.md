@@ -54,6 +54,12 @@ Export navigation menus: classic menus with their theme locations, and block nav
    git switch trunk
    studio wp --require=wp-content/plugins/eizport/bin/release.php eizport release 1.2.0-dev
    ```
+   Then send `release/X.Y` to the WordPress.org **SVN trunk**, so its new
+   strings can be translated before the release: Actions → **WordPress.org
+   trunk** → Run workflow (first with *dry_run*). No tag, no assets; the
+   readme keeps the released Stable tag, so installs stay on it. The stable
+   release waits until pt-BR is at 100% on translate.wordpress.org (at least
+   suggested); run the workflow again after fixes to `release/X.Y`.
 2. **Fixes** land on `trunk` first, then on the release branch with
    `git cherry-pick -x <commit>`. A fix that only makes sense on the release
    branch is committed there and cherry-picked to `trunk`. Release branches
