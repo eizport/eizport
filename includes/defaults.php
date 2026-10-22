@@ -157,6 +157,7 @@ function sanitize( $defaults ) {
 			'update_existing'   => ! empty( $in['update_existing'] ),
 			'landing'           => in_array( $in['landing'] ?? '', array( 'home', 'admin', 'page', 'path' ), true ) ? $in['landing'] : 'home',
 			'landing_page'      => absint( $in['landing_page'] ?? 0 ),
+			'language'          => in_array( $in['language'] ?? '', array( 'site', 'user', 'en_US' ), true ) ? $in['language'] : 'site',
 			'landing_path'      => '/' === substr( (string) ( $in['landing_path'] ?? '' ), 0, 1 ) ? sanitize_text_field( (string) $in['landing_path'] ) : '',
 			'themes'            => array_values( array_intersect( $names( 'themes' ), array_keys( \Eizport\Playground\theme_choices() ) ) ),
 			'plugins'           => array_values( array_intersect( $names( 'plugins' ), array_keys( \Eizport\Playground\plugin_choices() ) ) ),

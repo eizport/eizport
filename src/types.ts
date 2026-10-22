@@ -27,6 +27,12 @@ export interface ExportOptions {
 		active: boolean;
 	}[];
 	plugins: { plugin: string; name: string; active: boolean }[];
+	/** The languages a Playground .zip can open in: the site's, the user's (when it's another one) and English. */
+	languages: {
+		value: 'site' | 'user' | 'en_US';
+		locale: string;
+		name: string;
+	}[];
 	copy_lifetime: number;
 	/** Core's file name without extension, like "site.WordPress.2026-10-10". */
 	filename: string;
@@ -177,6 +183,8 @@ export interface FileSettings {
 	landing_page: number;
 	/** The path it opens on (landing "path"), like "/shop/". */
 	landing_path: string;
+	/** The language it opens in: the site's, the user's or English. */
+	language: 'site' | 'user' | 'en_US';
 	themes: string[];
 	plugins: string[];
 }

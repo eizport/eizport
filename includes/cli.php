@@ -147,7 +147,7 @@ function export_input( $assoc_args ) {
 			$input[ str_replace( '-', '_', $name ) ] = true;
 		}
 	}
-	// --playground: a Playground .zip, with --themes, --plugins and --landing.
+	// --playground: a Playground .zip, with --themes, --plugins, --landing and --language.
 	if ( $flag( 'playground' ) ) {
 		$list    = function ( $name ) use ( $assoc_args ) {
 			return array_values( array_filter( array_map( 'trim', explode( ',', (string) ( $assoc_args[ $name ] ?? '' ) ) ) ) );
@@ -160,6 +160,7 @@ function export_input( $assoc_args ) {
 			'themes'       => $list( 'themes' ),
 			'plugins'      => $list( 'plugins' ),
 			'landing_page' => $landing,
+			'language'     => (string) ( $assoc_args['language'] ?? 'site' ),
 		);
 	}
 	if ( isset( $assoc_args['filename'] ) ) {
@@ -242,6 +243,10 @@ function export_input( $assoc_args ) {
  * : With --playground: where it opens — home (default), admin, page:ID (a
  * published page, saved as /?pagename=<its path>) or a path (/shop/).
  *
+ * [--language=<language>]
+ * : With --playground: the language it opens in — site (this site's, the
+ * default), user (yours), en_US or an installed locale (pt_BR).
+ *
  * [--filename=<name>]
  * : File name, without extension. With --dir, also the WXR's name there.
  *
@@ -255,7 +260,7 @@ function export_input( $assoc_args ) {
  *     wp eizport export --types=page:43,product --options=basics
  *     wp eizport export --types=page:43 --as-plugin --update-existing
  *     wp eizport export --types=page:43,product --dir=deliverables/bundle
- *     wp eizport export --types=page:43 --playground --themes=twentytwentyfive --plugins=woocommerce/woocommerce.php --landing=page:43
+ *     wp eizport export --types=page:43 --playground --themes=twentytwentyfive --plugins=woocommerce/woocommerce.php --landing=page:43 --language=pt_BR
  *
  * @param string[] $args       Positional arguments (none).
  * @param array    $assoc_args Flags.

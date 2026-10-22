@@ -25,6 +25,7 @@ const MEDIA_FIELD     = 'eizport_media';
 const BLUEPRINT_FIELD = 'eizport_blueprint';
 const THEMES_FIELD    = 'eizport_themes';
 const LANDING_FIELD   = 'eizport_landing';
+const LANGUAGE_FIELD  = 'eizport_language';
 const PLUGINS_FIELD   = 'eizport_plugins';
 const KEEP_FIELD      = 'eizport_keep_copy';
 const SAVE_FIELD      = 'eizport_save_defaults';
@@ -277,6 +278,16 @@ function blueprint_options() {
 			</label>
 			<span class="description"><?php esc_html_e( 'A path, like /shop/ or /wp-admin/; empty: the home page.', 'eizport' ); ?></span>
 		</p>
+		<p>
+			<label>
+				<?php esc_html_e( 'Language:', 'eizport' ); ?>
+				<select name="<?php echo esc_attr( LANGUAGE_FIELD ); ?>">
+					<?php foreach ( \Eizport\Playground\language_choices() as $choice ) : ?>
+						<option value="<?php echo esc_attr( $choice['value'] ); ?>" lang="<?php echo esc_attr( str_replace( '_', '-', $choice['locale'] ) ); ?>"><?php echo esc_html( $choice['name'] ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</label>
+		</p>
 	</div>
 	<?php
 }
@@ -333,6 +344,7 @@ function file_args( $args ) {
 			'themes'       => $list( THEMES_FIELD ),
 			'plugins'      => $list( PLUGINS_FIELD ),
 			'landing'      => isset( $_GET[ LANDING_FIELD ] ) ? sanitize_text_field( wp_unslash( $_GET[ LANDING_FIELD ] ) ) : 'home',
+			'language'     => isset( $_GET[ LANGUAGE_FIELD ] ) ? sanitize_text_field( wp_unslash( $_GET[ LANGUAGE_FIELD ] ) ) : 'site',
 			'filename'     => isset( $_GET[ FILENAME_FIELD ] ) ? sanitize_file_name( wp_unslash( $_GET[ FILENAME_FIELD ] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		)
 	);
@@ -376,6 +388,8 @@ function bundle_settings( $in ) {
 	$out['plugins'] = array();
 	// Where the Playground .zip opens (Playground\landing_page()).
 	$out['landing'] = $out['blueprint'] ? \Eizport\Playground\landing_page( $in['landing'] ?? 'home' ) : '/';
+	// And the language it opens in, as Playground\language() resolves it (empty for English).
+	$out['language'] = $out['blueprint'] ? \Eizport\Playground\language( $in['language'] ?? 'site' ) : '';
 	if ( $out['blueprint'] ) {
 		$out['themes']  = array_values( array_intersect( array_unique( array_map( 'strval', (array) ( $in['themes'] ?? array() ) ) ), array_keys( \Eizport\Playground\theme_choices() ) ) );
 		$out['plugins'] = array_values( array_intersect( array_unique( array_map( 'strval', (array) ( $in['plugins'] ?? array() ) ) ), array_keys( \Eizport\Playground\plugin_choices() ) ) );
@@ -435,6 +449,7 @@ function file_output( $args ) {
 			'themes'       => $args['themes'] ?? array(),
 			'plugins'      => $args['plugins'] ?? array(),
 			'landing'      => $args['landing'] ?? '/',
+			'language'     => $args['language'] ?? '',
 			'keep_copy'    => ! empty( $args['keep_copy'] ),
 			'option_names' => $args['options'] ?? array(),
 			'appearance'   => \Eizport\Appearance\chosen( $args ),

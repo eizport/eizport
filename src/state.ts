@@ -31,6 +31,7 @@ export const DEFAULT_STATE: ExportState = {
 		landing: 'home',
 		landing_page: 0,
 		landing_path: '',
+		language: 'site',
 		themes: [],
 		plugins: [],
 	},
@@ -505,6 +506,7 @@ export function exportInput( state: ExportState ): Record< string, unknown > {
 			themes: settings.themes,
 			plugins: settings.plugins,
 			landing_page: landing[ settings.landing ] ?? 'home',
+			language: settings.language,
 		};
 	}
 	return input;

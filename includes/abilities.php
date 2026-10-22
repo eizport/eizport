@@ -935,7 +935,7 @@ function export_input_schema() {
 			),
 			'blueprint'       => array(
 				'type'                 => 'object',
-				'description'          => __( 'Make a WordPress Playground .zip instead of a .wxrz, installing these themes (a child theme brings its parent) and plugins (active or inactive as on this site), opening on landing_page.', 'eizport' ),
+				'description'          => __( 'Make a WordPress Playground .zip instead of a .wxrz, installing these themes (a child theme brings its parent) and plugins (active or inactive as on this site), opening on landing_page, in language.', 'eizport' ),
 				'properties'           => array(
 					'themes'       => array(
 						'type'  => 'array',
@@ -948,6 +948,10 @@ function export_input_schema() {
 					'landing_page' => array(
 						'type'        => array( 'string', 'object' ),
 						'description' => __( 'Where Playground opens: "home" (default), "admin", { "page": ID } (a published page of this site) or a path ("/shop/").', 'eizport' ),
+					),
+					'language'     => array(
+						'type'        => 'string',
+						'description' => __( 'The language Playground opens in: "site" (this site\'s, the default), "user" (the current user\'s), "en_US" or a locale installed here ("pt_BR"); English when that language isn\'t installed.', 'eizport' ),
 					),
 				),
 				'additionalProperties' => false,
@@ -1122,6 +1126,8 @@ function get_export_options( $input = array() ) { // phpcs:ignore Generic.CodeAn
 		'front_pages'   => Options\front_pages(),
 		'themes'        => $themes,
 		'plugins'       => $plugins,
+		// The languages a Playground .zip can open in.
+		'languages'     => Playground\language_choices(),
 		'copy_lifetime' => Copies\lifetime(),
 		'filename'      => \Eizport\Export\default_filename(),
 		'linked'        => \Eizport\Settings\get()['linked_options'],
@@ -1260,6 +1266,7 @@ function export( $input = array() ) {
 			'themes'          => $themes,
 			'plugins'         => $plugins,
 			'landing'         => $blueprint ? ( $input['blueprint']['landing_page'] ?? 'home' ) : 'home',
+			'language'        => $blueprint ? (string) ( $input['blueprint']['language'] ?? 'site' ) : 'site',
 			'filename'        => (string) ( $input['filename'] ?? '' ),
 		)
 	);

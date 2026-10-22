@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T20:29:19+00:00\n"
+"POT-Creation-Date: 2026-10-21T20:57:31+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -18,6 +18,12 @@ msgid "Landing page"
 msgstr ""
 
 msgid "Where Playground opens once the site is ready: the home page, the dashboard, a page of this site or a path."
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "The language Playground opens in: this site’s, yours or English. Playground fetches the translations of WordPress and of the themes and plugins from the WordPress.org directory; the ones of the others go inside the file."
 msgstr ""
 
 msgid "Themes and plugins"
@@ -105,24 +111,40 @@ msgstr ""
 msgid "Path"
 msgstr ""
 
+msgid "Opens in"
+msgstr ""
+
 msgid "Themes to install"
 msgstr ""
 
-#: includes/export.php:243
-#: includes/export.php:265
+#: includes/export.php:244
+#: includes/export.php:266
 msgid "active"
 msgstr ""
 
 msgid "Plugins to install"
 msgstr ""
 
-#: includes/export.php:265
+#: includes/export.php:266
 msgid "inactive"
 msgstr ""
 
-#. translators: 1: number of themes and plugins ("1 theme, 2 plugins"), 2: where Playground opens (", opens on the dashboard"), or nothing for the home page.
+#. translators: 1: number of themes and plugins ("1 theme, 2 plugins"), 2: where Playground opens and in what language (", opens on the dashboard, in Português do Brasil"), or nothing for the home page in the site's language.
 #, js-format
 msgid "Playground: %1$s%2$s"
+msgstr ""
+
+#, js-format
+msgid "Site language (%s)"
+msgstr ""
+
+#, js-format
+msgid "Your language (%s)"
+msgstr ""
+
+#. translators: %s: a language's name, in that language ("Português do Brasil").
+#, js-format
+msgid "in %s"
 msgstr ""
 
 #. translators: 1: number of themes, 2: number of plugins.
@@ -277,7 +299,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:290
+#: includes/cli.php:295
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -473,11 +495,11 @@ msgstr ""
 msgid "Never"
 msgstr ""
 
-#: includes/export.php:218
+#: includes/export.php:219
 msgid "Open in WordPress Playground"
 msgstr ""
 
-#: includes/export.php:220
+#: includes/export.php:221
 msgid "Copy link"
 msgstr ""
 
@@ -974,73 +996,77 @@ msgid "Every option that can be exported (no transients, no denied options), ins
 msgstr ""
 
 #: includes/abilities.php:938
-msgid "Make a WordPress Playground .zip instead of a .wxrz, installing these themes (a child theme brings its parent) and plugins (active or inactive as on this site), opening on landing_page."
+msgid "Make a WordPress Playground .zip instead of a .wxrz, installing these themes (a child theme brings its parent) and plugins (active or inactive as on this site), opening on landing_page, in language."
 msgstr ""
 
 #: includes/abilities.php:950
 msgid "Where Playground opens: \"home\" (default), \"admin\", { \"page\": ID } (a published page of this site) or a path (\"/shop/\")."
 msgstr ""
 
-#: includes/abilities.php:957
+#: includes/abilities.php:954
+msgid "The language Playground opens in: \"site\" (this site's, the default), \"user\" (the current user's), \"en_US\" or a locale installed here (\"pt_BR\"); English when that language isn't installed."
+msgstr ""
+
+#: includes/abilities.php:961
 msgid "File name without extension. Default: \"<site name>.WordPress.<date>\"."
 msgstr ""
 
-#: includes/abilities.php:982
+#: includes/abilities.php:986
 msgid "When the copy is deleted (ISO 8601), or \"\" when it is kept until deleted."
 msgstr ""
 
-#: includes/abilities.php:987
+#: includes/abilities.php:991
 msgid "Opens a Playground .zip on playground.wordpress.net; \"\" for a .wxrz."
 msgstr ""
 
-#: includes/abilities.php:991
+#: includes/abilities.php:995
 msgid "Runs a downloaded Playground .zip with the Playground CLI; \"\" for a .wxrz."
 msgstr ""
 
-#: includes/abilities.php:1084
+#: includes/abilities.php:1088
 msgid "Attachments"
 msgstr ""
 
-#: includes/abilities.php:1183
+#: includes/abilities.php:1189
 msgid "Give the \"type\" of the items to list."
 msgstr ""
 
 #. translators: %s: post type.
-#: includes/abilities.php:1189
+#: includes/abilities.php:1195
 #: includes/selection.php:569
 #, php-format
 msgid "\"%s\" is not a content type that can be exported."
 msgstr ""
 
 #. translators: %s: option names.
-#: includes/abilities.php:1217
+#: includes/abilities.php:1223
 #, php-format
 msgid "These options are never exported: %s."
 msgstr ""
 
 #. translators: %s: theme stylesheets or plugin files.
-#: includes/abilities.php:1232
+#: includes/abilities.php:1238
 #, php-format
 msgid "Not installed on this site: %s."
 msgstr ""
 
-#: includes/abilities.php:1294
+#: includes/abilities.php:1301
 msgid "Give the names of the copies to delete, or \"all\"."
 msgstr ""
 
-#: includes/abilities.php:1310
+#: includes/abilities.php:1317
 msgid "There is no such copy: see eizport/get-copies."
 msgstr ""
 
-#: includes/abilities.php:1317
+#: includes/abilities.php:1324
 msgid "The attachment is not a .wxrz, .zip, .xml or .xml.gz file."
 msgstr ""
 
-#: includes/abilities.php:1322
+#: includes/abilities.php:1329
 msgid "Give a \"copy\" name or an \"attachment_id\" to import."
 msgstr ""
 
-#: includes/abilities.php:1335
+#: includes/abilities.php:1342
 msgid "This .zip is a plugin: install it in Plugins → Add Plugin → Upload Plugin, then run its import screen under Tools."
 msgstr ""
 
@@ -1357,24 +1383,24 @@ msgstr ""
 msgid "Sorry, you are not allowed to delete plugins."
 msgstr ""
 
-#: includes/bundle.php:557
+#: includes/bundle.php:558
 msgid "The .wxrz bundle is damaged or incomplete."
 msgstr ""
 
-#: includes/bundle.php:612
-#: includes/bundle.php:646
+#: includes/bundle.php:613
+#: includes/bundle.php:647
 msgid "The content of the .wxrz bundle could not be merged."
 msgstr ""
 
-#: includes/bundle.php:723
+#: includes/bundle.php:724
 msgid "The .wxrz bundle has no valid manifest."
 msgstr ""
 
-#: includes/bundle.php:754
+#: includes/bundle.php:755
 msgid "Could not create a folder for the .wxrz bundle."
 msgstr ""
 
-#: includes/bundle.php:1004
+#: includes/bundle.php:1005
 msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 
@@ -1386,16 +1412,16 @@ msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:274
+#: includes/cli.php:279
 msgid "--dir writes a bundle, not a Playground .zip: leave out --playground."
 msgstr ""
 
-#: includes/cli.php:277
+#: includes/cli.php:282
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:286
+#: includes/cli.php:291
 #, php-format
 msgid "Bundle written to %s."
 msgstr ""
@@ -1428,132 +1454,136 @@ msgstr ""
 msgid "until deleted"
 msgstr ""
 
-#: includes/export.php:73
+#: includes/export.php:74
 msgid "Choose what to export."
 msgstr ""
 
-#: includes/export.php:74
+#: includes/export.php:75
 msgid "Check at least one item to export for each type exported by selection."
 msgstr ""
 
 #. translators: %s: bundle extension, "wxrz" or "zip".
-#: includes/export.php:119
+#: includes/export.php:120
 #, php-format
 msgid "Bundle (.%s): the WXR and, optionally, its media and content files, compressed"
 msgstr ""
 
-#: includes/export.php:125
+#: includes/export.php:126
 msgid "File name:"
 msgstr ""
 
-#: includes/export.php:132
+#: includes/export.php:133
 msgid "Include media: the files of the exported attachments, so the importer doesn't download them from this site"
 msgstr ""
 
-#: includes/export.php:139
+#: includes/export.php:140
 msgid "Include a Playground blueprint"
 msgstr ""
 
-#: includes/export.php:143
+#: includes/export.php:144
 msgid "The download becomes a .zip with blueprint.json, the WXR (.xml) and, as checked above, the attachment files and the content as .html files: run it with WordPress Playground to get a site with the exported content."
 msgstr ""
 
 #. translators: %s: how long the copy lasts, like "1 day" or "until deleted".
-#: includes/export.php:153
+#: includes/export.php:154
 #, php-format
 msgid "Keep a copy (%s) to open by link on playground.wordpress.net"
 msgstr ""
 
 #. translators: %s: link to the plugin's settings.
-#: includes/export.php:162
+#: includes/export.php:163
 #, php-format
 msgid "The copy goes to uploads/eizport/tmp/, anyone with its link can download it, and it is deleted when it expires (the time is set in the same settings); manage the copies in %s."
 msgstr ""
 
-#: includes/export.php:163
+#: includes/export.php:164
 msgid "Eizport settings"
 msgstr ""
 
-#: includes/export.php:177
+#: includes/export.php:178
 msgid "Save these choices as the site's default"
 msgstr ""
 
-#: includes/export.php:178
+#: includes/export.php:179
 msgid "Save these choices as my default"
 msgstr ""
 
 #. translators: %s: link to the WordPress Importer screen.
-#: includes/export.php:191
+#: includes/export.php:192
 #, php-format
 msgid "Import .xml and .wxrz files with %s."
 msgstr ""
 
-#: includes/export.php:192
+#: includes/export.php:193
 msgid "Tools → Import → WordPress"
 msgstr ""
 
 #. translators: %s: link to Tools → Import.
-#: includes/export.php:195
+#: includes/export.php:196
 #, php-format
 msgid "To import .xml and .wxrz files, install the WordPress Importer from %s."
 msgstr ""
 
-#: includes/export.php:196
+#: includes/export.php:197
 msgid "Tools → Import"
 msgstr ""
 
-#: includes/export.php:215
+#: includes/export.php:216
 msgid "Playground .zip downloaded:"
 msgstr ""
 
-#: includes/export.php:216
+#: includes/export.php:217
 msgid "Run it in a terminal, in the folder you saved it to:"
 msgstr ""
 
-#: includes/export.php:217
+#: includes/export.php:218
 msgid "Or open the copy kept on this site until it expires (anyone with the link can download it):"
 msgstr ""
 
-#: includes/export.php:219
+#: includes/export.php:220
 msgid "Copy"
 msgstr ""
 
-#: includes/export.php:221
+#: includes/export.php:222
 msgid "Copied!"
 msgstr ""
 
-#: includes/export.php:235
+#: includes/export.php:236
 msgid "Themes to install:"
 msgstr ""
 
 #. translators: %s: parent theme name.
-#: includes/export.php:247
+#: includes/export.php:248
 #, php-format
 msgid "child of %s, installed too"
 msgstr ""
 
-#: includes/export.php:255
+#: includes/export.php:256
 msgid "Plugins to install, active or inactive as on this site:"
 msgstr ""
 
-#: includes/export.php:258
+#: includes/export.php:259
 msgid "No other plugins."
 msgstr ""
 
-#: includes/export.php:271
+#: includes/export.php:272
 msgid "The active theme is activated, if checked; else the first theme checked."
 msgstr ""
 
-#: includes/export.php:272
+#: includes/export.php:273
 msgid "Any installed theme or plugin can go in. The ones from the WordPress.org directory are installed from there, in the version this site has; premium and custom ones are copied into the file: share it only where their licenses allow."
 msgstr ""
 
-#: includes/export.php:275
+#: includes/export.php:276
 msgid "Opens on:"
 msgstr ""
 
-#: includes/export.php:278
+#: includes/export.php:279
 msgid "A path, like /shop/ or /wp-admin/; empty: the home page."
+msgstr ""
+
+#: includes/export.php:283
+msgid "Language:"
 msgstr ""
 
 #: includes/folder.php:39

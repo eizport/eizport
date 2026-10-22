@@ -389,4 +389,112 @@ class PlaygroundTest extends Test_Case {
 		);
 		$this->assertSame( array( Bundle\MANIFEST, 'site.xml' ), $names );
 	}
+
+	/**
+	 * Fake translation files in WP_LANG_DIR (the ones that weren't there are
+	 * removed after the test).
+	 *
+	 * @param string[] $files Paths under WP_LANG_DIR.
+	 */
+	private function language_files( $files ) {
+		foreach ( $files as $file ) {
+			$path = WP_LANG_DIR . '/' . $file;
+			if ( ! file_exists( $path ) ) {
+				wp_mkdir_p( dirname( $path ) );
+				file_put_contents( $path, '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				$this->remove_later( $path );
+			}
+		}
+	}
+
+	public function test_the_language_playground_opens_in() {
+		// Installed here (core keeps its list of files in a cache).
+		$installed = function () {
+			return array( 'pt_BR', 'de_DE' );
+		};
+		add_filter( 'get_available_languages', $installed );
+		$site = function () {
+			return 'pt_BR';
+		};
+		add_filter( 'locale', $site );
+		// The user's own language (their "locale" meta), without writing it.
+		$user = function ( $value, $id, $key ) {
+			return 'locale' === $key ? array( 'de_DE' ) : $value;
+		};
+		add_filter( 'get_user_metadata', $user, 10, 3 );
+		wp_set_current_user( 1 );
+
+		$this->assertSame( 'pt_BR', Playground\language( 'site' ) );
+		$this->assertSame( 'pt_BR', Playground\language( '' ), 'The site\'s by default.' );
+		$this->assertSame( 'de_DE', Playground\language( 'user' ) );
+		$this->assertSame( 'de_DE', Playground\language( 'de_DE' ) );
+		$this->assertSame( '', Playground\language( 'en_US' ) );
+		$this->assertSame( '', Playground\language( 'xx_YY' ), 'Not installed here: English.' );
+
+		// The screens' choices: the site's, the user's and English.
+		add_filter(
+			'pre_site_transient_available_translations',
+			function () {
+				return array( 'pt_BR' => array( 'native_name' => 'Português do Brasil' ) );
+			}
+		);
+		$choices = Playground\language_choices();
+		$this->assertSame( array( 'site', 'user', 'en_US' ), wp_list_pluck( $choices, 'value' ) );
+		$this->assertSame( array( 'Português do Brasil', 'de_DE', 'English (United States)' ), wp_list_pluck( $choices, 'name' ), 'The locale when its name isn\'t known.' );
+
+		// An English site: no second English.
+		remove_filter( 'locale', $site );
+		$this->assertSame( array( 'site', 'user' ), wp_list_pluck( Playground\language_choices(), 'value' ) );
+		$this->assertSame( 'en_US', Playground\language_choices()[0]['locale'] );
+
+		remove_filter( 'get_user_metadata', $user );
+		remove_filter( 'get_available_languages', $installed );
+		remove_all_filters( 'pre_site_transient_available_translations' );
+		wp_set_current_user( 0 );
+	}
+
+	public function test_blueprint_in_a_language() {
+		$steps = Playground\blueprint( 'site.xml', array( $this->child ), array( 'eizport/eizport.php' ) )['steps'];
+		$this->assertNotContains( 'setSiteLanguage', wp_list_pluck( $steps, 'step' ), 'English: no step.' );
+
+		$this->language_files(
+			array(
+				'plugins/eizport-pt_BR.mo',
+				'plugins/eizport-pt_BR.l10n.php',
+				'plugins/eizport-pt_BR-0123456789abcdef0123456789abcdef.json',
+				'plugins/eizport-pt_BR.po',
+				'plugins/eizport-pt_BR_formal.mo',
+			)
+		);
+		$steps = Playground\blueprint( 'site.xml', array( $this->child ), array( 'eizport/eizport.php' ), array(), array(), null, '/', 'pt_BR' )['steps'];
+		$names = wp_list_pluck( $steps, 'step' );
+		$at    = array_search( 'setSiteLanguage', $names, true );
+
+		$this->assertSame( 'pt_BR', $steps[ $at ]['language'] );
+		$this->assertGreaterThan( max( array_keys( $names, 'installTheme', true ) ), $at, 'After the installs: it fetches their translations.' );
+		$this->assertLessThan( array_search( 'importWxr', $names, true ), $at );
+		// This site's translations of the plugin that isn't from the directory, after it.
+		$written = preg_grep( '#^/wordpress/wp-content/languages/#', array_column( array_slice( $steps, $at + 1 ), 'path' ) );
+		foreach ( array( 'eizport-pt_BR.mo', 'eizport-pt_BR.l10n.php', 'eizport-pt_BR-0123456789abcdef0123456789abcdef.json' ) as $file ) {
+			$this->assertContains( '/wordpress/wp-content/languages/plugins/' . $file, $written );
+		}
+		$this->assertNotContains( '/wordpress/wp-content/languages/plugins/eizport-pt_BR.po', $written );
+		$this->assertNotContains( '/wordpress/wp-content/languages/plugins/eizport-pt_BR_formal.mo', $written, 'Not another locale.' );
+
+		// From the directory: Playground fetches it, nothing in the .zip.
+		$this->directory( array( 'eizport/eizport.php' => 'eizport' ), array() );
+		$this->assertSame( array(), Playground\language_files( array(), array( 'eizport/eizport.php' ), 'pt_BR' ) );
+		$this->directory( array(), array() );
+
+		if ( class_exists( 'ZipArchive' ) ) {
+			$wxr = $this->temp_file( '<?xml version="1.0"?><rss version="2.0"><channel></channel></rss>' );
+			$zip = Playground\build_zip( $wxr, 'site.xml', array(), array( 'eizport/eizport.php' ), false, array(), null, '/', 'pt_BR' );
+			$this->remove_later( $zip );
+			$archive = new \ZipArchive();
+			$archive->open( $zip );
+			$this->assertNotFalse( $archive->locateName( 'languages/plugins/eizport-pt_BR.mo' ) );
+			$this->assertFalse( $archive->locateName( 'languages/plugins/eizport-pt_BR.po' ) );
+			$archive->close();
+		}
+	}
 }
