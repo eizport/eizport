@@ -29,7 +29,7 @@ export const en = {
 		about: '{tagline} Free and open source, for WordPress {requires} and later.',
 		product: 'Product',
 		playground: 'Try in Playground',
-		download: 'Download',
+		download: 'WordPress.org',
 		changelog: 'Changelog',
 		docs: 'Docs',
 		gettingStarted: 'Getting started',

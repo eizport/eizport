@@ -7,8 +7,8 @@
 export const hero = {
 	title: 'Move your WordPress content. Not your mess.',
 	lead: 'Pick the pages, products or posts you need — or just ask your AI agent. They arrive on the other site with their images, their settings and their homepage: no database dump, no broken images, no search-and-replace.',
-	primary: 'Try it free in your browser',
-	secondary: 'Download free',
+	primary: 'Live Preview',
+	secondary: 'Get it on WordPress.org',
 	note: 'Free and open source. No account, no upsell, no “pro” version.',
 };
 

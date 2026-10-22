@@ -27,7 +27,10 @@ export const site = {
 	license: header( 'License' ),
 	repo,
 	releases: `${ repo }/releases`,
-	download: `${ repo }/releases/latest/download/eizport.zip`,
+	/** Where to get it: its page in the WordPress.org plugin directory. */
+	directory: 'https://wordpress.org/plugins/eizport/',
+	/** The latest stable version's .zip, from the directory (where a file is meant). */
+	download: 'https://downloads.wordpress.org/plugin/eizport.zip',
 	issues: `${ repo }/issues`,
 	editBase: `${ repo }/edit/trunk/site/src/content/docs/`,
 	demo: 'https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/eizport/eizport/trunk/playground/blueprint.json',
