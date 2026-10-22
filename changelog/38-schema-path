@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+The manifest JSON Schema is kept per version (schemas/<X.Y>/manifest.json, published at /schemas/<X.Y>/manifest.json and /schemas/trunk/manifest.json); eizport release X.Y.0-dev starts the next one.
