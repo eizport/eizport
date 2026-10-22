@@ -38,6 +38,7 @@ require_once __DIR__ . '/includes/suggestions.php';
 require_once __DIR__ . '/includes/menus.php';
 require_once __DIR__ . '/includes/terms.php';
 require_once __DIR__ . '/includes/import-menus.php';
+require_once __DIR__ . '/includes/import-templates.php';
 require_once __DIR__ . '/includes/import-blocks.php';
 require_once __DIR__ . '/includes/import-links.php';
 require_once __DIR__ . '/includes/import-advanced-custom-fields.php';

@@ -76,6 +76,22 @@ function texts( key: string ): { title: string; subTitle: string } {
 					'eizport'
 				),
 			};
+		case 'templates':
+			return {
+				title: __( 'Editor templates', 'eizport' ),
+				subTitle: __(
+					'Check the active theme’s templates edited in the Site Editor to export. On import, each replaces the same template of the same theme on the other site; the images and navigations they use point to the ones there.',
+					'eizport'
+				),
+			};
+		case 'template_parts':
+			return {
+				title: __( 'Editor template parts', 'eizport' ),
+				subTitle: __(
+					'Check the active theme’s template parts (header, footer…) edited in the Site Editor to export. On import, each replaces the same part of the same theme on the other site; the images and navigations they use point to the ones there.',
+					'eizport'
+				),
+			};
 		case 'advanced-custom-fields':
 			return {
 				title: __( 'Advanced Custom Fields (ACF)', 'eizport' ),

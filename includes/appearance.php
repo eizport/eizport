@@ -1,11 +1,14 @@
 <?php
 /**
  * The site's look, each on its own row of the Export screen: the
- * Customizer's theme mods and custom CSS, the Site Editor's global styles
- * and global CSS (block themes), and the widgets (classic and block ones).
- * They travel in the bundle's options file (options.json): the theme mods
- * and widget options as options, the rest under keys of their own, which
- * apply-options.php sets when the import ends.
+ * Customizer's theme mods and custom CSS, the Site Editor's global styles,
+ * global CSS, templates and template parts (block themes), and the widgets
+ * (classic and block ones). They travel in the bundle's options file
+ * (options.json): the theme mods and widget options as options, the rest
+ * under keys of their own, which apply-options.php sets when the import
+ * ends. Templates and template parts are posts: they travel in the WXR
+ * (post_ids(), through Selection\where()), so the import maps the IDs and
+ * links in their blocks as in any content (import-templates.php).
  *
  * Each row lists its items (items()): a theme mod, a CSS rule, a group of
  * global styles, a widget. The export args carry the choice as
@@ -26,7 +29,15 @@ require_once __DIR__ . '/apply-options.php';
 /**
  * What can be exported, in the screen's order.
  */
-const KEYS = array( 'theme_mods', 'custom_css', 'global_styles', 'global_css', 'widgets', 'advanced-custom-fields', 'elementor' );
+const KEYS = array( 'theme_mods', 'custom_css', 'global_styles', 'global_css', 'templates', 'template_parts', 'widgets', 'advanced-custom-fields', 'elementor' );
+
+/**
+ * The rows whose items are posts of the active theme: row => post type.
+ */
+const THEME_POST_ROWS = array(
+	'templates'      => 'wp_template',
+	'template_parts' => 'wp_template_part',
+);
 
 /**
  * The rows a plugin's compatibility fills (through eizport_look_items,
@@ -84,6 +95,113 @@ function global_styles() {
 	$data = isset( $post['post_content'] ) ? json_decode( (string) $post['post_content'], true ) : null;
 
 	return is_array( $data ) ? $data : array();
+}
+
+/**
+ * The active theme's templates or template parts edited in the Site Editor
+ * (saved on the site; the theme's own files the other site has too), one
+ * per slug: post_name => post, the newest when there are more, as core
+ * shows it.
+ *
+ * @param string $type wp_template or wp_template_part.
+ * @return array<string, \WP_Post>
+ */
+function theme_posts( $type ) {
+	if ( ! wp_is_block_theme() ) {
+		return array();
+	}
+	$posts   = get_posts(
+		array(
+			'post_type'      => $type,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'no_found_rows'  => true,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- a handful of posts, by the theme they belong to.
+			'tax_query'      => array(
+				array(
+					'taxonomy' => 'wp_theme',
+					'field'    => 'name',
+					'terms'    => get_stylesheet(),
+				),
+			),
+		)
+	);
+	$by_slug = array();
+	foreach ( $posts as $post ) {
+		if ( ! isset( $by_slug[ $post->post_name ] ) ) {
+			$by_slug[ $post->post_name ] = $post;
+		}
+	}
+	ksort( $by_slug );
+
+	return $by_slug;
+}
+
+/**
+ * A template's or template part's item: its title, where it goes (the
+ * part's area, or the template), and the start of its block markup.
+ *
+ * @param \WP_Post $post A theme_posts() post.
+ * @return array{key: string, label: string, details: string, preview: array{type: string, value: string}}
+ */
+function theme_post_item( $post ) {
+	$template = get_block_template( get_stylesheet() . '//' . $post->post_name, $post->post_type );
+	$label    = '' !== $post->post_title ? $post->post_title : ( $template->title ?? $post->post_name );
+	$details  = __( 'Template', 'eizport' );
+	if ( 'wp_template_part' === $post->post_type ) {
+		$areas   = wp_list_pluck( get_allowed_block_template_part_areas(), 'label', 'area' );
+		$area    = (string) ( $template->area ?? WP_TEMPLATE_PART_AREA_UNCATEGORIZED );
+		$details = $areas[ $area ] ?? $area;
+	}
+
+	return array(
+		'key'     => (string) $post->post_name,
+		'label'   => wp_strip_all_tags( (string) $label ),
+		/* translators: 1: where a template or part goes (Template, Header, Footer…), 2: its slug. */
+		'details' => sprintf( __( '%1$s · %2$s', 'eizport' ), $details, $post->post_name ),
+		'preview' => array(
+			'type'  => 'code',
+			// The markup itself (wp_html_excerpt() would strip the block comments).
+			'value' => mb_strlen( $post->post_content ) > 600 ? mb_substr( $post->post_content, 0, 600 ) . '…' : (string) $post->post_content,
+		),
+	);
+}
+
+/**
+ * The posts the choice exports in the WXR: the templates and template parts
+ * chosen, and, with $media, the attachments their blocks use.
+ *
+ * @param array $choice normalize()'s (or a list of rows).
+ * @param bool  $media  With the media they use.
+ * @return int[] Post IDs.
+ */
+function post_ids( $choice, $media = true ) {
+	$choice = normalize( $choice );
+	$ids    = array();
+	$base   = wp_get_upload_dir()['baseurl'];
+	foreach ( THEME_POST_ROWS as $row => $type ) {
+		$posts = theme_posts( $type );
+		foreach ( keys_of( $choice, $row ) as $slug ) {
+			if ( ! isset( $posts[ $slug ] ) ) {
+				continue;
+			}
+			$ids[] = $posts[ $slug ]->ID;
+			if ( $media ) {
+				$ids = array_merge( $ids, \Eizport\Selection\ids_in_content( (string) $posts[ $slug ]->post_content, $base ) );
+			}
+		}
+	}
+
+	return array_values(
+		array_filter(
+			array_unique( array_map( 'intval', $ids ) ),
+			function ( $id ) {
+				return $id && in_array( get_post_type( $id ), array( 'attachment', 'wp_template', 'wp_template_part' ), true );
+			}
+		)
+	);
 }
 
 /**
@@ -246,7 +364,7 @@ function mod_labels() {
  * which one) and a preview (`type` image, color, colors, code or text, and
  * its `value`).
  *
- * @param string $row theme_mods, custom_css, global_styles, global_css or widgets.
+ * @param string $row theme_mods, custom_css, global_styles, global_css, templates, template_parts or widgets.
  * @return array<int, array{key: string, label: string, details: string, preview: array{type: string, value: mixed}}>
  */
 function items( $row ) {
@@ -325,6 +443,8 @@ function items( $row ) {
 					),
 			);
 		}
+	} elseif ( isset( THEME_POST_ROWS[ $row ] ) ) {
+		$items = array_values( array_map( __NAMESPACE__ . '\\theme_post_item', theme_posts( THEME_POST_ROWS[ $row ] ) ) );
 	} elseif ( 'widgets' === $row ) {
 		global $wp_registered_sidebars, $wp_widget_factory;
 		$names = array();

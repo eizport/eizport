@@ -115,6 +115,8 @@ export const LOOK_ROWS: Record< string, string > = {
 	__custom_css: 'custom_css',
 	__global_styles: 'global_styles',
 	__global_css: 'global_css',
+	__templates: 'templates',
+	__template_parts: 'template_parts',
 	__widgets: 'widgets',
 	'__advanced-custom-fields': 'advanced-custom-fields',
 	__elementor: 'elementor',
@@ -448,7 +450,13 @@ export function resolvedTypes( state: ExportState ): Record< string, TypeChoice 
 }
 
 /** Items an update doesn't reach: the importer matches them its own way. */
-export const NOT_UPDATED = [ 'attachment', 'nav_menu_item', 'wp_navigation' ];
+export const NOT_UPDATED = [
+	'attachment',
+	'nav_menu_item',
+	'wp_navigation',
+	'wp_template',
+	'wp_template_part',
+];
 
 /**
  * Whether the export holds items "Update existing" reaches: all content with

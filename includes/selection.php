@@ -1015,6 +1015,8 @@ function where( $args ) {
 	if ( $media_used ) {
 		$also = array_merge( $also, \Eizport\Appearance\media_ids( \Eizport\Appearance\chosen( $args ) ) );
 	}
+	// The templates and template parts chosen (and, with media, the images their blocks use).
+	$also = array_merge( $also, \Eizport\Appearance\post_ids( \Eizport\Appearance\chosen( $args ), $media_used ) );
 	// The menus chosen: classic menus' items and block navigations.
 	$also = array_merge( $also, \Eizport\Menus\post_ids( $args ) );
 	if ( $also ) {
