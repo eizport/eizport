@@ -1,5 +1,5 @@
 ---
-title: "A second delivery to staging"
+title: "Second delivery to staging"
 description: "Delivering new pages to a staging site that already has the media from the first delivery — without duplicating the images and without links to the local site."
 ---
 
