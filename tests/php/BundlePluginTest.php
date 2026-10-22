@@ -42,6 +42,13 @@ class BundlePluginTest extends Test_Case {
 		$this->assertNotFalse( $zip->locateName( 'my-site-abcdefgh12345678/my-site-abcdefgh12345678.zip' ), 'Named as it is.' );
 		$this->assertStringContainsString( 'Eizport Bundle:    my-site-abcdefgh12345678.zip', (string) $zip->getFromName( 'my-site-abcdefgh12345678/my-site-abcdefgh12345678.php' ) );
 		$zip->close();
+
+		// Recognized as one of these plugins, and the .zip comes back out.
+		$this->assertTrue( BundlePlugin\is_plugin_zip( $target ) );
+		$out = BundlePlugin\unwrap_zip( $target );
+		$this->assertIsString( $out );
+		$this->remove_later( $out );
+		$this->assertTrue( \Eizport\Bundle\is_zip( $out ) );
 	}
 
 	public function test_zip_holds_the_plugin_and_the_bundle() {

@@ -242,7 +242,7 @@ function is_plugin_zip( $path ) {
 	}
 	$zip->close();
 	foreach ( $names as $name ) {
-		if ( preg_match( '#^([^/]+)/\1\.php$#', $name, $match ) && preg_grep( '#^' . preg_quote( $match[1], '#' ) . '/([^/]+\.wxrz|(' . FOLDER . '/)?' . preg_quote( \Eizport\Bundle\MANIFEST, '#' ) . ')$#', $names ) ) {
+		if ( preg_match( '#^([^/]+)/\1\.php$#', $name, $match ) && preg_grep( '#^' . preg_quote( $match[1], '#' ) . '/([^/]+\.(wxrz|zip)|(' . FOLDER . '/)?' . preg_quote( \Eizport\Bundle\MANIFEST, '#' ) . ')$#', $names ) ) {
 			return true;
 		}
 	}
