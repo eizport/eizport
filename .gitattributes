@@ -15,6 +15,7 @@
 /phpcs.xml.dist         export-ignore
 /phpunit.xml.dist       export-ignore
 /tests                  export-ignore
+/changelog              export-ignore
 /src                    export-ignore
 /routes                 export-ignore
 /tsconfig.json          export-ignore

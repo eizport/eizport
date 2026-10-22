@@ -7,7 +7,7 @@ How Eizport's branches and releases work.
 | Branch | What goes in | Version in `eizport.php` |
 |---|---|---|
 | `trunk` | every change, squash-merged from a feature or fix branch | the next `X.Y.0-dev` |
-| `feature/<name>`, `fix/<name>` | one change, branched from `trunk` | — |
+| `feature/<issue>-<name>`, `fix/<issue>-<name>` | one change, branched from `trunk` (e.g. `feature/7-menus`) | — |
 | `release/X.Y` | fixes only, after the release is cut | `X.Y.0-rc.N`, `X.Y.0`, then `X.Y.1`… |
 
 readme.txt's `Stable tag` is always the last final release, also on `trunk`.
@@ -16,12 +16,34 @@ readme.txt's `Stable tag` is always the last final release, also on `trunk`.
 
 ```sh
 git switch trunk && git pull
-git switch -c feature/menus
-# work and commit; before each commit, from the plugin folder:
+git switch -c feature/7-menus
+# work, add changelog/7-menus (below) and commit; before each commit, from the plugin folder:
 composer check && npm run readme && bin/plugin-check.sh studio wp && (cd site && npm run check)
-git push -u origin feature/menus
-gh pr create --base trunk           # squash-merged: one commit per change
+git push -u origin feature/7-menus
+gh pr create --base trunk           # "Fixes #7"; squash-merged: one commit per change
 ```
+
+## Changelog entries
+
+Every change to what ships (`includes/`, `src/`, `routes/`, `templates/`,
+`eizport.php`, `uninstall.php`, `readme.txt`) adds one file to `changelog/`,
+named after its branch without the prefix (`changelog/7-menus`); the CI checks
+it. Nobody edits readme.txt's Changelog by hand, so branches never conflict
+there.
+
+```
+Significance: minor
+Type: add
+
+Export navigation menus: classic menus with their theme locations, and block navigations.
+```
+
+- `Significance`: `patch` (a fix), `minor` (a feature) or `major` (a breaking change). The release command warns when the version is smaller than the entries need.
+- `Type`: `add`, `fix`, `update` (readme's *Added:*, *Fixed:*, *Changed:*) or `dev` (tooling, tests, docs: left out of the readme).
+- The entry: one sentence for users, starting with a verb ("Export navigation menus…").
+
+`eizport release` adds the entries to the version's Changelog in readme.txt
+(a pre-release adds them, the release adds them and deletes the files).
 
 ## Releasing X.Y.0
 
@@ -37,8 +59,8 @@ gh pr create --base trunk           # squash-merged: one commit per change
    branch is committed there and cherry-picked to `trunk`. Release branches
    are never merged back.
 3. **Optional pre-release** for testing, on GitHub only (not the latest
-   release, not on WordPress.org): write the `= 1.1.0 =` Changelog and
-   Upgrade Notice in readme.txt, then
+   release, not on WordPress.org): write the `= 1.1.0 =` Upgrade Notice in
+   readme.txt (the Changelog comes from `changelog/`), then
    `eizport release 1.1.0-rc.1` from `release/1.1`.
 4. **The release**, from `release/1.1`: `eizport release 1.1.0` (or `patch`
    from `1.1.0-dev`/`-rc.N`). It bumps the version and Stable tag, runs the
