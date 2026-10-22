@@ -178,17 +178,17 @@ class AppearanceTest extends Test_Case {
 	public function test_css_merges_by_mode_and_markers() {
 		$site = '.site { color: black; }';
 
-		$end = eizport_merge_css( $site, '.new { color: red; }', 'end', true, 'delivery 1a2b3c4d' );
-		$this->assertSame( ".site { color: black; }\n\n/* head delivery 1a2b3c4d */\n.new { color: red; }\n/* tail delivery 1a2b3c4d */", $end );
-		$this->assertStringStartsWith( '/* head delivery 1a2b3c4d */', eizport_merge_css( $site, '.new {}', 'start', true, 'delivery 1a2b3c4d' ) );
-		$this->assertStringNotContainsString( '.site', eizport_merge_css( $site, '.new {}', 'replace', true, 'delivery 1a2b3c4d' ) );
+		$end = eizport_merge_css( $site, '.new { color: red; }', 'end', true, 'delivery' );
+		$this->assertSame( ".site { color: black; }\n\n/* head delivery */\n.new { color: red; }\n/* tail delivery */", $end );
+		$this->assertStringStartsWith( '/* head delivery */', eizport_merge_css( $site, '.new {}', 'start', true, 'delivery' ) );
+		$this->assertStringNotContainsString( '.site', eizport_merge_css( $site, '.new {}', 'replace', true, 'delivery' ) );
 
 		// The same file again: its block is replaced in place, whatever the mode.
-		$again = eizport_merge_css( $end . "\n\n.after {}", '.new { color: blue; }', 'start', true, 'delivery 1a2b3c4d' );
-		$this->assertSame( ".site { color: black; }\n\n/* head delivery 1a2b3c4d */\n.new { color: blue; }\n/* tail delivery 1a2b3c4d */\n\n.after {}", $again );
+		$again = eizport_merge_css( $end . "\n\n.after {}", '.new { color: blue; }', 'start', true, 'delivery' );
+		$this->assertSame( ".site { color: black; }\n\n/* head delivery */\n.new { color: blue; }\n/* tail delivery */\n\n.after {}", $again );
 
 		// Without markers, rules the site has aren't repeated.
-		$plain = eizport_merge_css( $site, ".site  {  color: black; }\n.new {}", 'end', false, 'delivery 1a2b3c4d' );
+		$plain = eizport_merge_css( $site, ".site  {  color: black; }\n.new {}", 'end', false, 'delivery' );
 		$this->assertSame( ".site { color: black; }\n\n.new {}", $plain );
 		$this->assertSame( $site, eizport_merge_css( $site, '.site { color: black; }', 'end', false, '' ) );
 	}
@@ -226,7 +226,7 @@ class AppearanceTest extends Test_Case {
 		$this->assertSame( '.c { color: blue; }', $data['custom_css']['css'] );
 		$this->assertSame( 'start', $data['custom_css']['mode'] );
 		$this->assertFalse( $data['custom_css']['markers'] );
-		$this->assertStringStartsWith( 'delivery ', $data['custom_css']['id'] );
+		$this->assertSame( 'delivery', $data['custom_css']['id'], 'The file name, nothing else.' );
 		$this->assertSame( Appearance\css_id( 'delivery' ), $data['custom_css']['id'], 'The same name, the same ID.' );
 		$this->assertSame( "{$items[0]['key']}", Appearance\rule_key( '.a  { color: red; }' ), 'Keys ignore whitespace.' );
 
@@ -266,7 +266,7 @@ class AppearanceTest extends Test_Case {
 		update_option( 'sidebars_widgets', array( 'sidebar-1' => array( 'text-3' ) ) );
 
 		$entry = array(
-			'id'        => 'delivery 1a2b3c4d',
+			'id'        => 'delivery',
 			'sidebars'  => array(
 				'sidebar-1' => array( 'text-3' ),
 				'sidebar-9' => array( 'text-4' ),

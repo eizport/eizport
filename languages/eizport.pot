@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T18:12:42+00:00\n"
+"POT-Creation-Date: 2026-10-21T18:41:22+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -1556,7 +1556,7 @@ msgstr ""
 msgid "Replace this site's CSS"
 msgstr ""
 
-#. translators: %s: the name the CSS rules are marked with, like "delivery 1a2b3c4d".
+#. translators: %s: the name the CSS rules are marked with, like "delivery".
 #: includes/import.php:766
 #, php-format
 msgid "Between \"head\" and \"tail\" comments (%s): importing this file again replaces them"

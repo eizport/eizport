@@ -26,12 +26,12 @@ The images the items chosen use are exported with them, even when the Attachment
   ```css
   .their-own { color: purple; }
 
-  /* head delivery 0bf978b5 */
+  /* head delivery */
   .site-footer { background: #ffeedd; }
-  /* tail delivery 0bf978b5 */
+  /* tail delivery */
   ```
 
-  The name is the file's name and a short hash of this site and that name, the same for each delivery of the same file: **importing it again replaces its block in place**, whatever the mode, instead of adding the rules twice. Without the comments ([Settings → Export](../../settings/export-settings/), or the importer), rules the other site already has (same text) aren't repeated.
+  The name is the file's name (without extension), the same for each delivery of the same file: **importing it again replaces its block in place**, whatever the mode, instead of adding the rules twice. Without the comments ([Settings → Export](../../settings/export-settings/), or the importer), rules the other site already has (same text) aren't repeated.
 - Whoever imports can change both on the importer's step 1 (**Additional CSS**), with `css_mode`/`css_markers` in [`eizport/import`](../../developers/abilities/#eizportimport), or with `--css-mode`/`--[no-]css-markers` in [WP-CLI](../../developers/wp-cli/).
 - **Theme mods** chosen go to the active theme and are **merged** into its own: what the file doesn't hold stays (the other settings, the menus' locations). The logo and the header image point to the imported attachments, the header and background images' addresses to the imported files.
 - **Style groups** chosen replace the same groups on the other site's styles (a block theme); its other groups stay.

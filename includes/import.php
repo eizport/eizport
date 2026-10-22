@@ -762,7 +762,7 @@ function css_field() {
 			),
 			'markersName'  => CSS_MARKERS_FIELD,
 			'markers'      => ! empty( $css['markers'] ),
-			/* translators: %s: the name the CSS rules are marked with, like "delivery 1a2b3c4d". */
+			/* translators: %s: the name the CSS rules are marked with, like "delivery". */
 			'markersLabel' => sprintf( __( 'Between "head" and "tail" comments (%s): importing this file again replaces them', 'eizport' ), (string) ( $css['id'] ?? '' ) ),
 		)
 	);

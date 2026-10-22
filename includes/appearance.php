@@ -420,8 +420,8 @@ function css_chosen( $row, $keys ) {
 }
 
 /**
- * The block ID an export's CSS goes under: its file name and a hash of this
- * site and that name, the same for each delivery of the same file.
+ * The block ID an export's CSS goes under: its file name (without
+ * extension), the same for each delivery of the same file.
  *
  * @param string $filename The file's name, without extension.
  * @return string
@@ -429,7 +429,7 @@ function css_chosen( $row, $keys ) {
 function css_id( $filename ) {
 	$filename = '' !== (string) $filename ? (string) $filename : \Eizport\Export\default_filename();
 
-	return trim( (string) preg_replace( '/[^A-Za-z0-9._-]+/', '-', $filename ), '-' ) . ' ' . substr( md5( home_url() . '|' . $filename ), 0, 8 );
+	return trim( (string) preg_replace( '/[^A-Za-z0-9._-]+/', '-', $filename ), '-' );
 }
 
 /**
