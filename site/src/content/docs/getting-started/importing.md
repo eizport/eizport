@@ -57,6 +57,7 @@ Copies made by the Export screen are listed in the plugin's **Settings → Copie
 | Attachment URLs | Files come from the bundle; the importer creates the attachments and image sizes as usual. An attachment the site already has is reused, with or without *Update existing*: its URLs (and its image sizes') in the imported content point to the file here |
 | `post_content/<slug>.html` | Put back into the item's content |
 | `options.json` | Set at the end; options listed in `post_ids` get the imported post's ID |
+| An edited image's original (`_wp_attachment_edit_root_id`) | Points to the imported original when both come in the bundle; otherwise left out, as the WordPress Importer 0.9.7 does |
 | `term_media` in the manifest | Term meta holding an attachment ID get the imported attachment's ID |
 | Post IDs in blocks | Image, Gallery, Cover, Media & Text, File, Video and Audio blocks (`"id"`, `"ids"`, `"mediaId"`, `wp-image-N`, gallery `data-id`), `[gallery ids]` and navigation links to pages and posts point to the imported items, in new and updated items and in block widgets. Plugins add their blocks with `eizport_block_id_attributes` |
 | The look ([appearance](../../exporting/appearance/)) | CSS rules added to this site's CSS as the bundle asks (end or start; head/tail comments), or — chosen on import — replacing a head/tail block of the same name or all the CSS — step 1 of the importer, `css_mode`/`css_markers` and `--css-mode`/`--[no-]css-markers` change it; theme mods, style groups and widgets join this site's |
