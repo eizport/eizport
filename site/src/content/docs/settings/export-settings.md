@@ -15,3 +15,4 @@ All in one card, **With the items exported**:
 | **As plugin: allow importing again** — a plugin exported [as plugin](../../exporting/as-plugin/) still offers *Import again* once it imported | Off | — |
 | **As plugin holds the bundle as** — in a plugin exported [as plugin](../../exporting/as-plugin/): one `.wxrz` file, or its files next to the plugin's, or in a `bundle/` folder | One .wxrz file | — |
 | **Content as .html files** — each post's content in `post_content/<slug>.html` | On | `post_content` |
+| **Mark imported CSS** — CSS rules from the [look's rows](../../exporting/appearance/) go between `/* head … */` and `/* tail … */` comments named after the file, to show where they came from; the importer can change it | On | `css_markers` |

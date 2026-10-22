@@ -54,9 +54,10 @@ function groups() {
 			'label'   => __( 'Privacy policy page', 'eizport' ),
 			'options' => array( 'wp_page_for_privacy_policy' ),
 		),
+		// The theme mods have their own row (Customizer theme mods, includes/appearance.php).
 		'appearance' => array(
-			'label'   => __( 'Theme customizations (logo, menus, colors) and site icon', 'eizport' ),
-			'options' => array( 'theme_mods_' . get_stylesheet(), 'site_icon' ),
+			'label'   => __( 'Site logo and site icon', 'eizport' ),
+			'options' => array( 'site_logo', 'site_icon' ),
 		),
 	);
 
@@ -104,6 +105,10 @@ function linked_options() {
 		),
 		'site_icon'                  => array(
 			'label' => __( 'Site icon', 'eizport' ),
+		),
+		// The Site Logo block's image (block themes; classic ones keep it in the theme mods).
+		'site_logo'                  => array(
+			'label' => __( 'Site logo', 'eizport' ),
 		),
 	);
 

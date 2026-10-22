@@ -36,6 +36,8 @@ export interface ExportOptions {
 	review_count: number;
 	/** Bundles are plain .zip files (Settings → Export). */
 	bundle_zip: boolean;
+	/** The look's rows: key (theme_mods, custom_css, global_styles, global_css, widgets) => their items, none when the site has none. */
+	appearance: Record< string, LookItem[] >;
 	/** Navigation menus: classic ones and block navigations. */
 	menus: {
 		classic: ClassicMenu[];
@@ -72,6 +74,20 @@ export interface Suggestions {
 	options: string[];
 	/** Classic menus in theme locations; navigations the items or the theme use. */
 	menus?: { classic: number[]; navigation: number[] };
+	/** The look's items the site has, by row. */
+	appearance?: Record< string, string[] >;
+}
+
+/** An item of a look row: a theme mod, a CSS rule, a group of global styles, a widget. */
+export interface LookItem {
+	key: string;
+	label: string;
+	/** Where it is or which one (the setting's name, "Rule 3 of 3", the sidebar). */
+	details: string;
+	preview: {
+		type: 'image' | 'color' | 'colors' | 'code' | 'text';
+		value: string | string[];
+	};
 }
 
 /** A post's role on the site: an option pointing to it (eizport_linked_options). */
@@ -149,6 +165,12 @@ export interface FileSettings {
 	menu_ids: string[];
 	/** Every menu. */
 	menu_all: boolean;
+	/** The look's rows exported whole: theme_mods, custom_css, global_styles, global_css, widgets. */
+	appearance: string[];
+	/** The look's items chosen one by one, by row (theme mod names, rule keys, style groups, widget IDs). */
+	appearance_items: Record< string, string[] >;
+	/** How the CSS rules are added on import: after the other site's CSS, before it, instead of its block of the same name, or instead of all of it. */
+	css_mode: 'end' | 'start' | 'replace' | 'replace_all';
 	themes: string[];
 	plugins: string[];
 }
@@ -172,6 +194,7 @@ export interface Settings {
 	plugin_import_again: boolean;
 	defaults_scope: 'user' | 'site';
 	linked_options: 'both' | 'check' | 'export' | 'off';
+	css_markers: boolean;
 	lifetime_choices: { value: number; label: string }[];
 	scope_choices: { value: string; label: string }[];
 	linked_choices: { value: string; label: string }[];

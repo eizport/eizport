@@ -997,6 +997,10 @@ function where( $args ) {
 			$also = array_merge( $also, media_used( array_merge( (array) $ids, $children ) ) );
 		}
 	}
+	// The media the look chosen uses (logo, header and background images, widgets' media…).
+	if ( $media_used ) {
+		$also = array_merge( $also, \Eizport\Appearance\media_ids( \Eizport\Appearance\chosen( $args ) ) );
+	}
 	// The menus chosen: classic menus' items and block navigations.
 	$also = array_merge( $also, \Eizport\Menus\post_ids( $args ) );
 	if ( $also ) {

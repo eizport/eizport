@@ -189,6 +189,20 @@ function with_options_data( $options ) {
 	$GLOBALS['eizport_exported_ids'] = array();
 	$options['options']              = $names ? \Eizport\Options\data( $names ) : null;
 
+	// The look chosen on its own rows (Customizer, Site Editor, widgets) goes in the same file.
+	$look = \Eizport\Appearance\data( (array) ( $options['appearance'] ?? array() ), (array) ( $options['css'] ?? array() ) );
+	if ( $look['options'] || count( $look ) > 1 ) {
+		$data            = $options['options'] ? $options['options'] : array(
+			'format'   => 'eizport-options',
+			'version'  => \Eizport\Options\VERSION,
+			'options'  => array(),
+			'post_ids' => array(),
+		);
+		$data['options'] = array_merge( $data['options'], $look['options'] );
+		unset( $look['options'] );
+		$options['options'] = array_merge( $data, $look );
+	}
+
 	return $options;
 }
 
@@ -853,7 +867,8 @@ function apply_options_at_end( $data ) {
 		$GLOBALS['eizport_applied_options'] = eizport_apply_options(
 			$data,
 			is_object( $importer ) ? (array) $importer->processed_posts : array(),
-			is_object( $importer ) ? (array) $importer->processed_terms : array()
+			is_object( $importer ) ? (array) $importer->processed_terms : array(),
+			is_object( $importer ) ? (array) $importer->url_remap : array()
 		);
 	};
 	add_action( 'import_end', $action );

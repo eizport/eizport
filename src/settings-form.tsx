@@ -42,6 +42,7 @@ const KEYS: ( keyof Values )[] = [
 	'plugin_import_again',
 	'defaults_scope',
 	'linked_options',
+	'css_markers',
 ];
 
 export default function SettingsForm( {
@@ -117,6 +118,7 @@ export default function SettingsForm( {
 					plugin_import_again: settings.plugin_import_again,
 					defaults_scope: settings.defaults_scope,
 					linked_options: settings.linked_options,
+					css_markers: settings.css_markers,
 				} );
 			} )
 			.catch( ( error ) =>
@@ -202,6 +204,16 @@ export default function SettingsForm( {
 				Edit: 'toggle',
 				description: __(
 					'Bundles are plain .zip files, which any computer opens, instead of .wxrz (a gzipped tar). Same contents; the importer takes both.',
+					'eizport'
+				),
+			},
+			{
+				id: 'css_markers',
+				label: __( 'Mark imported CSS', 'eizport' ),
+				type: 'boolean',
+				Edit: 'toggle',
+				description: __(
+					'CSS rules exported from the look’s rows go between "head" and "tail" comments named after the file, to show where they came from. The default for exports and for the importer, which can change it.',
 					'eizport'
 				),
 			},

@@ -25,7 +25,7 @@ export const sidebar: SidebarGroup[] = [
 	{
 		title: 'Use cases',
 		icon: 'start',
-		pages: [ { title: 'Header menus to staging' } ],
+		pages: [ { title: 'Header menus to staging' }, { title: 'Theme look to staging' } ],
 	},
 	{
 		title: 'Exporting',
@@ -35,6 +35,7 @@ export const sidebar: SidebarGroup[] = [
 			{ title: 'Choosing items' },
 			{ title: 'Options' },
 			{ title: 'Menus' },
+			{ title: 'Appearance' },
 			{ title: 'Media' },
 			{ title: 'File and formats' },
 			{ title: 'As plugin' },

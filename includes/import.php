@@ -35,6 +35,12 @@ const IMPORTER_PLUGIN = 'wordpress-importer/wordpress-importer.php';
 const UPDATE_FIELD = 'eizport_update_existing';
 
 /**
+ * Fields of the importer's step 1: how the look's CSS is added, and whether it's marked.
+ */
+const CSS_MODE_FIELD    = 'eizport_css_mode';
+const CSS_MARKERS_FIELD = 'eizport_css_markers';
+
+/**
  * Bundle folder unpacked during this request, until the import attachment
  * that records it is created.
  *
@@ -218,7 +224,9 @@ function prepare_wxr( $source, $wxr_target ) {
  * @param string $file File to import.
  * @param array  $args `update_existing` (bool): update the items that
  *                     already exist (same slug); null or missing: as the
- *                     bundle asks.
+ *                     bundle asks. `css_mode` (end, start, replace) and
+ *                     `css_markers` (bool): how the look's CSS is added;
+ *                     missing, as the bundle asks.
  * @return array{log: string, posts: int}|\WP_Error The importer's messages and how many posts it created or found.
  */
 function import_file( $file, $args = array() ) {
@@ -241,6 +249,7 @@ function import_file( $file, $args = array() ) {
 		wp_set_current_user( $admins ? (int) $admins[0] : 0 );
 	}
 
+	look_import( $args );
 	$wxr = Files\temp_file( 'eizport-wxr' );
 	$dir = prepare_wxr( $file, $wxr );
 	if ( is_wp_error( $dir ) ) {
@@ -269,6 +278,7 @@ function import_file( $file, $args = array() ) {
 		remove_action( 'import_end', $media );
 	}
 	$update();
+	unset( $GLOBALS['eizport_look_import'] );
 	if ( $serve ) {
 		remove_filter( 'pre_http_request', $serve );
 		Bundle\delete_folder( $dir );
@@ -421,10 +431,13 @@ function update_existing( $on ) {
 	add_filter( 'wp_import_existing_post', $find, 20, 2 );
 	// Classic menus the site has take the file's items instead of keeping theirs (import-menus.php).
 	add_filter( 'eizport_menus_update_existing', '__return_true' );
+	// Widgets an earlier import of the same file added are updated in place (apply-options.php).
+	add_filter( 'eizport_look_update_existing', '__return_true' );
 
 	return function () use ( $find ) {
 		remove_filter( 'wp_import_existing_post', $find, 20 );
 		remove_filter( 'eizport_menus_update_existing', '__return_true' );
+		remove_filter( 'eizport_look_update_existing', '__return_true' );
 	};
 }
 
@@ -640,6 +653,34 @@ function serve_bundle() {
 	}
 	// "Update items that already exist", checked on step 1.
 	update_existing( ! empty( $_POST[ UPDATE_FIELD ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- the importer checked its nonce.
+	// How the look's CSS is added, as chosen on step 1 (when the bundle has some).
+	// phpcs:disable WordPress.Security.NonceVerification.Missing -- the importer checked its nonce.
+	if ( isset( $_POST[ CSS_MODE_FIELD ] ) ) {
+		look_import(
+			array(
+				'css_mode'    => sanitize_key( wp_unslash( $_POST[ CSS_MODE_FIELD ] ) ),
+				'css_markers' => ! empty( $_POST[ CSS_MARKERS_FIELD ] ),
+			)
+		);
+	}
+	// phpcs:enable
+}
+
+/**
+ * How whoever imports wants the look's CSS added (css_mode: end, start or
+ * replace; css_markers), read when the import ends (apply-options.php).
+ *
+ * @param array $args `css_mode` and `css_markers`, each optional: missing, as the bundle asks.
+ */
+function look_import( $args ) {
+	$choice = array();
+	if ( isset( $args['css_mode'] ) && in_array( $args['css_mode'], array( 'end', 'start', 'replace', 'replace_all' ), true ) ) {
+		$choice['css_mode'] = $args['css_mode'];
+	}
+	if ( array_key_exists( 'css_markers', $args ) && null !== $args['css_markers'] ) {
+		$choice['css_markers'] = (bool) $args['css_markers'];
+	}
+	$GLOBALS['eizport_look_import'] = $choice;
 }
 
 /**
@@ -682,6 +723,61 @@ function update_existing_field() {
 			'checked' => bundle_updates_existing( $dir ),
 			'heading' => __( 'Existing items', 'eizport' ),
 			'label'   => __( 'Update pages, posts and products that already exist (same slug) instead of adding copies', 'eizport' ),
+		)
+	);
+}
+
+/**
+ * Step 1: how the bundle's CSS rules are added (at the end of this site's
+ * CSS, at its start, or replacing it) and whether they're marked, as the
+ * bundle asks; only when it has some.
+ */
+function css_field() {
+	$dir  = $GLOBALS['eizport_bundle_import_id'] ? (string) get_post_meta( $GLOBALS['eizport_bundle_import_id'], Bundle\DIR_META, true ) : '';
+	$data = $dir ? Bundle\read_options( $dir ) : null;
+	$css  = is_array( $data ) ? ( $data['custom_css'] ?? $data['global_css'] ?? null ) : null;
+	if ( ! is_array( $css ) ) {
+		return;
+	}
+	$replace = eizport_css_has_block( (string) ( $css['id'] ?? '' ) );
+	steps_script(
+		'css',
+		array(
+			'heading'      => __( 'Additional CSS', 'eizport' ),
+			'modeName'     => CSS_MODE_FIELD,
+			'modeLabel'    => __( 'The file\'s CSS rules', 'eizport' ),
+			// As the export chose; replacing a block of the same name is offered below only when there is one (else: at the end).
+			'mode'         => 'replace' === ( $css['mode'] ?? '' ) && ! $replace ? 'end' : ( in_array( $css['mode'] ?? '', array( 'start', 'replace', 'replace_all' ), true ) ? $css['mode'] : 'end' ),
+			'modes'        => array_merge(
+				array(
+					array(
+						'value' => 'end',
+						'label' => __( 'Add at the end of this site\'s CSS', 'eizport' ),
+					),
+					array(
+						'value' => 'start',
+						'label' => __( 'Add at the start of this site\'s CSS', 'eizport' ),
+					),
+				),
+				// Only when this site already has a block of the same name (an earlier delivery of COMB-584.wxrz, say).
+				$replace ? array(
+					array(
+						'value' => 'replace',
+						/* translators: %s: the name of the CSS block, the file's name, like "delivery". */
+						'label' => sprintf( __( 'Replace the "%s" block this site already has', 'eizport' ), (string) ( $css['id'] ?? '' ) ),
+					),
+				) : array(),
+				array(
+					array(
+						'value' => 'replace_all',
+						'label' => __( 'Replace all of this site\'s CSS', 'eizport' ),
+					),
+				)
+			),
+			'markersName'  => CSS_MARKERS_FIELD,
+			'markers'      => ! empty( $css['markers'] ),
+			/* translators: %s: the name the CSS rules are marked with: the file's name, like "delivery". */
+			'markersLabel' => sprintf( __( 'Between "head" and "tail" comments with the file\'s name (%s)', 'eizport' ), (string) ( $css['id'] ?? '' ) ),
 		)
 	);
 }
@@ -743,6 +839,7 @@ function mention_wxrz() {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only picks the step.
 	if ( isset( $_GET['step'] ) && 1 === absint( $_GET['step'] ) ) {
 		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\update_existing_field', 5 );
+		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\css_field', 5 );
 	}
 	add_filter(
 		'gettext_wordpress-importer',

@@ -95,7 +95,7 @@ function register() {
 		'eizport/get-export-options',
 		array(
 			'label'               => __( 'Get export options', 'eizport' ),
-			'description'         => __( 'Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the navigation menus (classic, with their theme locations, and block navigations); the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export.', 'eizport' ),
+			'description'         => __( 'Lists what can be exported: content types with their item counts, taxonomy terms, statuses and months; the navigation menus (classic, with their theme locations, and block navigations); the site\'s look (Customizer theme mods and custom CSS, Site Editor global styles and CSS, widgets); the groups of settings; the default file name; the themes and plugins a Playground .zip can install; the homepage and posts page; how long copies last. Use it before eizport/export.', 'eizport' ),
 			'category'            => CATEGORY,
 			// No input. Not "properties => array()": PHP sends [] where JSON Schema needs {}.
 			'input_schema'        => array(
@@ -204,16 +204,17 @@ function register() {
 			'output_schema'       => array(
 				'type'       => 'object',
 				'properties' => array(
-					'items'   => array( 'type' => 'object' ),
-					'reviews' => array(
+					'items'      => array( 'type' => 'object' ),
+					'reviews'    => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'integer' ),
 					),
-					'options' => array(
+					'options'    => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'string' ),
 					),
-					'menus'   => array(
+					'appearance' => array( 'type' => array( 'object', 'array' ) ),
+					'menus'      => array(
 						'type'       => 'object',
 						'properties' => array(
 							'classic'    => array(
@@ -470,6 +471,10 @@ function register() {
 				'type'        => 'string',
 				'description' => __( 'What a plugin exported "as plugin" holds: wxrz (one .wxrz file), root (the bundle\'s files next to the plugin\'s) or folder (in a bundle/ folder).', 'eizport' ),
 			),
+			'css_markers'            => array(
+				'type'        => 'boolean',
+				'description' => __( 'Whether the CSS rules of an export go between "head" and "tail" comments named after the file, to show where they came from. The default for exports and imports.', 'eizport' ),
+			),
 			'attached_only'          => array(
 				'type'        => 'boolean',
 				'description' => __( 'Whether exports of some items bring only their attached media and featured images, like WordPress, without the media they use in their content.', 'eizport' ),
@@ -528,7 +533,7 @@ function register() {
 
 	$defaults_schema = array(
 		'type'        => 'object',
-		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews", "__menus"), review_ids, review_all, menu_ids ("c:<menu term ID>", "n:<navigation ID>"), menu_all, themes, plugins).', 'eizport' ),
+		'description' => __( 'The Export screen\'s choices: "types" (post type => "ids" or "filters", as eizport/export takes them) and "settings" (format "wxr" or "playground", filename, media, option_names, option_groups, option_all, include_suggested (rows that bring what the items chosen suggest: post types, "__options", "__reviews", "__menus"), review_ids, review_all, menu_ids ("c:<menu term ID>", "n:<navigation ID>"), menu_all, appearance (theme_mods, custom_css, global_styles, global_css, widgets), themes, plugins).', 'eizport' ),
 	);
 
 	wp_register_ability(
@@ -612,7 +617,7 @@ function register() {
 		'eizport/update-settings',
 		array(
 			'label'               => __( 'Update settings', 'eizport' ),
-			'description'         => __( 'Changes the plugin\'s settings given (copy_lifetime in seconds, replace_export, classic_ui, style_import, import_direct, content_files, attached_only, bundle_zip, plugin_content, plugin_import_again, defaults_scope, linked_options: one of the choices eizport/get-settings lists) and returns them all.', 'eizport' ),
+			'description'         => __( 'Changes the plugin\'s settings given (copy_lifetime in seconds, replace_export, classic_ui, style_import, import_direct, content_files, attached_only, bundle_zip, plugin_content, plugin_import_again, defaults_scope, linked_options, css_markers: one of the choices eizport/get-settings lists) and returns them all.', 'eizport' ),
 			'category'            => CATEGORY,
 			'input_schema'        => array(
 				'type'                 => 'object',
@@ -629,6 +634,7 @@ function register() {
 					'content_files'       => array( 'type' => 'boolean' ),
 					'attached_only'       => array( 'type' => 'boolean' ),
 					'bundle_zip'          => array( 'type' => 'boolean' ),
+					'css_markers'         => array( 'type' => 'boolean' ),
 					'plugin_import_again' => array( 'type' => 'boolean' ),
 					'plugin_content'      => array(
 						'type' => 'string',
@@ -680,6 +686,15 @@ function register() {
 					'update_existing' => array(
 						'type'        => 'boolean',
 						'description' => __( 'Update the posts that already exist (same type and slug) with the imported content instead of adding copies. Default: as the bundle asks (exported with update_existing), else no.', 'eizport' ),
+					),
+					'css_mode'        => array(
+						'type'        => 'string',
+						'enum'        => array( 'end', 'start', 'replace', 'replace_all' ),
+						'description' => __( 'How the bundle\'s CSS rules are added: at the end of this site\'s CSS, at its start, replacing the head/tail blocks of the same name this site already has (replace; with none, at the end), or replacing all of this site\'s CSS (replace_all). Default: as the bundle asks.', 'eizport' ),
+					),
+					'css_markers'     => array(
+						'type'        => 'boolean',
+						'description' => __( 'Put the CSS rules between "head" and "tail" comments named after the file. Default: as the bundle asks.', 'eizport' ),
 					),
 				),
 				'additionalProperties' => false,
@@ -841,6 +856,19 @@ function export_input_schema() {
 					'all' => array( 'type' => 'boolean' ),
 				),
 				'additionalProperties' => false,
+			),
+			'appearance'      => array(
+				'type'        => array( 'object', 'array' ),
+				'description' => __( 'The site\'s look, in the bundle\'s options file, row => "all" or the keys of the items chosen (eizport/get-export-options lists them): "theme_mods" (the Customizer\'s theme mods: logo, header and background images, colors), "custom_css" (the Customizer\'s Additional CSS, rule by rule), "global_styles" (the Site Editor\'s styles, group by group) and "global_css" (its Additional CSS, rule by rule) — block themes — and "widgets" (classic and block widgets). A list of rows means each of them whole. The media they use come along. Default: none.', 'eizport' ),
+			),
+			'css_mode'        => array(
+				'type'        => 'string',
+				'enum'        => array( 'end', 'start', 'replace', 'replace_all' ),
+				'description' => __( 'How the CSS rules are added on import: at the end of the other site\'s CSS (default), at its start, replacing the head/tail blocks of the same name it already has (replace; with none, at the end), or replacing all its CSS (replace_all). Whoever imports can change it.', 'eizport' ),
+			),
+			'css_markers'     => array(
+				'type'        => 'boolean',
+				'description' => __( 'Put the CSS rules between "head" and "tail" comments named after the file. Default: Settings → Export.', 'eizport' ),
 			),
 			'menus'           => array(
 				'type'                 => 'object',
@@ -1103,6 +1131,11 @@ function get_export_options( $input = array() ) { // phpcs:ignore Generic.CodeAn
 		'bundle_zip'    => \Eizport\Settings\get()['bundle_zip'],
 		// Navigation menus, for the Menus row.
 		'menus'         => \Eizport\Menus\all(),
+		// The look's rows (theme mods, custom CSS, global styles and CSS, widgets): key => their items, none when the site has none.
+		'appearance'    => array_combine(
+			\Eizport\Appearance\KEYS,
+			array_map( '\Eizport\Appearance\items', \Eizport\Appearance\KEYS )
+		),
 	);
 }
 
@@ -1204,6 +1237,9 @@ function export( $input = array() ) {
 			// Product reviews: null exports them all, as WordPress does.
 			'reviews'         => isset( $input['reviews'] ) && empty( $input['reviews']['all'] ) ? array_map( 'intval', (array) ( $input['reviews']['ids'] ?? array() ) ) : null,
 			'menus'           => menus_input( $input['menus'] ?? null ),
+			'appearance'      => \Eizport\Appearance\normalize( $input['appearance'] ?? array() ),
+			'css_mode'        => (string) ( $input['css_mode'] ?? 'end' ),
+			'css_markers'     => array_key_exists( 'css_markers', $input ) ? (bool) $input['css_markers'] : \Eizport\Settings\get()['css_markers'],
 			'blueprint'       => $blueprint,
 			'as_plugin'       => ! $blueprint && ! empty( $input['as_plugin'] ),
 			'update_existing' => ! empty( $input['update_existing'] ),
@@ -1308,7 +1344,7 @@ function import( $input = array() ) {
 	}
 
 	$GLOBALS['eizport_applied_options'] = array();
-	$result                             = \Eizport\Import\import_file( $file, array_key_exists( 'update_existing', (array) $input ) ? array( 'update_existing' => (bool) $input['update_existing'] ) : array() );
+	$result                             = \Eizport\Import\import_file( $file, array_intersect_key( (array) $input, array_flip( array( 'update_existing', 'css_mode', 'css_markers' ) ) ) );
 	if ( is_wp_error( $result ) ) {
 		if ( 'eizport_no_importer' === $result->get_error_code() ) {
 			return new WP_Error( 'eizport_not_initialized', $result->get_error_message() );
@@ -1400,6 +1436,14 @@ function get_suggestions( $input = array() ) {
 	// The menus the items use (theme locations, navigation blocks), and what the menus chosen point to.
 	$out['menus'] = \Eizport\Menus\suggested( array() === $out['chosen'] ? array() : array_merge( ...array_values( $out['chosen'] ) ) );
 	unset( $out['chosen'] );
+	// What the site has of its look: every item is suggested, row by row.
+	$out['appearance'] = array();
+	foreach ( \Eizport\Appearance\KEYS as $key ) {
+		$keys = wp_list_pluck( \Eizport\Appearance\items( $key ), 'key' );
+		if ( $keys ) {
+			$out['appearance'][ $key ] = $keys;
+		}
+	}
 	foreach ( \Eizport\Menus\targets( (array) ( $input['menus']['classic'] ?? array() ) ) as $type => $ids ) {
 		if ( isset( Selection\content_types()[ $type ] ) ) {
 			$out['items'][ $type ] = array_values( array_unique( array_merge( $out['items'][ $type ] ?? array(), $ids ) ) );

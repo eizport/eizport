@@ -40,6 +40,7 @@ import { mark } from '../../src/mark';
 import usePhoneView from '../../src/use-phone-view';
 import {
 	DEFAULT_STATE,
+	LOOK_ROWS,
 	MENUS_ROW,
 	OPTIONS_ROW,
 	REVIEWS_ROW,
@@ -128,11 +129,17 @@ function describe(
 	const parts: string[] = [];
 	const suggestions = suggestedFor( row );
 	const choice: TypeChoice | undefined = state.types[ row ];
+	// A look row whole: "All", like a whole type.
+	const lookWhole =
+		!! LOOK_ROWS[ row ] &&
+		state.settings.appearance.includes( LOOK_ROWS[ row ] );
 	if ( row === OPTIONS_ROW && state.settings.option_all ) {
 		parts.push( __( 'All options', 'eizport' ) );
 	} else if ( row === REVIEWS_ROW && state.settings.review_all ) {
 		parts.push( __( 'All', 'eizport' ) );
 	} else if ( row === MENUS_ROW && state.settings.menu_all ) {
+		parts.push( __( 'All', 'eizport' ) );
+	} else if ( lookWhole ) {
 		parts.push( __( 'All', 'eizport' ) );
 	} else if ( choice && ! choice.ids ) {
 		parts.push(
@@ -165,6 +172,8 @@ function describe(
 		exportsAll = state.settings.review_all;
 	} else if ( row === MENUS_ROW ) {
 		exportsAll = state.settings.menu_all;
+	} else if ( LOOK_ROWS[ row ] ) {
+		exportsAll = lookWhole;
 	}
 	if ( parts.length ) {
 		return { checked: true, summary: parts.join( ' + ' ), exportsAll };
@@ -342,6 +351,28 @@ function Stage() {
 				...describe( state, MENUS_ROW, options ),
 			} );
 		}
+		// The look, a row each: only what the site has.
+		const lookLabels: Record< string, string > = {
+			theme_mods: __( 'Customizer theme mods', 'eizport' ),
+			custom_css: __( 'Customizer custom CSS', 'eizport' ),
+			global_styles: __( 'Editor global styles', 'eizport' ),
+			global_css: __( 'Editor global CSS', 'eizport' ),
+			widgets: __( 'Widgets', 'eizport' ),
+		};
+		Object.entries( LOOK_ROWS ).forEach( ( [ row, key ] ) => {
+			const count = options?.appearance?.[ key ]?.length || 0;
+			if ( count ) {
+				list.push( {
+					type: row,
+					label: lookLabels[ key ],
+					count,
+					hierarchical: false,
+					statuses: [],
+					taxonomies: [],
+					...describe( state, row, options ),
+				} );
+			}
+		} );
 		if ( options ) {
 			// Options (settings), one by one, are exported with the content, in the same list.
 			list.push( {

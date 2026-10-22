@@ -113,6 +113,7 @@ export type SettingValues = Pick<
 	| 'plugin_import_again'
 	| 'defaults_scope'
 	| 'linked_options'
+	| 'css_markers'
 >;
 
 export const updateSettings = (

@@ -17,6 +17,9 @@ wp eizport export --types=page --menus=classic:18 --filename=header
 | --- | --- |
 | `--types=<types>` | Content types, comma-separated: `type:ID+ID` for some items, the type alone for all of it. None: all content |
 | `--options=<options>` | Option groups (like `basics`) and option names, comma-separated |
+| `--appearance=<parts>` | The site's [look](../../exporting/appearance/): `all`, or rows comma-separated, each whole or with its items' keys after a colon joined by `+` (`theme_mods:custom_logo+background_color,custom_css:r:1a2b3c4d5e`) |
+| `--css-mode=<mode>` | How the CSS rules are added on import: `end` (default), `start`, `replace` (the block of the same name; at the end with none) or `replace_all` |
+| `--[no-]css-markers` | Head/tail comments around the CSS rules (default: Settings → Export) |
 | `--menus=<menus>` | [Menus](../../exporting/menus/): `all`, or `classic:ID+ID` (menu term IDs) and `navigation:ID+ID` (`wp_navigation` IDs), comma-separated. None: no menus (all content already has them) |
 | `--[no-]media` | Media files inside; default: yes |
 | `--zip` | A `.zip` bundle instead of `.wxrz` |
@@ -49,6 +52,8 @@ wp eizport import site.wxrz --user=admin
 | `<file>` | The file or bundle folder to import |
 | `--user=<login>` | Who the posts go to; default: the first administrator |
 | `--[no-]update-existing` | Update the items that already exist (same type and slug) instead of adding copies; default: what the bundle asks |
+| `--css-mode=<mode>` | How the bundle's CSS rules are added: `end`, `start`, `replace` (the head/tail blocks of the same name this site has; with none, at the end) or `replace_all`; default: what the bundle asks |
+| `--[no-]css-markers` | Head/tail comments around them; default: what the bundle asks |
 
 It needs the WordPress Importer plugin installed (it doesn't have to be active).
 

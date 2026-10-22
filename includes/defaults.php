@@ -94,7 +94,7 @@ function sanitize( $defaults ) {
 	};
 
 	// Rows that bring what the items chosen suggest.
-	$rows    = array_merge( array( '__options', '__reviews', '__menus' ), array_keys( \Eizport\Selection\content_types() ) );
+	$rows    = array_merge( array( '__options', '__reviews', '__menus', '__theme_mods', '__custom_css', '__global_styles', '__global_css', '__widgets' ), array_keys( \Eizport\Selection\content_types() ) );
 	$suggest = array_values( array_intersect( $names( 'include_suggested' ), $rows ) );
 
 	// Only the filters set: the export's schema refuses empty ones.
@@ -119,6 +119,14 @@ function sanitize( $defaults ) {
 			'review_all'        => ! empty( $in['review_all'] ),
 			'menu_ids'          => array_values( preg_grep( '/^[cn]:\d+$/', $names( 'menu_ids' ) ) ),
 			'menu_all'          => ! empty( $in['menu_all'] ),
+			'appearance'        => array_values( array_intersect( \Eizport\Appearance\KEYS, $names( 'appearance' ) ) ),
+			'appearance_items'  => array_map(
+				function ( $keys ) {
+					return array_values( array_filter( array_map( 'strval', (array) $keys ), 'strlen' ) );
+				},
+				array_intersect_key( (array) ( $in['appearance_items'] ?? array() ), array_flip( \Eizport\Appearance\KEYS ) )
+			),
+			'css_mode'          => in_array( $in['css_mode'] ?? '', array( 'end', 'start', 'replace', 'replace_all' ), true ) ? $in['css_mode'] : 'end',
 			'as_plugin'         => ! empty( $in['as_plugin'] ),
 			'update_existing'   => ! empty( $in['update_existing'] ),
 			'themes'            => array_values( array_intersect( $names( 'themes' ), array_keys( \Eizport\Playground\theme_choices() ) ) ),
