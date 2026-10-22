@@ -46,20 +46,22 @@ function to_export( $args ) {
 }
 
 /**
- * The posts the export holds: what its query picks (Selection\where()).
+ * The posts the export holds, as Selection\where() picks them: the types'
+ * items (chosen or filtered), their children of other types, and the menus'
+ * items. Media have no terms worth carrying.
  *
  * @param array $args Export args.
  * @return int[]
  */
 function exported_ids( $args ) {
-	global $wpdb;
-
-	$where = \Eizport\Selection\where( $args );
-	if ( '' === $where ) {
-		return array();
+	$ids = array();
+	foreach ( (array) $args['eizport_types'] as $type => $spec ) {
+		$spec  = (array) $spec;
+		$items = isset( $spec['ids'] ) ? array_map( 'intval', (array) $spec['ids'] ) : \Eizport\Selection\filtered_ids( (string) $type, (array) ( $spec['filters'] ?? array() ) );
+		$ids   = array_merge( $ids, $items, \Eizport\Selection\children_of( $items, (string) $type ) );
 	}
 
-	return array_map( 'intval', $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE {$where}" ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the WHERE export_wp() runs, built and escaped by Selection\where().
+	return array_values( array_unique( array_filter( array_merge( $ids, \Eizport\Menus\post_ids( $args ) ) ) ) );
 }
 
 /**
