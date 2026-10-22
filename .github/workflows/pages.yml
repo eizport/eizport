@@ -55,7 +55,8 @@ jobs:
         if: ( inputs.ref || 'site' ) == 'site'
         run: |
           git fetch --force origin 'refs/tags/latest:refs/tags/latest'
-          changed=$(git diff --name-only latest...HEAD | grep -Ev '^(site/|\.github/workflows/pages\.yml$)' || true)
+          # Exception: the 1.1 manifest schema, published ahead of 1.1.0 to be tested.
+          changed=$(git diff --name-only latest...HEAD | grep -Ev '^(site/|\.github/workflows/pages\.yml$|schemas/1\.1/manifest\.json$)' || true)
           if [ -n "$changed" ]; then
             echo "::error::Only site/ may change on the site branch after a release:"
             echo "$changed"
