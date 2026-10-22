@@ -2,16 +2,31 @@
  * The Export screen's "Details" panel, above the list: a line with the
  * file's settings in a few words that opens (always closed to start) the quick
  * settings in a DataForm row (format, name, media; content as .html is a
- * setting) and "Themes and plugins" — a modal with the themes and plugins a
- * Playground .zip installs, enabled with that format.
+ * setting) and "Playground options" — a modal with where a Playground .zip
+ * opens and the themes and plugins it installs, enabled with that format: two
+ * groups that open one at a time, each with an ⓘ on its title.
  */
-import { Button, Modal, Popover, ToggleControl } from '@wordpress/components';
+import {
+	Button,
+	Modal,
+	Popover,
+	SelectControl,
+	ToggleControl,
+} from '@wordpress/components';
 import { DataForm, type Field, type Form } from '@wordpress/dataviews';
 import { useEffect, useMemo, useState } from '@wordpress/element';
+import type { ReactNode } from 'react';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { chevronDown, chevronRight, Icon, info } from '@wordpress/icons';
+import {
+	chevronDown,
+	chevronRight,
+	chevronUp,
+	Icon,
+	info,
+} from '@wordpress/icons';
 import { Stack } from '@wordpress/ui';
 
+import { getItems } from './abilities';
 import { needsBundle, setExportState, useExportState } from './state';
 import type { ExportOptions, FileSettings } from './types';
 
@@ -43,47 +58,44 @@ const BAR_FORM: Form = {
 	],
 };
 
-const MORE_FORM: Form = {
-	layout: { type: 'card' },
-	fields: [
-		{
-			id: 'playground',
-			label: __( 'Playground', 'eizport' ),
-			description: __(
-				'What the WordPress Playground .zip installs — any installed theme or plugin. The ones from the WordPress.org directory are installed from there, in the version this site has; premium and custom ones go inside the file: share it only where their licenses allow.',
-				'eizport'
-			),
-			layout: { type: 'card', isCollapsible: true, isOpened: true },
-			children: [ 'themes', 'plugins' ],
-		},
-	],
-};
+/**
+ * The Playground options' groups: a title with an ⓘ, and the fields.
+ */
+const PLAYGROUND_GROUPS: {
+	id: string;
+	title: string;
+	help: string;
+	form: Form;
+}[] = [
+	{
+		id: 'landing',
+		title: __( 'Landing page', 'eizport' ),
+		help: __(
+			'Where Playground opens once the site is ready: the home page, the dashboard, a page of this site or a path.',
+			'eizport'
+		),
+		form: { fields: [ 'landing', 'landing_page', 'landing_path' ] },
+	},
+	{
+		id: 'themes',
+		title: __( 'Themes and plugins', 'eizport' ),
+		help: __(
+			'What the WordPress Playground .zip installs — any installed theme or plugin, active or inactive as on this site; a child theme brings its parent, and the active theme is activated if chosen. The ones from the WordPress.org directory are installed from there, in the version this site has; premium and custom ones go inside the file: share it only where their licenses allow.',
+			'eizport'
+		),
+		form: { fields: [ 'themes', 'plugins' ] },
+	},
+];
 
 /**
- * A toggle with an ⓘ whose help shows in the same popover on hover and focus,
- * and stays open or closes on click.
+ * An ⓘ whose help shows in the same popover on hover and focus, and stays
+ * open or closes on click.
  *
- * @param props          Props.
- * @param props.label    Toggle label.
- * @param props.help     Help text.
- * @param props.checked  Whether it is on.
- * @param props.disabled Whether it can't change.
- * @param props.onChange Sets it.
- * @return Control.
+ * @param props      Props.
+ * @param props.help Help text.
+ * @return Button and popover.
  */
-function ToggleWithHelp( {
-	label,
-	help,
-	checked,
-	disabled = false,
-	onChange,
-}: {
-	label: string;
-	help: string;
-	checked: boolean;
-	disabled?: boolean;
-	onChange: ( checked: boolean ) => void;
-} ) {
+function InfoButton( { help }: { help: string } ) {
 	const [ anchor, setAnchor ] = useState< HTMLButtonElement | null >( null );
 	const [ isHelpOpen, setIsHelpOpen ] = useState( false );
 	const [ isHovered, setIsHovered ] = useState( false );
@@ -114,14 +126,7 @@ function ToggleWithHelp( {
 	}, [ isHelpOpen, anchor ] );
 
 	return (
-		<Stack align="center" gap="xs">
-			<ToggleControl
-				__nextHasNoMarginBottom
-				label={ label }
-				checked={ checked }
-				disabled={ disabled }
-				onChange={ onChange }
-			/>
+		<>
 			<Button
 				ref={ setAnchor }
 				size="small"
@@ -154,15 +159,159 @@ function ToggleWithHelp( {
 					{ help }
 				</Popover>
 			) }
+		</>
+	);
+}
+
+/**
+ * A toggle with an ⓘ (InfoButton).
+ *
+ * @param props          Props.
+ * @param props.label    Toggle label.
+ * @param props.help     Help text.
+ * @param props.checked  Whether it is on.
+ * @param props.disabled Whether it can't change.
+ * @param props.onChange Sets it.
+ * @return Control.
+ */
+function ToggleWithHelp( {
+	label,
+	help,
+	checked,
+	disabled = false,
+	onChange,
+}: {
+	label: string;
+	help: string;
+	checked: boolean;
+	disabled?: boolean;
+	onChange: ( checked: boolean ) => void;
+} ) {
+	return (
+		<Stack align="center" gap="xs">
+			<ToggleControl
+				__nextHasNoMarginBottom
+				label={ label }
+				checked={ checked }
+				disabled={ disabled }
+				onChange={ onChange }
+			/>
+			<InfoButton help={ help } />
 		</Stack>
+	);
+}
+
+/**
+ * A Playground options group: a header that opens and closes it (one open at
+ * a time), its title with an ⓘ, and, while closed, what it holds.
+ *
+ * @param props          Props.
+ * @param props.title    Title.
+ * @param props.help     Help on the ⓘ.
+ * @param props.summary  What it holds, while closed.
+ * @param props.isOpen   Whether it is open.
+ * @param props.onToggle Opens or closes it.
+ * @param props.children Its fields.
+ * @return Group.
+ */
+function PlaygroundGroup( {
+	title,
+	help,
+	summary,
+	isOpen,
+	onToggle,
+	children,
+}: {
+	title: string;
+	help: string;
+	summary: string;
+	isOpen: boolean;
+	onToggle: () => void;
+	children: ReactNode;
+} ) {
+	return (
+		<div className="eizport-playground-group">
+			<Stack
+				align="center"
+				justify="space-between"
+				className="eizport-playground-group__header"
+			>
+				<Stack align="center" gap="xs">
+					<h2 className="eizport-playground-group__title">{ title }</h2>
+					<InfoButton help={ help } />
+				</Stack>
+				<Button
+					__next40pxDefaultSize
+					size="compact"
+					variant="tertiary"
+					icon={ isOpen ? chevronUp : chevronDown }
+					iconPosition="right"
+					aria-expanded={ isOpen }
+					label={ title }
+					showTooltip={ false }
+					onClick={ onToggle }
+				>
+					{ isOpen ? null : summary }
+				</Button>
+			</Stack>
+			{ isOpen && (
+				<div className="eizport-playground-group__body">{ children }</div>
+			) }
+		</div>
 	);
 }
 
 type EditProps = {
 	data: FileSettings;
-	field: { label: string };
+	field: {
+		label: string;
+		elements?: { value: string | number; label: string }[];
+	};
 	onChange: ( edits: Partial< FileSettings > ) => void;
 };
+
+/**
+ * "Page" (the landing page): the site's pages, with an ⓘ saying the page
+ * goes in the blueprint as a relative path.
+ *
+ * @param props          Field edit props.
+ * @param props.data     File settings.
+ * @param props.field    The field.
+ * @param props.onChange Sets settings.
+ * @return Control.
+ */
+function LandingPageEdit( { data, field, onChange }: EditProps ) {
+	return (
+		<Stack direction="column" gap="xs">
+			<Stack align="center" gap="xs">
+				<span className="eizport-field-label">{ field.label }</span>
+				<InfoButton
+					help={ __(
+						'The page is saved as a relative path, /?pagename=<its slug>, so Playground opens the same page whatever ID it gets there.',
+						'eizport'
+					) }
+				/>
+			</Stack>
+			<SelectControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
+				hideLabelFromVision
+				label={ field.label }
+				value={ String( data.landing_page || 0 ) }
+				options={ [
+					{ value: '0', label: __( 'Choose a page', 'eizport' ) },
+					...( field.elements || [] ).map( ( element ) => ( {
+						value: String( element.value ),
+						label: element.label,
+					} ) ),
+				] }
+				onChange={ ( value ) =>
+					onChange( { landing_page: parseInt( value, 10 ) || 0 } )
+				}
+			/>
+		</Stack>
+	);
+}
 
 /**
  * "Media files": the attachments' files go inside the bundle.
@@ -259,7 +408,8 @@ function bundleLabel( options?: ExportOptions ): string {
  */
 function useFields(
 	options: ExportOptions | undefined,
-	bundle: boolean
+	bundle: boolean,
+	pages: { value: number; label: string }[] = []
 ): Field< FileSettings >[] {
 	return useMemo(
 		() => [
@@ -340,6 +490,34 @@ function useFields(
 				isVisible: ( item: FileSettings ) => hasCss( item ),
 			},
 			{
+				id: 'landing',
+				label: __( 'Opens on', 'eizport' ),
+				type: 'text',
+				// Buttons, like Format's.
+				Edit: 'toggleGroup',
+				elements: [
+					{ value: 'home', label: __( 'Home page', 'eizport' ) },
+					{ value: 'admin', label: __( 'Dashboard', 'eizport' ) },
+					{ value: 'page', label: __( 'A page', 'eizport' ) },
+					{ value: 'path', label: __( 'A path', 'eizport' ) },
+				],
+			},
+			{
+				id: 'landing_page',
+				label: __( 'Page', 'eizport' ),
+				type: 'integer',
+				Edit: LandingPageEdit,
+				elements: pages,
+				isVisible: ( item: FileSettings ) => item.landing === 'page',
+			},
+			{
+				id: 'landing_path',
+				label: __( 'Path', 'eizport' ),
+				type: 'text',
+				placeholder: '/shop/',
+				isVisible: ( item: FileSettings ) => item.landing === 'path',
+			},
+			{
 				id: 'themes',
 				label: __( 'Themes to install', 'eizport' ),
 				type: 'array',
@@ -352,25 +530,23 @@ function useFields(
 						  ) })`
 						: theme.name,
 				} ) ),
-				description: __(
-					'A child theme brings its parent. The active one is activated, if chosen.',
-					'eizport'
-				),
 			},
 			{
 				id: 'plugins',
-				label: __(
-					'Plugins to install and activate',
-					'eizport'
-				),
+				label: __( 'Plugins to install', 'eizport' ),
 				type: 'array',
+				// Active or inactive in Playground, as here.
 				elements: ( options?.plugins || [] ).map( ( plugin ) => ( {
 					value: plugin.plugin,
-					label: plugin.name,
+					label: `${ plugin.name } (${
+						plugin.active
+							? __( 'active', 'eizport' )
+							: __( 'inactive', 'eizport' )
+					})`,
 				} ) ),
 			},
 		],
-		[ options, bundle ]
+		[ options, bundle, pages ]
 	);
 }
 
@@ -381,9 +557,25 @@ function useFields(
  * @return Summary.
  */
 function summary( settings: FileSettings ): string {
+	const opens = landingWords( settings );
+	return sprintf(
+		/* translators: 1: number of themes and plugins ("1 theme, 2 plugins"), 2: where Playground opens (", opens on the dashboard"), or nothing for the home page. */
+		__( 'Playground: %1$s%2$s', 'eizport' ),
+		themesAndPlugins( settings ),
+		opens ? `, ${ opens }` : ''
+	);
+}
+
+/**
+ * The themes and plugins chosen, counted: "1 theme, 2 plugins".
+ *
+ * @param settings File settings.
+ * @return Words.
+ */
+function themesAndPlugins( settings: FileSettings ): string {
 	return sprintf(
 		/* translators: 1: number of themes, 2: number of plugins. */
-		__( 'Playground: %1$s, %2$s', 'eizport' ),
+		__( '%1$s, %2$s', 'eizport' ),
 		sprintf(
 			/* translators: %d: number of themes. */
 			_n( '%d theme', '%d themes', settings.themes.length, 'eizport' ),
@@ -394,6 +586,68 @@ function summary( settings: FileSettings ): string {
 			_n( '%d plugin', '%d plugins', settings.plugins.length, 'eizport' ),
 			settings.plugins.length
 		)
+	);
+}
+
+/**
+ * Where Playground opens, in words; nothing for the home page.
+ *
+ * @param settings File settings.
+ * @return Words.
+ */
+function landingWords( settings: FileSettings ): string {
+	if ( settings.landing === 'admin' ) {
+		return __( 'opens on the dashboard', 'eizport' );
+	}
+	if ( settings.landing === 'page' && settings.landing_page ) {
+		return __( 'opens on a page', 'eizport' );
+	}
+	if ( settings.landing === 'path' && settings.landing_path.startsWith( '/' ) ) {
+		/* translators: %s: a path, like "/shop/". */
+		return sprintf( __( 'opens on %s', 'eizport' ), settings.landing_path );
+	}
+	return '';
+}
+
+/**
+ * Where Playground opens, for the closed "Landing page" group: the page's
+ * title, the path, or the choice.
+ *
+ * @param settings File settings.
+ * @param pages    The site's pages.
+ * @return Words.
+ */
+function landingSummary(
+	settings: FileSettings,
+	pages: { value: number; label: string }[]
+): string {
+	if ( settings.landing === 'admin' ) {
+		return __( 'Dashboard', 'eizport' );
+	}
+	if ( settings.landing === 'page' && settings.landing_page ) {
+		return (
+			pages.find( ( page ) => page.value === settings.landing_page )
+				?.label || __( 'A page', 'eizport' )
+		);
+	}
+	if ( settings.landing === 'path' && settings.landing_path.startsWith( '/' ) ) {
+		return settings.landing_path;
+	}
+	return __( 'Home page', 'eizport' );
+}
+
+/**
+ * How many Playground options are set: themes, plugins, and one more when
+ * it doesn't open on the home page.
+ *
+ * @param settings File settings.
+ * @return Count.
+ */
+function playgroundCount( settings: FileSettings ): number {
+	return (
+		settings.themes.length +
+		settings.plugins.length +
+		( landingWords( settings ) ? 1 : 0 )
 	);
 }
 
@@ -414,9 +668,8 @@ function fileSummary( settings: FileSettings, format: string ): string {
 		settings.media
 			? __( 'media files', 'eizport' )
 			: __( 'no media files', 'eizport' ),
-		// Themes and plugins only when some are chosen.
-		...( settings.format === 'playground' &&
-		settings.themes.length + settings.plugins.length > 0
+		// Playground options only when some are set.
+		...( settings.format === 'playground' && playgroundCount( settings ) > 0
 			? [ summary( settings ) ]
 			: [] ),
 		...( settings.format !== 'playground' && settings.as_plugin
@@ -443,16 +696,41 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 	const state = useExportState();
 	const { settings } = state;
 	const bundle = needsBundle( state );
-	const fields = useFields( options, bundle );
+	// The site's pages, for "Opens on: A page" (the first hundred, by title).
+	const [ pages, setPages ] = useState< { value: number; label: string }[] >(
+		[]
+	);
+	useEffect( () => {
+		if ( settings.format !== 'playground' ) {
+			return;
+		}
+		getItems( {
+			type: 'page',
+			per_page: 100,
+			orderby: 'title',
+			order: 'asc',
+			filters: { status: 'publish' },
+		} )
+			.then( ( result ) =>
+				setPages(
+					result.items.map( ( item ) => ( {
+						value: item.id,
+						label: item.title || `#${ item.id }`,
+					} ) )
+				)
+			)
+			.catch( () => setPages( [] ) );
+	}, [ settings.format ] );
+	const fields = useFields( options, bundle, pages );
+	// The Playground options' groups open one at a time, closed to start with.
+	const [ openGroup, setOpenGroup ] = useState< string | null >( null );
 	const [ isOpen, setIsOpen ] = useState( false );
 	// Always closed to start with.
 	const [ isExpanded, setIsExpanded ] = useState( false );
 	const [ draft, setDraft ] = useState< FileSettings >( settings );
 	const isPlayground = settings.format === 'playground';
-	// Themes and plugins the Playground .zip installs, on its button.
-	const chosenCount = isPlayground
-		? settings.themes.length + settings.plugins.length
-		: 0;
+	// What the Playground options set, on their button: themes, plugins, and where it opens.
+	const chosenCount = isPlayground ? playgroundCount( settings ) : 0;
 
 	const save = ( edits: Partial< FileSettings > ) =>
 		setExportState( ( current ) => ( {
@@ -499,7 +777,7 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 				form={ BAR_FORM }
 				onChange={ save }
 			/>
-			{ /* Always there, so the bar doesn't shift: off unless Playground. A count, like the filters', once themes or plugins are chosen. */ }
+			{ /* Always there, so the bar doesn't shift: off unless Playground. A count, like the filters', once themes, plugins or a landing page are set. */ }
 			<Stack align="center" gap="md" className="eizport-file-bar__more">
 				<Button
 					__next40pxDefaultSize
@@ -509,15 +787,16 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 					className="eizport-counted"
 					aria-label={
 						chosenCount > 0
-							? `${ __( 'Themes and plugins', 'eizport' ) } (${ summary( settings ) })`
+							? `${ __( 'Playground options', 'eizport' ) } (${ summary( settings ) })`
 							: undefined
 					}
 					onClick={ () => {
 						setDraft( settings );
+						setOpenGroup( null );
 						setIsOpen( true );
 					} }
 				>
-					{ __( 'Themes and plugins', 'eizport' ) }
+					{ __( 'Playground options', 'eizport' ) }
 					{ chosenCount > 0 && (
 						<span className="eizport-count" aria-hidden="true">
 							{ chosenCount }
@@ -527,19 +806,43 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 			</Stack>
 			{ isOpen && (
 				<Modal
-					title={ __( 'Playground themes and plugins', 'eizport' ) }
+					title={ __( 'Playground options', 'eizport' ) }
 					size="medium"
 					className="eizport-options-modal"
 					onRequestClose={ () => setIsOpen( false ) }
 				>
-					<DataForm< FileSettings >
-						data={ draft }
-						fields={ fields }
-						form={ MORE_FORM }
-						onChange={ ( edits ) =>
-							setDraft( ( current ) => ( { ...current, ...edits } ) )
-						}
-					/>
+					<Stack direction="column" gap="md">
+						{ PLAYGROUND_GROUPS.map( ( group ) => (
+							<PlaygroundGroup
+								key={ group.id }
+								title={ group.title }
+								help={ group.help }
+								summary={
+									group.id === 'landing'
+										? landingSummary( draft, pages )
+										: themesAndPlugins( draft )
+								}
+								isOpen={ openGroup === group.id }
+								onToggle={ () =>
+									setOpenGroup(
+										openGroup === group.id ? null : group.id
+									)
+								}
+							>
+								<DataForm< FileSettings >
+									data={ draft }
+									fields={ fields }
+									form={ group.form }
+									onChange={ ( edits ) =>
+										setDraft( ( current ) => ( {
+											...current,
+											...edits,
+										} ) )
+									}
+								/>
+							</PlaygroundGroup>
+						) ) }
+					</Stack>
 					<Stack justify="flex-end" gap="sm" className="eizport-modal-actions">
 						<Button
 							__next40pxDefaultSize

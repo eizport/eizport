@@ -26,7 +26,7 @@ export interface ExportOptions {
 		parent: string;
 		active: boolean;
 	}[];
-	plugins: { plugin: string; name: string }[];
+	plugins: { plugin: string; name: string; active: boolean }[];
 	copy_lifetime: number;
 	/** Core's file name without extension, like "site.WordPress.2026-10-10". */
 	filename: string;
@@ -171,6 +171,12 @@ export interface FileSettings {
 	appearance_items: Record< string, string[] >;
 	/** How the CSS rules are added on import: after the other site's CSS, before it, instead of its block of the same name, or instead of all of it. */
 	css_mode: 'end' | 'start' | 'replace' | 'replace_all';
+	/** Where the Playground .zip opens: the home page, the dashboard, a page, or a path. */
+	landing: 'home' | 'admin' | 'page' | 'path';
+	/** The page it opens on (landing "page"). */
+	landing_page: number;
+	/** The path it opens on (landing "path"), like "/shop/". */
+	landing_path: string;
 	themes: string[];
 	plugins: string[];
 }

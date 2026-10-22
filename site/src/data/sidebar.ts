@@ -25,7 +25,7 @@ export const sidebar: SidebarGroup[] = [
 	{
 		title: 'Use cases',
 		icon: 'start',
-		pages: [ { title: 'Header menus to staging' }, { title: 'Theme look to staging' }, { title: 'Galleries to staging' }, { title: 'Internal links to staging' }, { title: 'Product categories to staging' }, { title: 'Second delivery to staging' }, { title: 'Subsite to subsite' } ],
+		pages: [ { title: 'Header menus to staging' }, { title: 'Theme look to staging' }, { title: 'Galleries to staging' }, { title: 'Internal links to staging' }, { title: 'Product categories to staging' }, { title: 'Second delivery to staging' }, { title: 'Subsite to subsite' }, { title: 'Client demo in Playground' } ],
 	},
 	{
 		title: 'Exporting',

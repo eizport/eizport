@@ -935,15 +935,19 @@ function export_input_schema() {
 			),
 			'blueprint'       => array(
 				'type'                 => 'object',
-				'description'          => __( 'Make a WordPress Playground .zip instead of a .wxrz, installing these themes (a child theme brings its parent) and plugins.', 'eizport' ),
+				'description'          => __( 'Make a WordPress Playground .zip instead of a .wxrz, installing these themes (a child theme brings its parent) and plugins (active or inactive as on this site), opening on landing_page.', 'eizport' ),
 				'properties'           => array(
-					'themes'  => array(
+					'themes'       => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'string' ),
 					),
-					'plugins' => array(
+					'plugins'      => array(
 						'type'  => 'array',
 						'items' => array( 'type' => 'string' ),
+					),
+					'landing_page' => array(
+						'type'        => array( 'string', 'object' ),
+						'description' => __( 'Where Playground opens: "home" (default), "admin", { "page": ID } (a published page of this site) or a path ("/shop/").', 'eizport' ),
 					),
 				),
 				'additionalProperties' => false,
@@ -1099,6 +1103,8 @@ function get_export_options( $input = array() ) { // phpcs:ignore Generic.CodeAn
 		$plugins[] = array(
 			'plugin' => $file,
 			'name'   => $data['Name'],
+			// Installed active or inactive in Playground, as here.
+			'active' => is_plugin_active( $file ),
 		);
 	}
 	$groups = array();
@@ -1253,6 +1259,7 @@ function export( $input = array() ) {
 				: Options\names_for( (array) ( $options['groups'] ?? array() ), $names, ! empty( $options['front_pages'] ) ),
 			'themes'          => $themes,
 			'plugins'         => $plugins,
+			'landing'         => $blueprint ? ( $input['blueprint']['landing_page'] ?? 'home' ) : 'home',
 			'filename'        => (string) ( $input['filename'] ?? '' ),
 		)
 	);

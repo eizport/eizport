@@ -147,6 +147,21 @@ function export_input( $assoc_args ) {
 			$input[ str_replace( '-', '_', $name ) ] = true;
 		}
 	}
+	// --playground: a Playground .zip, with --themes, --plugins and --landing.
+	if ( $flag( 'playground' ) ) {
+		$list    = function ( $name ) use ( $assoc_args ) {
+			return array_values( array_filter( array_map( 'trim', explode( ',', (string) ( $assoc_args[ $name ] ?? '' ) ) ) ) );
+		};
+		$landing = (string) ( $assoc_args['landing'] ?? 'home' );
+		if ( preg_match( '/^page:(\d+)$/', $landing, $m ) ) {
+			$landing = array( 'page' => (int) $m[1] );
+		}
+		$input['blueprint'] = array(
+			'themes'       => $list( 'themes' ),
+			'plugins'      => $list( 'plugins' ),
+			'landing_page' => $landing,
+		);
+	}
 	if ( isset( $assoc_args['filename'] ) ) {
 		$input['filename'] = (string) $assoc_args['filename'];
 	}
@@ -211,6 +226,22 @@ function export_input( $assoc_args ) {
  * [--update-existing]
  * : Ask the import to update the items that already exist (same slug).
  *
+ * [--playground]
+ * : A WordPress Playground .zip (blueprint, plain WXR, media and content
+ * files) instead of a bundle; not with --as-plugin or --update-existing.
+ *
+ * [--themes=<stylesheets>]
+ * : With --playground: themes to install, comma-separated (a child theme
+ * brings its parent; this site's theme is activated).
+ *
+ * [--plugins=<files>]
+ * : With --playground: plugins to install, comma-separated plugin files
+ * (woocommerce/woocommerce.php), active or inactive as on this site.
+ *
+ * [--landing=<where>]
+ * : With --playground: where it opens — home (default), admin, page:ID (a
+ * published page, saved as /?pagename=<its path>) or a path (/shop/).
+ *
  * [--filename=<name>]
  * : File name, without extension. With --dir, also the WXR's name there.
  *
@@ -224,6 +255,7 @@ function export_input( $assoc_args ) {
  *     wp eizport export --types=page:43,product --options=basics
  *     wp eizport export --types=page:43 --as-plugin --update-existing
  *     wp eizport export --types=page:43,product --dir=deliverables/bundle
+ *     wp eizport export --types=page:43 --playground --themes=twentytwentyfive --plugins=woocommerce/woocommerce.php --landing=page:43
  *
  * @param string[] $args       Positional arguments (none).
  * @param array    $assoc_args Flags.
@@ -238,6 +270,9 @@ function export_command( $args, $assoc_args = array() ) {
 	WP_CLI::log( $path );
 
 	if ( ! empty( $assoc_args['dir'] ) ) {
+		if ( ! empty( $assoc_args['playground'] ) ) {
+			WP_CLI::error( __( '--dir writes a bundle, not a Playground .zip: leave out --playground.', 'eizport' ) );
+		}
 		if ( ! empty( $assoc_args['as-plugin'] ) ) {
 			WP_CLI::error( __( '--dir writes a bundle, not a plugin: leave out --as-plugin.', 'eizport' ) );
 		}

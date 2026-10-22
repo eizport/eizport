@@ -24,6 +24,7 @@ const FILENAME_FIELD  = 'eizport_filename';
 const MEDIA_FIELD     = 'eizport_media';
 const BLUEPRINT_FIELD = 'eizport_blueprint';
 const THEMES_FIELD    = 'eizport_themes';
+const LANDING_FIELD   = 'eizport_landing';
 const PLUGINS_FIELD   = 'eizport_plugins';
 const KEEP_FIELD      = 'eizport_keep_copy';
 const SAVE_FIELD      = 'eizport_save_defaults';
@@ -251,7 +252,7 @@ function blueprint_options() {
 			</div>
 		</fieldset>
 		<fieldset>
-			<legend><?php esc_html_e( 'Plugins to install and activate:', 'eizport' ); ?></legend>
+			<legend><?php esc_html_e( 'Plugins to install, active or inactive as on this site:', 'eizport' ); ?></legend>
 			<div class="eizport-checklist">
 				<?php if ( ! $plugins ) : ?>
 					<?php esc_html_e( 'No other plugins.', 'eizport' ); ?>
@@ -259,13 +260,23 @@ function blueprint_options() {
 				<?php foreach ( $plugins as $file => $data ) : ?>
 					<label>
 						<input type="checkbox" name="<?php echo esc_attr( PLUGINS_FIELD ); ?>[]" value="<?php echo esc_attr( $file ); ?>" />
-						<?php echo esc_html( '' === $data['Name'] ? $file : $data['Name'] ); ?>
+						<?php
+						echo esc_html( '' === $data['Name'] ? $file : $data['Name'] );
+						echo ' — ' . esc_html( is_plugin_active( $file ) ? __( 'active', 'eizport' ) : __( 'inactive', 'eizport' ) );
+						?>
 					</label><br />
 				<?php endforeach; ?>
 			</div>
 		</fieldset>
 		<p class="description"><?php esc_html_e( 'The active theme is activated, if checked; else the first theme checked.', 'eizport' ); ?></p>
 		<p class="description"><?php esc_html_e( 'Any installed theme or plugin can go in. The ones from the WordPress.org directory are installed from there, in the version this site has; premium and custom ones are copied into the file: share it only where their licenses allow.', 'eizport' ); ?></p>
+		<p>
+			<label>
+				<?php esc_html_e( 'Opens on:', 'eizport' ); ?>
+				<input type="text" class="regular-text" name="<?php echo esc_attr( LANDING_FIELD ); ?>" placeholder="/" />
+			</label>
+			<span class="description"><?php esc_html_e( 'A path, like /shop/ or /wp-admin/; empty: the home page.', 'eizport' ); ?></span>
+		</p>
 	</div>
 	<?php
 }
@@ -321,6 +332,7 @@ function file_args( $args ) {
 			'options'      => $field( BUNDLE_FIELD ) ? \Eizport\Options\requested_names() : array(),
 			'themes'       => $list( THEMES_FIELD ),
 			'plugins'      => $list( PLUGINS_FIELD ),
+			'landing'      => isset( $_GET[ LANDING_FIELD ] ) ? sanitize_text_field( wp_unslash( $_GET[ LANDING_FIELD ] ) ) : 'home',
 			'filename'     => isset( $_GET[ FILENAME_FIELD ] ) ? sanitize_file_name( wp_unslash( $_GET[ FILENAME_FIELD ] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		)
 	);
@@ -362,6 +374,8 @@ function bundle_settings( $in ) {
 	$out['zip']     = $out['bundle'] && ! $out['blueprint'] && ! $out['as_plugin'] && ( array_key_exists( 'zip', $in ) ? ! empty( $in['zip'] ) : \Eizport\Settings\get()['bundle_zip'] );
 	$out['themes']  = array();
 	$out['plugins'] = array();
+	// Where the Playground .zip opens (Playground\landing_page()).
+	$out['landing'] = $out['blueprint'] ? \Eizport\Playground\landing_page( $in['landing'] ?? 'home' ) : '/';
 	if ( $out['blueprint'] ) {
 		$out['themes']  = array_values( array_intersect( array_unique( array_map( 'strval', (array) ( $in['themes'] ?? array() ) ) ), array_keys( \Eizport\Playground\theme_choices() ) ) );
 		$out['plugins'] = array_values( array_intersect( array_unique( array_map( 'strval', (array) ( $in['plugins'] ?? array() ) ) ), array_keys( \Eizport\Playground\plugin_choices() ) ) );
@@ -420,6 +434,7 @@ function file_output( $args ) {
 			'blueprint'    => $blueprint,
 			'themes'       => $args['themes'] ?? array(),
 			'plugins'      => $args['plugins'] ?? array(),
+			'landing'      => $args['landing'] ?? '/',
 			'keep_copy'    => ! empty( $args['keep_copy'] ),
 			'option_names' => $args['options'] ?? array(),
 			'appearance'   => \Eizport\Appearance\chosen( $args ),

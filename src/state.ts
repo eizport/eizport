@@ -28,6 +28,9 @@ export const DEFAULT_STATE: ExportState = {
 		appearance: [],
 		appearance_items: {},
 		css_mode: 'end',
+		landing: 'home',
+		landing_page: 0,
+		landing_path: '',
 		themes: [],
 		plugins: [],
 	},
@@ -493,9 +496,15 @@ export function exportInput( state: ExportState ): Record< string, unknown > {
 		input.update_existing = true;
 	}
 	if ( settings.format === 'playground' ) {
+		const landing: Record< string, unknown > = {
+			admin: 'admin',
+			page: settings.landing_page ? { page: settings.landing_page } : 'home',
+			path: settings.landing_path.startsWith( '/' ) ? settings.landing_path : 'home',
+		};
 		input.blueprint = {
 			themes: settings.themes,
 			plugins: settings.plugins,
+			landing_page: landing[ settings.landing ] ?? 'home',
 		};
 	}
 	return input;

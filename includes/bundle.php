@@ -77,6 +77,7 @@ function start_export( $wxr_name, $options = array() ) {
 			'blueprint'    => false,
 			'themes'       => array(),
 			'plugins'      => array(),
+			'landing'      => '/',
 			'keep_copy'    => false,
 			'download'     => '',
 			'option_names' => array(),
@@ -141,7 +142,7 @@ function start_export( $wxr_name, $options = array() ) {
 				rewind( $capture );
 				$copied = false !== stream_copy_to_stream( $capture, $out );
 				fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-				$zip = $copied ? \Eizport\Playground\build_zip( $wxr, $wxr_name, $options['themes'], $options['plugins'], $options['media'], $GLOBALS['eizport_post_content'], $options['options'] ) : false;
+				$zip = $copied ? \Eizport\Playground\build_zip( $wxr, $wxr_name, $options['themes'], $options['plugins'], $options['media'], $GLOBALS['eizport_post_content'], $options['options'], $options['landing'] ) : false;
 				if ( $zip ) {
 					\Eizport\Copies\cleanup();
 					$copy = $options['keep_copy'] ? \Eizport\Copies\keep( $zip, $options['download'] ) : '';
@@ -253,7 +254,7 @@ function write_export( $target, $wxr, $wxr_name, $options ) {
 		rewind( $wxr );
 		$copied = false !== stream_copy_to_stream( $wxr, $out );
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-		$zip = $copied ? \Eizport\Playground\build_zip( $plain, $wxr_name, $options['themes'], $options['plugins'], $options['media'], $GLOBALS['eizport_post_content'], $options['options'] ) : false;
+		$zip = $copied ? \Eizport\Playground\build_zip( $plain, $wxr_name, $options['themes'], $options['plugins'], $options['media'], $GLOBALS['eizport_post_content'], $options['options'], $options['landing'] ) : false;
 	}
 	wp_delete_file( $plain );
 

@@ -41,5 +41,32 @@ class CliTest extends Test_Case {
 
 	public function test_no_flags_export_everything_with_media() {
 		$this->assertSame( array( 'media' => true ), Cli\export_input( array() ) );
+
+		// A Playground .zip: themes, plugins and where it opens.
+		$this->assertSame(
+			array(
+				'themes'       => array( 'twentytwentyfive' ),
+				'plugins'      => array( 'akismet/akismet.php', 'hello.php' ),
+				'landing_page' => array( 'page' => 43 ),
+			),
+			Cli\export_input(
+				array(
+					'playground' => true,
+					'themes'     => 'twentytwentyfive',
+					'plugins'    => 'akismet/akismet.php, hello.php',
+					'landing'    => 'page:43',
+				)
+			)['blueprint']
+		);
+		$this->assertSame(
+			'/shop/',
+			Cli\export_input(
+				array(
+					'playground' => true,
+					'landing'    => '/shop/',
+				)
+			)['blueprint']['landing_page']
+		);
+		$this->assertArrayNotHasKey( 'blueprint', Cli\export_input( array( 'landing' => 'admin' ) ), 'Only with --playground.' );
 	}
 }
