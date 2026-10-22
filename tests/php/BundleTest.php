@@ -243,6 +243,72 @@ class BundleTest extends Test_Case {
 		$this->assertSame( Bundle\REQUIRES, $manifest['requires'] );
 		$this->assertSame( 'Eizport ' . \Eizport\VERSION, $manifest['generator'] );
 		$this->assertSame( \Eizport\VERSION, Bundle\made_with( $manifest ) );
+		$this->assertSame( Bundle\SCHEMA_URL, $manifest['$schema'], 'Editors validate it.' );
+		$this->assertStringStartsWith( '{"$schema":', (string) wp_json_encode( $manifest ), 'The first key.' );
+	}
+
+	public function test_a_hand_edited_manifest_is_checked_against_its_schema() {
+		$wxr   = $this->wxr( array() );
+		$base  = array(
+			'$schema'  => Bundle\SCHEMA_URL,
+			'format'   => 'wxrz',
+			'version'  => 2,
+			'requires' => '1.1.0',
+			'wxr'      => array( 'site.xml' ),
+			'files'    => new \stdClass(),
+		);
+		$edits = array(
+			'requires'        => array( 'requires' => 'soon' ),
+			'wxr'             => array( 'wxr' => array() ),
+			'update_existing' => array( 'update_existing' => 'yes' ),
+			'files'           => array( 'files' => array( 'http://x/a.jpg' => 'elsewhere/a.jpg' ) ),
+			'format'          => array( 'format' => 'zip' ),
+		);
+		foreach ( $edits as $key => $edit ) {
+			list( $result ) = $this->unpack_entries(
+				array(
+					'manifest.json' => (string) wp_json_encode( array_merge( $base, $edit ) ),
+					'site.xml'      => $wxr,
+				)
+			);
+			$this->assertInstanceOf( \WP_Error::class, $result, $key );
+			$this->assertSame( 'eizport_bundle_manifest', $result->get_error_code(), $key );
+			$this->assertStringContainsString( $key, $result->get_error_message(), 'The message names the key.' );
+		}
+
+		// Keys a later version adds don't make it invalid.
+		list( $more ) = $this->unpack_entries(
+			array(
+				'manifest.json' => (string) wp_json_encode( array_merge( $base, array( 'later' => true ) ) ),
+				'site.xml'      => $wxr,
+			)
+		);
+		$this->assertIsString( $more );
+	}
+
+	public function test_the_schema_files() {
+		$dir    = dirname( __DIR__, 2 ) . '/schemas/';
+		$schema = (string) file_get_contents( $dir . 'eizport-schema-2.json' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->assertSame( $schema, (string) file_get_contents( $dir . 'eizport-schema.json' ), 'The unnumbered one is the newest.' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$decoded = json_decode( $schema, true );
+		$this->assertIsArray( $decoded );
+		$this->assertSame( Bundle\SCHEMA_URL, $decoded['id'] );
+		$this->assertSame( array( 2 ), $decoded['properties']['version']['enum'] );
+
+		// Only what WordPress's validator understands (rest_validate_value_from_schema), so editors and the import agree.
+		$known = array( '$schema', 'id', 'title', 'description', 'type', 'required', 'properties', 'additionalProperties', 'items', 'minItems', 'minLength', 'pattern', 'enum' );
+		$walk  = function ( $node ) use ( &$walk, $known ) {
+			foreach ( $node as $keyword => $value ) {
+				$this->assertContains( $keyword, $known, 'Keyword ' . $keyword );
+				if ( 'properties' === $keyword ) {
+					array_map( $walk, $value );
+				} elseif ( in_array( $keyword, array( 'additionalProperties', 'items' ), true ) && is_array( $value ) ) {
+					$walk( $value );
+				}
+			}
+		};
+		$walk( $decoded );
 	}
 
 	public function test_a_bundle_for_a_newer_eizport_is_refused() {
@@ -261,7 +327,7 @@ class BundleTest extends Test_Case {
 		// This format, but a newer Eizport asked for.
 		list( $requires ) = $this->unpack_entries(
 			array(
-				'manifest.json' => '{"version":2,"requires":"9.0.0","wxr":["site.xml"],"files":{}}',
+				'manifest.json' => '{"format":"wxrz","version":2,"requires":"9.0.0","wxr":["site.xml"],"files":{}}',
 				'site.xml'      => $wxr,
 			)
 		);
@@ -272,6 +338,7 @@ class BundleTest extends Test_Case {
 			array(
 				'manifest.json' => wp_json_encode(
 					array(
+						'format'   => 'wxrz',
 						'version'  => Bundle\FORMAT_VERSION,
 						'requires' => preg_replace( '/-.*$/', '', \Eizport\VERSION ),
 						'wxr'      => array( 'site.xml' ),

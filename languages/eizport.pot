@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T10:03:59+00:00\n"
+"POT-Creation-Date: 2026-10-22T10:40:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -1407,35 +1407,41 @@ msgstr ""
 msgid "Sorry, you are not allowed to delete plugins."
 msgstr ""
 
-#: includes/bundle.php:581
+#: includes/bundle.php:585
 msgid "The .wxrz bundle is damaged or incomplete."
 msgstr ""
 
-#: includes/bundle.php:636
-#: includes/bundle.php:670
+#: includes/bundle.php:640
+#: includes/bundle.php:674
 msgid "The content of the .wxrz bundle could not be merged."
 msgstr ""
 
-#: includes/bundle.php:755
+#: includes/bundle.php:759
 msgid "The .wxrz bundle has no valid manifest."
 msgstr ""
 
+#. translators: %s: what the schema found wrong, e.g. "manifest.json[requires] does not match pattern …".
+#: includes/bundle.php:768
+#, php-format
+msgid "The .wxrz bundle has no valid manifest: %s"
+msgstr ""
+
 #. translators: 1: Eizport version that made the bundle, 2: the oldest Eizport that reads it, 3: this site's Eizport version.
-#: includes/bundle.php:795
+#: includes/bundle.php:825
 #, php-format
 msgid "This bundle was made with Eizport %1$s and needs Eizport %2$s or newer; this site has %3$s. Update Eizport, then import again."
 msgstr ""
 
-#: includes/bundle.php:796
-#: includes/bundle.php:797
+#: includes/bundle.php:826
+#: includes/bundle.php:827
 msgid "a newer version"
 msgstr ""
 
-#: includes/bundle.php:828
+#: includes/bundle.php:858
 msgid "Could not create a folder for the .wxrz bundle."
 msgstr ""
 
-#: includes/bundle.php:1116
+#: includes/bundle.php:1146
 msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 

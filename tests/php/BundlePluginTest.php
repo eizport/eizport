@@ -118,9 +118,11 @@ class BundlePluginTest extends Test_Case {
 			$source . '/manifest.json',
 			wp_json_encode(
 				array(
-					'version' => \Eizport\Bundle\FORMAT_VERSION,
-					'wxr'     => array( 'export.xml' ),
-					'files'   => array(),
+					'format'   => 'wxrz',
+					'version'  => \Eizport\Bundle\FORMAT_VERSION,
+					'requires' => \Eizport\Bundle\REQUIRES,
+					'wxr'      => array( 'export.xml' ),
+					'files'    => array(),
 				)
 			)
 		);

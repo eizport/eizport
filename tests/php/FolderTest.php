@@ -68,9 +68,11 @@ line two</p>]]></content:encoded><wp:post_name><![CDATA[home]]></wp:post_name></
 			$source . '/manifest.json',
 			wp_json_encode(
 				array(
-					'version' => \Eizport\Bundle\FORMAT_VERSION,
-					'wxr'     => array( 'export.xml' ),
-					'files'   => array(),
+					'format'   => 'wxrz',
+					'version'  => \Eizport\Bundle\FORMAT_VERSION,
+					'requires' => \Eizport\Bundle\REQUIRES,
+					'wxr'      => array( 'export.xml' ),
+					'files'    => array(),
 				)
 			)
 		);
@@ -104,9 +106,11 @@ line two</p>]]></content:encoded><wp:post_name><![CDATA[home]]></wp:post_name></
 			$source . '/manifest.json',
 			wp_json_encode(
 				array(
-					'version' => \Eizport\Bundle\FORMAT_VERSION,
-					'wxr'     => array( 'site.WordPress.2026-10-12.xml' ),
-					'files'   => array(),
+					'format'   => 'wxrz',
+					'version'  => \Eizport\Bundle\FORMAT_VERSION,
+					'requires' => \Eizport\Bundle\REQUIRES,
+					'wxr'      => array( 'site.WordPress.2026-10-12.xml' ),
+					'files'    => array(),
 				)
 			)
 		);
