@@ -17,6 +17,8 @@
  *     themes/<slug>.zip   optional: themes to install (a child theme brings
  *                         its parent) that aren't in the WordPress.org directory
  *     plugins/<slug>.zip  optional: plugins to install and activate, same
+ *     languages/…         optional: this site's translations of those themes
+ *                         and plugins, in the language Playground opens in
  *
  * Themes and plugins from the WordPress.org directory aren't in the .zip:
  * the blueprint installs them from there, in the version this site has.
@@ -69,9 +71,10 @@ const OPTIONS_PLUGIN = '/wordpress/wp-content/mu-plugins/eizport-options.php';
  *                           Bundle\collect_content() keeps them.
  * @param array    $options  The options file's data, or null.
  * @param string   $landing  Where Playground opens (landing_page()'s path).
+ * @param string   $language Its language (language()'s locale), or '' for English.
  * @return string|false The .zip.
  */
-function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $media = false, $content = array(), $options = null, $landing = '/' ) {
+function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $media = false, $content = array(), $options = null, $landing = '/', $language = '' ) {
 	$files = array();
 	if ( $media ) {
 		$handle = Files\open_read( $wxr );
@@ -85,7 +88,7 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
 	$entries = array(
 		BLUEPRINT => array(
 			'data' => wp_json_encode(
-				blueprint( $wxr_name, $themes, $plugins, wp_list_pluck( $files, 'entry' ), wp_list_pluck( $content, 'item' ), $options, $landing ),
+				blueprint( $wxr_name, $themes, $plugins, wp_list_pluck( $files, 'entry' ), wp_list_pluck( $content, 'item' ), $options, $landing, $language ),
 				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
 			),
 		),
@@ -93,6 +96,9 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
 	);
 	foreach ( $files as $file ) {
 		$entries[ $file['entry'] ] = array( 'path' => $file['path'] );
+	}
+	foreach ( language_files( $themes, $plugins, $language ) as $entry => $path ) {
+		$entries[ $entry ] = array( 'path' => $path );
 	}
 	foreach ( $content as $name => $file ) {
 		rewind( $file['stream'] );
@@ -159,6 +165,106 @@ function landing_page( $choice ) {
 }
 
 /**
+ * The language the Playground .zip opens in: this site's ("site", the
+ * default), the exporting user's ("user") or a locale ("pt_BR"). English,
+ * and a language this site doesn't have installed (its translations may not
+ * exist on WordPress.org, and Playground's setSiteLanguage step fails
+ * without them), give ''.
+ *
+ * @param string $choice The choice.
+ * @return string Locale, or '' for English.
+ */
+function language( $choice ) {
+	$choice = (string) $choice;
+	$locale = 'site' === $choice || '' === $choice ? get_locale() : ( 'user' === $choice ? get_user_locale() : $choice );
+
+	return 'en_US' !== $locale && in_array( $locale, get_available_languages(), true ) ? $locale : '';
+}
+
+/**
+ * The language choices, for the screens: "site" (always: English when this
+ * site's language is, or isn't installed), "user" (only when it is another
+ * one) and "en_US" (only when the site's isn't English), each with its
+ * locale and its name in that language ("Português do Brasil").
+ *
+ * @return array<int, array{value: string, locale: string, name: string}>
+ */
+function language_choices() {
+	$site    = language( 'site' );
+	$user    = language( 'user' );
+	$locales = array( 'site' => '' === $site ? 'en_US' : $site );
+	if ( '' !== $user && $user !== $site ) {
+		$locales['user'] = $user;
+	}
+	if ( '' !== $site ) {
+		$locales['en_US'] = 'en_US';
+	}
+
+	$names = array( 'en_US' => array( 'native_name' => 'English (United States)' ) );
+	if ( '' !== $site || '' !== $user ) {
+		// Cached by core for a while (Settings → General asks for the same list).
+		require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+		$names += wp_get_available_translations();
+	}
+
+	$choices = array();
+	foreach ( $locales as $value => $locale ) {
+		$choices[] = array(
+			'value'  => $value,
+			'locale' => $locale,
+			'name'   => (string) ( $names[ $locale ]['native_name'] ?? $locale ),
+		);
+	}
+
+	return $choices;
+}
+
+/**
+ * This site's translations of the themes (with their parents) and plugins
+ * that go inside the .zip — the ones from the WordPress.org directory get
+ * theirs from there, through setSiteLanguage — in that language:
+ * "languages/plugins/<text domain>-<locale>.mo" (and .l10n.php, and the
+ * scripts' .json) => file.
+ *
+ * @param string[] $themes   Stylesheets chosen.
+ * @param string[] $plugins  Plugin files chosen.
+ * @param string   $language Locale, or ''.
+ * @return array<string, string>
+ */
+function language_files( $themes, $plugins, $language ) {
+	if ( '' === $language ) {
+		return array();
+	}
+	$domains = array();
+	foreach ( with_parent_themes( $themes ) as $stylesheet ) {
+		if ( '' === directory_theme_zip( $stylesheet ) ) {
+			$domains[] = array( 'themes', (string) wp_get_theme( $stylesheet )->get( 'TextDomain' ) );
+		}
+	}
+	foreach ( $plugins as $plugin ) {
+		if ( '' === directory_plugin_zip( $plugin ) ) {
+			$domains[] = array( 'plugins', (string) ( plugin_choices()[ $plugin ]['TextDomain'] ?? '' ) );
+		}
+	}
+
+	$files = array();
+	foreach ( $domains as list( $kind, $domain ) ) {
+		if ( '' === $domain ) {
+			continue;
+		}
+		// Not "pt_BR_formal" for "pt_BR", nor the .po (GLOB_BRACE isn't everywhere).
+		$name = '/^' . preg_quote( $domain . '-' . $language, '/' ) . '(\.mo|\.l10n\.php|-[0-9a-f]{32}\.json)$/';
+		foreach ( array_filter( (array) glob( WP_LANG_DIR . '/' . $kind . '/' . $domain . '-' . $language . '*' ) ) as $path ) {
+			if ( preg_match( $name, basename( $path ) ) ) {
+				$files[ 'languages/' . $kind . '/' . basename( $path ) ] = $path;
+			}
+		}
+	}
+
+	return $files;
+}
+
+/**
  * The blueprint: installs the chosen plugins and themes (from the .zip),
  * activates a theme, then imports the WXR with Playground's importWxr step.
  * With attachment files or content files, they are written into
@@ -178,9 +284,10 @@ function landing_page( $choice ) {
  *                           and `slug`.
  * @param array    $options  The options file's data, or null.
  * @param string   $landing  Where Playground opens (landing_page()'s path).
+ * @param string   $language Its language (language()'s locale), or '' for English.
  * @return array
  */
-function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = array(), $content = array(), $options = null, $landing = '/' ) {
+function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = array(), $content = array(), $options = null, $landing = '/', $language = '' ) {
 	$steps = array();
 	foreach ( $plugins as $plugin ) {
 		$directory = directory_plugin_zip( $plugin );
@@ -199,6 +306,9 @@ function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = a
 			'options'    => array( 'activate' => is_plugin_active( $plugin ) ),
 		);
 	}
+
+	// Names of this site's translations in the .zip, before $themes holds the parents too.
+	$translations = array_keys( language_files( $themes, $plugins, $language ) );
 
 	$all      = with_parent_themes( $themes );
 	$activate = theme_to_activate( array_intersect( $themes, $all ) );
@@ -228,6 +338,25 @@ function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = a
 				),
 			'options'   => array( 'activate' => $stylesheet === $activate ),
 		);
+	}
+
+	if ( '' !== $language ) {
+		// After the installs: it fetches WordPress's translations and the installed themes' and plugins'.
+		$steps[] = array(
+			'step'     => 'setSiteLanguage',
+			'language' => $language,
+		);
+		// Then the ones only this site has (setSiteLanguage made the folders).
+		foreach ( $translations as $entry ) {
+			$steps[] = array(
+				'step' => 'writeFile',
+				'path' => '/wordpress/wp-content/' . $entry,
+				'data' => array(
+					'resource' => 'bundled',
+					'path'     => '/' . $entry,
+				),
+			);
+		}
 	}
 
 	$entries = array_merge( array_values( $files ), preg_filter( '#^#', CONTENT_FOLDER . '/', array_keys( $content ) ) );

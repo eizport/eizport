@@ -3,8 +3,9 @@
  * file's settings in a few words that opens (always closed to start) the quick
  * settings in a DataForm row (format, name, media; content as .html is a
  * setting) and "Playground options" — a modal with where a Playground .zip
- * opens and the themes and plugins it installs, enabled with that format: two
- * groups that open one at a time, each with an ⓘ on its title.
+ * opens, its language and the themes and plugins it installs, enabled with
+ * that format: three groups that open one at a time, each with an ⓘ on its
+ * title.
  */
 import {
 	Button,
@@ -75,6 +76,15 @@ const PLAYGROUND_GROUPS: {
 			'eizport'
 		),
 		form: { fields: [ 'landing', 'landing_page', 'landing_path' ] },
+	},
+	{
+		id: 'language',
+		title: __( 'Language', 'eizport' ),
+		help: __(
+			'The language Playground opens in: this site’s, yours or English. Playground fetches the translations of WordPress and of the themes and plugins from the WordPress.org directory; the ones of the others go inside the file.',
+			'eizport'
+		),
+		form: { fields: [ 'language' ] },
 	},
 	{
 		id: 'themes',
@@ -518,6 +528,13 @@ function useFields(
 				isVisible: ( item: FileSettings ) => item.landing === 'path',
 			},
 			{
+				id: 'language',
+				label: __( 'Opens in', 'eizport' ),
+				type: 'text',
+				Edit: 'toggleGroup',
+				elements: languageElements( options ),
+			},
+			{
 				id: 'themes',
 				label: __( 'Themes to install', 'eizport' ),
 				type: 'array',
@@ -556,14 +573,79 @@ function useFields(
  * @param settings File settings.
  * @return Summary.
  */
-function summary( settings: FileSettings ): string {
-	const opens = landingWords( settings );
+function summary( settings: FileSettings, options?: ExportOptions ): string {
+	const more = [ landingWords( settings ), languageWords( settings, options ) ]
+		.filter( Boolean )
+		.map( ( words ) => `, ${ words }` )
+		.join( '' );
 	return sprintf(
-		/* translators: 1: number of themes and plugins ("1 theme, 2 plugins"), 2: where Playground opens (", opens on the dashboard"), or nothing for the home page. */
+		/* translators: 1: number of themes and plugins ("1 theme, 2 plugins"), 2: where Playground opens and in what language (", opens on the dashboard, in Português do Brasil"), or nothing for the home page in the site's language. */
 		__( 'Playground: %1$s%2$s', 'eizport' ),
 		themesAndPlugins( settings ),
-		opens ? `, ${ opens }` : ''
+		more
 	);
+}
+
+/**
+ * The languages Playground can open in, for the "Opens in" buttons: "Site
+ * language (Português do Brasil)", "Your language (…)" when it's another
+ * one, "English (United States)".
+ *
+ * @param options What the site offers (eizport/get-export-options).
+ * @return Elements.
+ */
+function languageElements(
+	options: ExportOptions | undefined
+): { value: string; label: string }[] {
+	return ( options?.languages || [] ).map( ( choice ) => {
+		let label = choice.name;
+		if ( choice.value === 'site' ) {
+			/* translators: %s: a language's name, in that language ("Português do Brasil"). */
+			label = sprintf( __( 'Site language (%s)', 'eizport' ), choice.name );
+		} else if ( choice.value === 'user' ) {
+			/* translators: %s: a language's name, in that language ("Português do Brasil"). */
+			label = sprintf( __( 'Your language (%s)', 'eizport' ), choice.name );
+		}
+		return { value: choice.value, label };
+	} );
+}
+
+/**
+ * The language chosen, by name ("Português do Brasil"): the site's when the
+ * choice isn't offered (yours, when it's the site's too).
+ *
+ * @param settings File settings.
+ * @param options  What the site offers (eizport/get-export-options).
+ * @return Name, or '' before the options load.
+ */
+function languageName(
+	settings: FileSettings,
+	options: ExportOptions | undefined
+): string {
+	const languages = options?.languages || [];
+	return (
+		( languages.find( ( choice ) => choice.value === settings.language ) ||
+			languages[ 0 ] )?.name || ''
+	);
+}
+
+/**
+ * The language, in words, when it isn't the site's: "in English (United
+ * States)".
+ *
+ * @param settings File settings.
+ * @param options  What the site offers (eizport/get-export-options).
+ * @return Words.
+ */
+function languageWords(
+	settings: FileSettings,
+	options: ExportOptions | undefined
+): string {
+	const name = languageName( settings, options );
+	return settings.language !== 'site' && name
+		? /* translators: %s: a language's name, in that language ("Português do Brasil"). */
+		  sprintf( __( 'in %s', 'eizport' ), name )
+		: '';
 }
 
 /**
@@ -637,8 +719,32 @@ function landingSummary(
 }
 
 /**
- * How many Playground options are set: themes, plugins, and one more when
- * it doesn't open on the home page.
+ * A closed Playground options group, in a few words.
+ *
+ * @param id       The group.
+ * @param settings File settings.
+ * @param pages    The site's pages.
+ * @param options  What the site offers (eizport/get-export-options).
+ * @return Words.
+ */
+function groupSummary(
+	id: string,
+	settings: FileSettings,
+	pages: { value: number; label: string }[],
+	options: ExportOptions | undefined
+): string {
+	if ( id === 'landing' ) {
+		return landingSummary( settings, pages );
+	}
+	if ( id === 'language' ) {
+		return languageName( settings, options );
+	}
+	return themesAndPlugins( settings );
+}
+
+/**
+ * How many Playground options are set: themes, plugins, one more when it
+ * doesn't open on the home page and one more when not in the site's language.
  *
  * @param settings File settings.
  * @return Count.
@@ -647,7 +753,8 @@ function playgroundCount( settings: FileSettings ): number {
 	return (
 		settings.themes.length +
 		settings.plugins.length +
-		( landingWords( settings ) ? 1 : 0 )
+		( landingWords( settings ) ? 1 : 0 ) +
+		( settings.language !== 'site' ? 1 : 0 )
 	);
 }
 
@@ -658,7 +765,11 @@ function playgroundCount( settings: FileSettings ): number {
  * @param format   The format's label.
  * @return Summary, like "WXRZ · default filename · media files".
  */
-function fileSummary( settings: FileSettings, format: string ): string {
+function fileSummary(
+	settings: FileSettings,
+	format: string,
+	options?: ExportOptions
+): string {
 	return [
 		format,
 		// Whether a name was typed, not the name: it would make the line long.
@@ -670,7 +781,7 @@ function fileSummary( settings: FileSettings, format: string ): string {
 			: __( 'no media files', 'eizport' ),
 		// Playground options only when some are set.
 		...( settings.format === 'playground' && playgroundCount( settings ) > 0
-			? [ summary( settings ) ]
+			? [ summary( settings, options ) ]
 			: [] ),
 		...( settings.format !== 'playground' && settings.as_plugin
 			? [ __( 'as plugin', 'eizport' ) ]
@@ -760,7 +871,7 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 					{ __( 'Details', 'eizport' ) }
 				</span>
 				<span className="eizport-file-panel__summary">
-					{ fileSummary( settings, format ) }
+					{ fileSummary( settings, format, options ) }
 				</span>
 			</button>
 		<Stack
@@ -787,7 +898,7 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 					className="eizport-counted"
 					aria-label={
 						chosenCount > 0
-							? `${ __( 'Playground options', 'eizport' ) } (${ summary( settings ) })`
+							? `${ __( 'Playground options', 'eizport' ) } (${ summary( settings, options ) })`
 							: undefined
 					}
 					onClick={ () => {
@@ -817,11 +928,7 @@ export default function FileBar( { options }: { options?: ExportOptions } ) {
 								key={ group.id }
 								title={ group.title }
 								help={ group.help }
-								summary={
-									group.id === 'landing'
-										? landingSummary( draft, pages )
-										: themesAndPlugins( draft )
-								}
+								summary={ groupSummary( group.id, draft, pages, options ) }
 								isOpen={ openGroup === group.id }
 								onToggle={ () =>
 									setOpenGroup(
