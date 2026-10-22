@@ -132,6 +132,15 @@ foreach ( json_decode( file_get_contents( ABSPATH . "theme-posts.json" ), true )
 	}
 }'
 rm -f "$SOURCE/theme-posts.json"
+# The copied templates link to the development site: the import points only the imported items at this site.
+wp "$SOURCE" eval '
+foreach ( get_posts( array( "post_type" => array( "wp_template", "wp_template_part" ), "post_status" => "any", "numberposts" => -1 ) ) as $post ) {
+	$content = str_replace( "'"$(wp "$DEV_SITE" option get siteurl)"'", home_url(), $post->post_content );
+	if ( $content !== $post->post_content ) {
+		kses_remove_filters();
+		wp_update_post( wp_slash( array( "ID" => $post->ID, "post_content" => $content ) ) );
+	}
+}'
 # An export of chosen types carries the products' categories by name only (core
 # WXR; see BACKLOG): their descriptions come from the development site.
 wp "$DEV_SITE" eval 'echo wp_json_encode( wp_list_pluck( get_terms( array( "taxonomy" => "product_cat", "hide_empty" => false ) ), "description", "slug" ) );' > "$SOURCE/terms.json"
@@ -146,9 +155,6 @@ rm -f "$SOURCE/terms.json"
 # The logo and the site icon: imported with the media, under the same IDs.
 set_option "$SOURCE" site_logo "$(wp "$DEV_SITE" option get site_logo)"
 set_option "$SOURCE" site_icon "$(wp "$DEV_SITE" option get site_icon)"
-# Links to other pages, products and categories still point at the
-# development site (the import remaps media URLs only; see BACKLOG).
-wp "$SOURCE" search-replace "$(wp "$DEV_SITE" option get siteurl)" "$(wp "$SOURCE" option get siteurl)" "$(wp "$SOURCE" db prefix)posts" --quiet
 images=$(wp "$SOURCE" eval '
 	foreach ( get_posts( array( "post_type" => "attachment", "post_mime_type" => "image", "numberposts" => -1 ) ) as $image ) {
 		echo $image->ID, " ", get_attached_file( $image->ID ), "\n";

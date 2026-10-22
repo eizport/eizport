@@ -150,6 +150,25 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	}
 
 	/**
+	 * The importer's URL map with the source site's address too (plain and
+	 * JSON-escaped), so links in widgets and theme mods point to this site.
+	 *
+	 * @param array  $urls Old URL => new (WP_Import::$url_remap).
+	 * @param string $base The source site's address (WP_Import::$base_url).
+	 * @return array
+	 */
+	function eizport_urls_with_source( $urls, $base ) {
+		$from = untrailingslashit( $base );
+		$to   = untrailingslashit( home_url() );
+		if ( '' !== $from && $from !== $to ) {
+			$urls[ $from ]                            = $to;
+			$urls[ str_replace( '/', '\\/', $from ) ] = str_replace( '/', '\\/', $to );
+		}
+
+		return $urls;
+	}
+
+	/**
 	 * Old URLs replaced by the new ones, longest first (as the importer does).
 	 *
 	 * @param string $text Text.
