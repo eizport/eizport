@@ -137,6 +137,14 @@ The options file's data for such a row (`$out`, `$row`, `$keys`: the item keys c
 
 The keys such a row suggests for the posts chosen (`$keys`, `$row`, `$chosen`: post type => IDs).
 
+## eizport_look_media
+
+The attachments the look chosen uses (`$ids`, `$choice`): a plugin's row adds the ones its items use (the Elementor row: images of templates and site settings).
+
+## eizport_content_file
+
+The file a post's content goes to with *Content as .html files* on (`$file`, `$post`): `null` for `post_content/<slug>.html`, or `array( 'extension' => 'json', 'data' => … )` for a page builder's design in its own format — the post's content then stays in the WXR, and the importer keeps the `.json` for whoever applies it when the import ends (`$GLOBALS['eizport_content_data']`, by the item's original ID). The Elementor compatibility uses it.
+
 ## eizport_advanced_custom_fields_id_types
 
 The ACF field types whose values are IDs an import maps: type => `post`, `term` or `user`. Add a plugin's own field type:

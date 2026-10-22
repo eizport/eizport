@@ -1,9 +1,9 @@
 ---
 title: "Compatibilities"
-description: "Which plugins are supported (WooCommerce, Advanced Custom Fields) and which aren't officially yet (Elementor), how support is built from the public hooks, and how a plugin ships its own."
+description: "Which plugins are supported (WooCommerce, Advanced Custom Fields, Elementor), how support is built from the public hooks, and how a plugin ships its own."
 ---
 
-Support for another plugin is a **compatibility**: a file that uses only the public [hooks](../hooks/). The plugin ships two, for WooCommerce and Advanced Custom Fields; any plugin can add its own — or replace the bundled one.
+Support for another plugin is a **compatibility**: a file that uses only the public [hooks](../hooks/). The plugin ships three, for WooCommerce, Advanced Custom Fields and Elementor; any plugin can add its own — or replace the bundled one.
 
 ## At a glance
 
@@ -11,9 +11,7 @@ Support for another plugin is a **compatibility**: a file that uses only the pub
 | --- | --- | --- |
 | **WooCommerce** | Supported | Products, variations, orders and coupons as content types; shop, cart, checkout, my account and terms pages as linked settings; product galleries and category images; products shown by blocks suggested; product reviews in their own row; the product lookup table refreshed after an import |
 | **Advanced Custom Fields (ACF)** | Supported (6.1 or later, free) | Its post types, taxonomies and field groups in its own export format, on their own row, imported before the content; fields that store IDs remapped; field groups and linked posts suggested; image and file fields as media used |
-| **Elementor** | Not officially supported yet, not tested | See below |
-
-Not tested means just that: nothing was checked against Elementor. What follows comes from how it stores its data, and from what the WordPress Importer does with it.
+| **Elementor** | Supported (free) | Site settings (the Kit) and templates on their own row; pages' designs as `.json` files; all of it through Elementor's own exporter and importer, with images, templates and links remapped; templates and site settings suggested; generated CSS rebuilt |
 
 ### Advanced Custom Fields
 
@@ -25,12 +23,13 @@ Supported, with its own row: see [Advanced Custom Fields](../../exporting/advanc
 
 ### Elementor
 
-- **Designs** live in each page's custom fields (`_elementor_data`, a JSON holding the widgets, with image IDs and URLs), so they come along with the pages.
-- **IDs and URLs inside that JSON** aren't remapped by the WordPress Importer: images can keep pointing to the old site's IDs and addresses.
-- **Global styles and templates** (the site kit, saved templates) are Elementor's own content; Elementor's *Import / Export Kit* tool is made for them.
-- **Generated CSS** files aren't exported; Elementor builds them again (*Elementor → Tools → Regenerate CSS & Data*).
+Supported, with Elementor's own exporter and importer: see [Elementor](../../exporting/elementor/). In short:
 
-Using one of these and want it supported? [Open an issue](https://github.com/eizport/eizport/issues) with what you export — or write a compatibility, below.
+- **Site settings** (the Kit) and **templates** go on their own row, in Elementor's formats, and come in through Elementor's own import; a later delivery updates them.
+- **Pages built with Elementor** carry their design as `post_content/<slug>.json`, brought in by Elementor's document import, with images, templates and links pointing to the other site's items.
+- **Elementor Pro** (Theme Builder, popups, forms) isn't covered yet; dynamic tags keep the IDs they hold.
+
+Using another plugin and want it supported? [Open an issue](https://github.com/eizport/eizport/issues) with what you export — or write a compatibility, below.
 
 ## The WooCommerce compatibility
 
@@ -60,6 +59,19 @@ Using one of these and want it supported? [Open an issue](https://github.com/eiz
 | `import_start` | Imports the post types, taxonomies and field groups (`acf_import_internal_post_type()`), and registers them |
 | `import_end` | Maps the IDs in the values and in field groups' location rules |
 | `wp_import_existing_post` | ACF's own posts in a WXR exist by key, not by title and date |
+
+## The Elementor compatibility
+
+`includes/compat/elementor.php`, registered on `eizport_register_compat` when Elementor is loaded, and `includes/import-elementor.php` for the import:
+
+| Hook | Adds |
+| --- | --- |
+| `eizport_content_types` | Leaves Elementor's library (templates and Kits) out of the content rows |
+| `eizport_look_items`, `eizport_look_data`, `eizport_look_suggested`, `eizport_look_media` | The *Elementor* row: the site settings and templates, their export (Elementor's formats), what the pages chosen suggest and the images they use |
+| `eizport_content_file` | A page built with Elementor as `post_content/<slug>.json` |
+| `wxr_export_skip_postmeta` | Its `_elementor_data`, `_elementor_page_settings` and `_elementor_css` out of the WXR, when the `.json` carries them |
+| `eizport_media_used` | The images of the pages' designs |
+| `import_end` | Templates, site settings and designs through Elementor's own import (`documents->create()`, the document's `import()`, the *Site_Settings* runner); the attachments marked so Elementor's import finds them; its CSS cache cleared |
 
 ## Writing one
 

@@ -87,7 +87,12 @@ add_filter(
 		$slug = (string) ( $post['post_name'] ?? '' );
 		$file = $by_id[ (int) ( $post['post_id'] ?? 0 ) ] ?? ( '' === $slug ? '' : $slug . '.html' );
 		// One level, no hidden files: as Bundle\is_content_name().
-		if ( ! preg_match( '/^[A-Za-z0-9%_-][A-Za-z0-9%._-]*\.html$/', $file ) || ! is_file( $dir . '/' . $file ) ) {
+		if ( ! preg_match( '/^[A-Za-z0-9%_-][A-Za-z0-9%._-]*\.(html|json)$/', $file ) || ! is_file( $dir . '/' . $file ) ) {
+			return $post;
+		}
+		if ( '.json' === substr( $file, -5 ) ) {
+			// A builder's design: kept for when the import ends (import-elementor.php), the content stays.
+			$GLOBALS['eizport_content_data'][ (int) ( $post['post_id'] ?? 0 ) ] = (string) file_get_contents( $dir . '/' . $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			return $post;
 		}
 		$post['post_content'] = (string) file_get_contents( $dir . '/' . $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -105,6 +110,10 @@ add_action(
 		$data = is_file( $path ) ? json_decode( (string) file_get_contents( $path ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		if ( function_exists( 'eizport_acf_start' ) ) {
 			eizport_acf_start( $data );
+		}
+		// Elementor's templates and site settings, applied when it ends (import-elementor.php).
+		if ( function_exists( 'eizport_elementor_start' ) ) {
+			eizport_elementor_start( $data );
 		}
 	}
 );
