@@ -134,6 +134,10 @@ WooCommerce, with its own support: products, orders and coupons, its pages as li
 
 A plugin .zip that holds the bundle. Install it on the other site (Plugins → Add Plugin → Upload Plugin) and open its screen under Tools: it checks that Eizport and the WordPress Importer are there, imports the bundle with one click, and then offers to delete itself.
 
+### Does it work on multisite? ###
+
+Yes. Activate it on the network or on each site: every site exports and imports on its own (its files in its own uploads folder, its own saved defaults), links are mapped between subsites, and uninstalling cleans every site. Site administrators export and import; WordPress filters imported content for those who can't post unfiltered HTML. Docs: https://eizport.github.io/docs/getting-started/multisite/
+
 ### Is there a size limit? ###
 
 Uploads are limited by your server's PHP settings (`upload_max_filesize` and `post_max_size`), which apply to the compressed file. A bundle may expand to 512 MB by default; developers can change it with the `eizport_wxrz_max_bytes` filter.
