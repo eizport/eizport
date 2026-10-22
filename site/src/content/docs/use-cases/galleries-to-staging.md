@@ -21,4 +21,3 @@ Only IDs that came in the file and changed are touched: a block pointing to some
 ## What it doesn't
 
 - A plugin's own blocks, until it lists them (the [`eizport_block_id_attributes`](../../developers/hooks/#eizport_block_id_attributes) filter).
-- Links to the source site's pages in the text (addresses, not IDs) — see the [issues](https://github.com/eizport/eizport/issues).
