@@ -25,7 +25,7 @@ export const sidebar: SidebarGroup[] = [
 	{
 		title: 'Use cases',
 		icon: 'start',
-		pages: [ { title: 'Header menus to staging' }, { title: 'Theme look to staging' }, { title: 'Galleries to staging' }, { title: 'Internal links to staging' }, { title: 'Product categories to staging' }, { title: 'Second delivery to staging' }, { title: 'Subsite to subsite' }, { title: 'Client demo in Playground' }, { title: 'Playground in your language' }, { title: 'Custom post types in Playground' }, { title: 'Advanced Custom Fields to staging' } ],
+		pages: [ { title: 'Header menus to staging' }, { title: 'Theme look to staging' }, { title: 'Galleries to staging' }, { title: 'Internal links to staging' }, { title: 'Product categories to staging' }, { title: 'Second delivery to staging' }, { title: 'Subsite to subsite' }, { title: 'Client demo in Playground' }, { title: 'Playground in your language' }, { title: 'Custom post types in Playground' }, { title: 'Advanced Custom Fields to staging' }, { title: 'Elementor to staging' } ],
 	},
 	{
 		title: 'Exporting',
@@ -37,6 +37,7 @@ export const sidebar: SidebarGroup[] = [
 			{ title: 'Menus' },
 			{ title: 'Appearance' },
 			{ title: 'Advanced Custom Fields' },
+			{ title: 'Elementor' },
 			{ title: 'Media' },
 			{ title: 'File and formats' },
 			{ title: 'As plugin' },

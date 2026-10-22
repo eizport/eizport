@@ -27,7 +27,7 @@ Leave it empty for WordPress's usual name, `<site name>.WordPress.<date>` — th
 
 ## Content as .html files
 
-With **Settings → Export → Content as .html files** (on by default), each post's content goes to `post_content/<slug>.html` instead of inside the WXR — easy to read, diff and keep under version control. On import it is put back before the importer runs.
+With **Settings → Export → Content as .html files** (on by default), each post's content goes to `post_content/<slug>.html` instead of inside the WXR — easy to read, diff and keep under version control. On import it is put back before the importer runs. A page built with [Elementor](../elementor/) goes as `post_content/<slug>.json` instead: its design in Elementor's format, brought in by Elementor's own import.
 
 ## Copies
 

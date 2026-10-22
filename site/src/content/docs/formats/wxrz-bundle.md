@@ -17,6 +17,7 @@ manifest.json                      required, first
 <site>.WordPress.<date>.xml        the WXR (WordPress eXtended RSS)
 options.json                       optional: settings
 post_content/<slug>.html           optional: one per post with content
+post_content/<slug>.json           optional: one per page built with Elementor, its design
 uploads/2026/10/photo.jpg          optional: media files, as in wp-content/uploads
 ```
 
