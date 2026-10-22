@@ -213,7 +213,7 @@ export default function SettingsForm( {
 				type: 'boolean',
 				Edit: 'toggle',
 				description: __(
-					'CSS rules exported from the look’s rows go between "head" and "tail" comments named after the file, so importing the same file again replaces them instead of adding them twice. The default for exports and for the importer, which can change it.',
+					'CSS rules exported from the look’s rows go between "head" and "tail" comments named after the file, to show where they came from. The default for exports and for the importer, which can change it.',
 					'eizport'
 				),
 			},

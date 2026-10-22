@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T18:41:22+00:00\n"
+"POT-Creation-Date: 2026-10-21T19:17:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -221,7 +221,7 @@ msgid "Leave out"
 msgstr ""
 
 #. translators: %s: file name.
-#: includes/cli.php:250
+#: includes/cli.php:249
 #, js-format,php-format
 msgid "%s is ready."
 msgstr ""
@@ -266,7 +266,7 @@ msgstr ""
 msgid "Check the settings to export: they join the other site’s theme mods, the rest staying as it is there. Images go with them."
 msgstr ""
 
-msgid "Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS, at its start, or replace it (Details); with head/tail comments, a second delivery replaces them."
+msgid "Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS, at its start, or replace it (Details), between head/tail comments named after the file."
 msgstr ""
 
 msgid "Check the groups to export: each replaces the same group on the other site, the rest of its styles staying."
@@ -545,7 +545,7 @@ msgstr ""
 msgid "Mark imported CSS"
 msgstr ""
 
-msgid "CSS rules exported from the look’s rows go between \"head\" and \"tail\" comments named after the file, so importing the same file again replaces them instead of adding them twice. The default for exports and for the importer, which can change it."
+msgid "CSS rules exported from the look’s rows go between \"head\" and \"tail\" comments named after the file, to show where they came from. The default for exports and for the importer, which can change it."
 msgstr ""
 
 msgid "As plugin holds the bundle as"
@@ -754,7 +754,7 @@ msgid "What a plugin exported \"as plugin\" holds: wxrz (one .wxrz file), root (
 msgstr ""
 
 #: includes/abilities.php:476
-msgid "Whether the CSS rules of an export go between \"head\" and \"tail\" comments named after the file, so importing it again replaces them. The default for exports and imports."
+msgid "Whether the CSS rules of an export go between \"head\" and \"tail\" comments named after the file, to show where they came from. The default for exports and imports."
 msgstr ""
 
 #: includes/abilities.php:480
@@ -842,7 +842,7 @@ msgid "How the bundle's CSS rules are added: at the end of this site's CSS, at i
 msgstr ""
 
 #: includes/abilities.php:697
-msgid "Put the CSS rules between \"head\" and \"tail\" comments named after the file (replacing them when the same file is imported again). Default: as the bundle asks."
+msgid "Put the CSS rules between \"head\" and \"tail\" comments named after the file. Default: as the bundle asks."
 msgstr ""
 
 #: includes/abilities.php:744
@@ -878,7 +878,7 @@ msgid "How the CSS rules are added on import: at the end of the other site's CSS
 msgstr ""
 
 #: includes/abilities.php:871
-msgid "Put the CSS rules between \"head\" and \"tail\" comments named after the file, so a second delivery of the same file replaces them. Default: Settings → Export."
+msgid "Put the CSS rules between \"head\" and \"tail\" comments named after the file. Default: Settings → Export."
 msgstr ""
 
 #: includes/abilities.php:875
@@ -1319,19 +1319,19 @@ msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 
 #. translators: %d: number of posts.
-#: includes/cli.php:78
+#: includes/cli.php:77
 #, php-format
 msgid "%d post imported."
 msgid_plural "%d posts imported."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/cli.php:237
+#: includes/cli.php:236
 msgid "--dir writes a bundle, not a plugin: leave out --as-plugin."
 msgstr ""
 
 #. translators: %s: folder.
-#: includes/cli.php:246
+#: includes/cli.php:245
 #, php-format
 msgid "Bundle written to %s."
 msgstr ""
@@ -1556,10 +1556,10 @@ msgstr ""
 msgid "Replace this site's CSS"
 msgstr ""
 
-#. translators: %s: the name the CSS rules are marked with, like "delivery".
+#. translators: %s: the name the CSS rules are marked with: the file's name, like "delivery".
 #: includes/import.php:766
 #, php-format
-msgid "Between \"head\" and \"tail\" comments (%s): importing this file again replaces them"
+msgid "Between \"head\" and \"tail\" comments with the file's name (%s)"
 msgstr ""
 
 #: includes/import.php:834

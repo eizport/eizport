@@ -56,7 +56,7 @@ function texts( key: string ): { title: string; subTitle: string } {
 			return {
 				title: __( 'Customizer custom CSS', 'eizport' ),
 				subTitle: __(
-					'Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS, at its start, or replace it (Details); with head/tail comments, a second delivery replaces them.',
+					'Check the rules to export — the last one only, say. On import they’re added at the end of the other site’s CSS, at its start, or replace it (Details), between head/tail comments named after the file.',
 					'eizport'
 				),
 			};

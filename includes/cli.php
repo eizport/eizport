@@ -46,8 +46,7 @@ function bootstrap() {
  *
  * [--[no-]css-markers]
  * : Put the CSS rules between "head" and "tail" comments named after the
- * file, replacing them when the same file is imported again. Default: as
- * the bundle asks.
+ * file. Default: as the bundle asks.
  *
  * ## EXAMPLES
  *

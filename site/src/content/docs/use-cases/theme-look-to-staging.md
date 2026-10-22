@@ -24,7 +24,7 @@ The same goes for a block theme customized in the Site Editor: a new color palet
 
 ## Next time
 
-Change the rule locally and export again **with the same file name**: on staging the block between the comments is replaced, not added again. With *Update existing* on, the *Hours* widget is updated in place too.
+Another change locally, another export: on staging, a new block is added after the first (the comments show which file each came from; tidy up in *Additional CSS* when needed). With *Update existing* on, the *Hours* widget is updated in place instead of added again.
 
 ## What it doesn't
 

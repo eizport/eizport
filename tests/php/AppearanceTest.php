@@ -183,9 +183,10 @@ class AppearanceTest extends Test_Case {
 		$this->assertStringStartsWith( '/* head delivery */', eizport_merge_css( $site, '.new {}', 'start', true, 'delivery' ) );
 		$this->assertStringNotContainsString( '.site', eizport_merge_css( $site, '.new {}', 'replace', true, 'delivery' ) );
 
-		// The same file again: its block is replaced in place, whatever the mode.
-		$again = eizport_merge_css( $end . "\n\n.after {}", '.new { color: blue; }', 'start', true, 'delivery' );
-		$this->assertSame( ".site { color: black; }\n\n/* head delivery */\n.new { color: blue; }\n/* tail delivery */\n\n.after {}", $again );
+		// The same file again: another block, as the mode says (blocks aren't unique).
+		$again = eizport_merge_css( $end, '.new { color: blue; }', 'end', true, 'delivery' );
+		$this->assertSame( 2, substr_count( $again, '/* head delivery */' ) );
+		$this->assertStringEndsWith( "/* head delivery */\n.new { color: blue; }\n/* tail delivery */", $again );
 
 		// Without markers, rules the site has aren't repeated.
 		$plain = eizport_merge_css( $site, ".site  {  color: black; }\n.new {}", 'end', false, 'delivery' );

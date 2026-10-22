@@ -473,7 +473,7 @@ function register() {
 			),
 			'css_markers'            => array(
 				'type'        => 'boolean',
-				'description' => __( 'Whether the CSS rules of an export go between "head" and "tail" comments named after the file, so importing it again replaces them. The default for exports and imports.', 'eizport' ),
+				'description' => __( 'Whether the CSS rules of an export go between "head" and "tail" comments named after the file, to show where they came from. The default for exports and imports.', 'eizport' ),
 			),
 			'attached_only'          => array(
 				'type'        => 'boolean',
@@ -694,7 +694,7 @@ function register() {
 					),
 					'css_markers'     => array(
 						'type'        => 'boolean',
-						'description' => __( 'Put the CSS rules between "head" and "tail" comments named after the file (replacing them when the same file is imported again). Default: as the bundle asks.', 'eizport' ),
+						'description' => __( 'Put the CSS rules between "head" and "tail" comments named after the file. Default: as the bundle asks.', 'eizport' ),
 					),
 				),
 				'additionalProperties' => false,
@@ -868,7 +868,7 @@ function export_input_schema() {
 			),
 			'css_markers'     => array(
 				'type'        => 'boolean',
-				'description' => __( 'Put the CSS rules between "head" and "tail" comments named after the file, so a second delivery of the same file replaces them. Default: Settings → Export.', 'eizport' ),
+				'description' => __( 'Put the CSS rules between "head" and "tail" comments named after the file. Default: Settings → Export.', 'eizport' ),
 			),
 			'menus'           => array(
 				'type'                 => 'object',

@@ -238,9 +238,9 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	/**
 	 * This site's CSS with the file's rules in it.
 	 *
-	 * - With markers, the rules go between "head ID" and "tail ID" comments;
-	 *   a block with the same ID already there is replaced in place (a second
-	 *   delivery of the same file), whatever the mode.
+	 * - With markers, the rules go between "head ID" and "tail ID" comments,
+	 *   a mark of the file they came from (blocks aren't unique: each import
+	 *   adds its own).
 	 * - Without, rules this site already has (same text) aren't repeated.
 	 * - Mode: "end" (after this site's CSS), "start" (before it) or
 	 *   "replace" (only the file's).
@@ -260,18 +260,8 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 			return $current;
 		}
 		if ( $markers && '' !== $id ) {
-			$block   = "/* head {$id} */\n{$rules}\n/* tail {$id} */";
-			$pattern = '#/\* head ' . preg_quote( $id, '#' ) . ' \*/.*?/\* tail ' . preg_quote( $id, '#' ) . ' \*/#s';
-			if ( preg_match( $pattern, $current ) ) {
-				return (string) preg_replace_callback(
-					$pattern,
-					function () use ( $block ) {
-						return $block;
-					},
-					$current,
-					1
-				);
-			}
+			// A mark of where the rules came from: each import adds its own block, the same name may repeat.
+			$block = "/* head {$id} */\n{$rules}\n/* tail {$id} */";
 		} else {
 			$have  = array_map( 'eizport_css_normalize', eizport_css_rules( $current ) );
 			$block = implode(
