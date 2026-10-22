@@ -78,6 +78,68 @@ function bootstrap() {
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_steps_script' );
 	// Before the footer scripts are printed (priority 10).
 	add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\check_fetch_attachments', 5 );
+	// An edited image's link to its original: kept as the importer reads it, mapped at the end.
+	add_action( 'import_start', __NAMESPACE__ . '\forget_edit_roots' );
+	add_filter( 'wp_import_post_meta', __NAMESPACE__ . '\note_edit_root', 10, 2 );
+	add_action( 'import_end', __NAMESPACE__ . '\map_edit_roots' );
+}
+
+/**
+ * The meta that ties an image edited as a copy to its original: an
+ * attachment ID on the exporting site. The WordPress Importer 0.9.7 drops it,
+ * as the ID would point elsewhere here; Eizport maps it instead.
+ */
+const EDIT_ROOT_META = '_wp_attachment_edit_root_id';
+
+/**
+ * Imported attachment ID => its original's ID on the exporting site, noted
+ * while the importer reads the items.
+ *
+ * @var int[]
+ */
+$GLOBALS['eizport_edit_roots'] = array();
+
+/**
+ * Starts an import with no edit roots noted.
+ */
+function forget_edit_roots() {
+	$GLOBALS['eizport_edit_roots'] = array();
+}
+
+/**
+ * Notes an item's edit root (wp_import_post_meta), before the importer
+ * checks its meta keys.
+ *
+ * @param array $postmeta The item's meta (key, value).
+ * @param int   $post_id  The imported post's ID.
+ * @return array The meta, unchanged.
+ */
+function note_edit_root( $postmeta, $post_id ) {
+	foreach ( (array) $postmeta as $meta ) {
+		if ( EDIT_ROOT_META === ( $meta['key'] ?? '' ) && (int) $meta['value'] > 0 ) {
+			$GLOBALS['eizport_edit_roots'][ (int) $post_id ] = (int) $meta['value'];
+		}
+	}
+
+	return $postmeta;
+}
+
+/**
+ * At the end of an import, points each edited image to its imported original
+ * — or, when the original didn't come along, leaves no link (an older
+ * importer wrote the exporting site's ID as it was).
+ */
+function map_edit_roots() {
+	$importer  = $GLOBALS['wp_import'] ?? null;
+	$processed = is_object( $importer ) ? (array) $importer->processed_posts : array();
+	foreach ( (array) $GLOBALS['eizport_edit_roots'] as $post_id => $root ) {
+		if ( isset( $processed[ $root ] ) ) {
+			update_post_meta( $post_id, EDIT_ROOT_META, (int) $processed[ $root ] );
+		} else {
+			delete_post_meta( $post_id, EDIT_ROOT_META );
+		}
+	}
+	forget_edit_roots();
 }
 
 /**

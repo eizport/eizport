@@ -304,4 +304,34 @@ class UpdateExistingTest extends Test_Case {
 		$this->assertSame( array( 'page', 'attachment' ), \Eizport\Import\wxr_types( $wxr ) );
 		$this->assertSame( array(), \Eizport\Import\wxr_types( '/no/such/file.xml' ) );
 	}
+
+	public function test_an_edited_image_points_to_its_imported_original() {
+		$attachment = function () {
+			return (int) wp_insert_post(
+				array(
+					'post_type'   => 'attachment',
+					'post_status' => 'inherit',
+					'post_title'  => 'Photo',
+				)
+			);
+		};
+		$original   = $attachment();
+		$copy       = $attachment();
+		$alone      = $attachment();
+		// As an older importer writes it: the exporting site's ID.
+		add_post_meta( $alone, Import\EDIT_ROOT_META, 99 );
+		$saved                = $GLOBALS['wp_import'] ?? null;
+		$GLOBALS['wp_import'] = (object) array( 'processed_posts' => array( 10 => $original, 11 => $copy, 12 => $alone ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- the importer's, restored below.
+
+		Import\forget_edit_roots();
+		$meta = array( array( 'key' => Import\EDIT_ROOT_META, 'value' => '10' ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		$this->assertSame( $meta, Import\note_edit_root( $meta, $copy ), 'The importer still gets its meta.' );
+		Import\note_edit_root( array( array( 'key' => Import\EDIT_ROOT_META, 'value' => '99' ) ), $alone ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		Import\map_edit_roots();
+		$GLOBALS['wp_import'] = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+
+		$this->assertSame( (string) $original, get_post_meta( $copy, Import\EDIT_ROOT_META, true ), 'The imported original.' );
+		$this->assertSame( '', get_post_meta( $alone, Import\EDIT_ROOT_META, true ), 'The original did not come: no link to an unrelated attachment.' );
+		$this->assertSame( array(), $GLOBALS['eizport_edit_roots'] );
+	}
 }
