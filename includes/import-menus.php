@@ -173,6 +173,8 @@ if ( ! function_exists( 'eizport_menus_read_terms' ) ) {
 	 * @return int Posts changed.
 	 */
 	function eizport_menus_remap_refs( $processed ) {
+		global $wpdb;
+
 		$map = array();
 		foreach ( $processed as $old => $new ) {
 			if ( (int) $old !== (int) $new && 'wp_navigation' === get_post_type( (int) $new ) ) {
@@ -213,12 +215,10 @@ if ( ! function_exists( 'eizport_menus_read_terms' ) ) {
 				}
 				$content = eizport_menus_replace_refs( $post->post_content, $refs );
 				if ( $content !== $post->post_content ) {
-					wp_update_post(
-						array(
-							'ID'           => $post->ID,
-							'post_content' => wp_slash( $content ),
-						)
-					);
+					// Only a number changes: straight to the table, as the block IDs are, so kses (for a user
+					// without unfiltered HTML) never strips the rest of a template someone else made.
+					$wpdb->update( $wpdb->posts, array( 'post_content' => $content ), array( 'ID' => $post->ID ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- once per post a navigation ref changed in.
+					clean_post_cache( $post->ID );
 					++$changed;
 				}
 			}

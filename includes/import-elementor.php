@@ -352,11 +352,22 @@ if ( ! function_exists( 'eizport_elementor_start' ) ) {
 		}
 
 		$settings = $entry['site_settings']['settings'] ?? null;
+		// The site settings' custom CSS (Elementor Pro) prints on every page: only for who may post unfiltered HTML.
+		if ( is_array( $settings ) && ! current_user_can( 'unfiltered_html' ) ) {
+			unset( $settings['custom_css'] );
+		}
 		if ( is_array( $settings ) && $active ) {
 			eizport_elementor_site_settings( eizport_elementor_map( $settings, $maps ), (string) ( $entry['title'] ?? 'Eizport' ), $source );
 		}
 
+		// A page the site already had (the importer matched it) keeps its design, unless the import updates existing items.
+		$inserted = (array) ( $GLOBALS['eizport_elementor_inserted'] ?? array() );
+		$update   = function_exists( 'eizport_look_updates_existing' ) && eizport_look_updates_existing();
+		unset( $GLOBALS['eizport_elementor_inserted'] );
 		foreach ( $posts as $old => $new ) {
+			if ( ! $update && ! isset( $inserted[ $new ] ) ) {
+				continue;
+			}
 			$file = isset( $designs[ $old ] ) ? json_decode( (string) $designs[ $old ], true ) : null;
 			if ( ! is_array( $file ) && isset( $builder[ $old ] ) ) {
 				// Designs left in the WXR (no content files): their meta, through the same import.
@@ -378,4 +389,11 @@ if ( ! function_exists( 'eizport_elementor_start' ) ) {
 		}
 	}
 	add_action( 'import_end', 'eizport_elementor_import_end', 17 );
+	// The posts this import inserted (the others were the site's already).
+	add_action(
+		'wp_import_insert_post',
+		function ( $post_id ) {
+			$GLOBALS['eizport_elementor_inserted'][ (int) $post_id ] = true;
+		}
+	);
 }
