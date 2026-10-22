@@ -88,25 +88,19 @@ function template_translations() {
 	}
 	$switched = switch_to_locale( $locale );
 	$texts    = array(
-		'Activate Eizport to import'           => __( 'Activate Eizport to import', 'eizport' ),
-		'Eizport is needed to import'          => __( 'Eizport is needed to import', 'eizport' ),
+		'Activate Eizport to import'  => __( 'Activate Eizport to import', 'eizport' ),
+		'Eizport is needed to import' => __( 'Eizport is needed to import', 'eizport' ),
 		'This plugin holds content exported with Eizport. Eizport imports it, and then this plugin can go.' => __( 'This plugin holds content exported with Eizport. Eizport imports it, and then this plugin can go.', 'eizport' ),
-		'Activate Eizport'                     => __( 'Activate Eizport', 'eizport' ),
-		'Install Now'                          => __( 'Install Now', 'eizport' ),
-		'Installing…'                          => __( 'Installing…', 'eizport' ),
-		'Activating…'                          => __( 'Activating…', 'eizport' ),
+		'Activate Eizport'            => __( 'Activate Eizport', 'eizport' ),
+		'Install Now'                 => __( 'Install Now', 'eizport' ),
+		'Installing…'                 => __( 'Installing…', 'eizport' ),
+		'Activating…'                 => __( 'Activating…', 'eizport' ),
 		/* translators: %s: error message. */
-		'Installation failed: %s'              => __( 'Installation failed: %s', 'eizport' ),
-		'Eizport is active.'                   => __( 'Eizport is active.', 'eizport' ),
-		'Continue'                             => __( 'Continue', 'eizport' ),
-		'Download Eizport.'                    => __( 'Download Eizport.', 'eizport' ),
-		'Add it in'                            => __( 'Add it in', 'eizport' ),
-		'Plugins → Add Plugin → Upload Plugin' => __( 'Plugins → Add Plugin → Upload Plugin', 'eizport' ),
-		', and activate it.'                   => __( ', and activate it.', 'eizport' ),
-		'Come back here to import.'            => __( 'Come back here to import.', 'eizport' ),
-		'Download Eizport'                     => __( 'Download Eizport', 'eizport' ),
-		'Import'                               => __( 'Import', 'eizport' ),
-		'open the import screen'               => __( 'open the import screen', 'eizport' ),
+		'Installation failed: %s'     => __( 'Installation failed: %s', 'eizport' ),
+		'Eizport is active.'          => __( 'Eizport is active.', 'eizport' ),
+		'Continue'                    => __( 'Continue', 'eizport' ),
+		'Import'                      => __( 'Import', 'eizport' ),
+		'open the import screen'      => __( 'open the import screen', 'eizport' ),
 	);
 	if ( $switched ) {
 		restore_previous_locale();

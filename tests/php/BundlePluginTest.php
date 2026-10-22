@@ -286,6 +286,14 @@ class BundlePluginTest extends Test_Case {
 		$this->assertSame( 'gone', $imported, 'Left empty: deleted.' );
 	}
 
+	public function test_without_eizport_the_plugin_installs_it_from_the_directory() {
+		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->assertStringContainsString( 'update.php?action=install-plugin&plugin=eizport', $template );
+		$this->assertStringNotContainsString( 'github.com', $template, 'Not from GitHub releases.' );
+		$this->assertStringNotContainsString( 'eizport_in_directory', $template, 'No check: Eizport is in the directory.' );
+	}
+
 	public function test_a_plugin_only_imports_its_own_bundle() {
 		$this->assertInstanceOf( \WP_Error::class, BundlePlugin\bundle_of( ABSPATH . 'wp-load.php' ), 'Not an installed plugin.' );
 		$this->assertInstanceOf( \WP_Error::class, BundlePlugin\bundle_of( dirname( __DIR__, 2 ) . '/eizport.php' ), 'No "Eizport Bundle" header.' );

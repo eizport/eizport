@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+The Playground .zip installs a theme or plugin from the WordPress.org directory only in a version the directory has; a development, beta or RC copy goes inside the .zip. Without Eizport, a bundle plugin installs it from the plugin directory.

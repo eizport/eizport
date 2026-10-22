@@ -43,24 +43,9 @@ defined( 'ABSPATH' ) || exit;
 	$page  = 'eizport-bundle-' . $slug;
 	$title = 'EIZPORT_MENU_TITLE';
 	$main  = 'eizport/eizport.php';
-	// Whether Eizport is in the plugin directory (asked once a day): then it installs like an importer.
-	$in_directory = static function () {
-		$found = get_site_transient( 'eizport_in_directory' );
-		if ( false === $found ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-			$info  = plugins_api(
-				'plugin_information',
-				array(
-					'slug'   => 'eizport',
-					'fields' => array( 'sections' => false ),
-				)
-			);
-			$found = is_wp_error( $info ) ? 'no' : 'yes';
-			set_site_transient( 'eizport_in_directory', $found, 12 * HOUR_IN_SECONDS );
-		}
-		return 'yes' === $found;
-	};
-	$screen       = static function () use ( $file, $title, $main, $in_directory, $page ) {
+
+	// Eizport's import screen, or, without Eizport, how to get it: from the plugin directory, like an importer.
+	$screen = static function () use ( $file, $title, $main, $page ) {
 		if ( function_exists( '\Eizport\BundlePlugin\render' ) ) {
 			\Eizport\BundlePlugin\render( $file );
 			return;
@@ -73,18 +58,10 @@ defined( 'ABSPATH' ) || exit;
 		echo '<p>' . esc_html( __( 'This plugin holds content exported with Eizport. Eizport imports it, and then this plugin can go.', 'EIZPORT_TEXT_DOMAIN' ) ) . '</p>';
 		if ( $installed && current_user_can( 'activate_plugins' ) ) {
 			echo '<p><a class="button button-primary" href="' . esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=' . rawurlencode( $main ) ), 'activate-plugin_' . $main ) ) . '">' . esc_html( __( 'Activate Eizport', 'EIZPORT_TEXT_DOMAIN' ) ) . '</a></p>';
-		} elseif ( current_user_can( 'install_plugins' ) && $in_directory() ) {
+		} elseif ( current_user_can( 'install_plugins' ) ) {
 			// From the plugin directory, installed and activated here (the script below); without JavaScript, core's install screen.
 			echo '<p class="eizport-requirement"><span class="eizport-requirement__before"><a class="button eizport-install-now" href="' . esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-plugin&plugin=eizport' ), 'install-plugin_eizport' ) ) . '" data-slug="eizport" data-plugin="' . esc_attr( $main ) . '" data-name="Eizport">' . esc_html( __( 'Install Now', 'EIZPORT_TEXT_DOMAIN' ) ) . '</a></span>';
 			echo '<span class="eizport-requirement__after" hidden><span style="color:#00a32a;font-weight:600" aria-hidden="true">✓</span> ' . esc_html( __( 'Eizport is active.', 'EIZPORT_TEXT_DOMAIN' ) ) . ' <a class="button button-primary" style="margin-left:8px" href="' . esc_url( admin_url( 'tools.php?page=' . $page ) ) . '">' . esc_html( __( 'Continue', 'EIZPORT_TEXT_DOMAIN' ) ) . '</a></span></p>';
-		} elseif ( current_user_can( 'install_plugins' ) ) {
-			// Not in the plugin directory (yet): the latest release, added by hand.
-			echo '<ol style="margin-left:1.5em">';
-			echo '<li>' . esc_html( __( 'Download Eizport.', 'EIZPORT_TEXT_DOMAIN' ) ) . '</li>';
-			echo '<li>' . esc_html( __( 'Add it in', 'EIZPORT_TEXT_DOMAIN' ) ) . ' <a href="' . esc_url( self_admin_url( 'plugin-install.php?tab=upload' ) ) . '">' . esc_html( __( 'Plugins → Add Plugin → Upload Plugin', 'EIZPORT_TEXT_DOMAIN' ) ) . '</a>' . esc_html( __( ', and activate it.', 'EIZPORT_TEXT_DOMAIN' ) ) . '</li>';
-			echo '<li>' . esc_html( __( 'Come back here to import.', 'EIZPORT_TEXT_DOMAIN' ) ) . '</li>';
-			echo '</ol>';
-			echo '<p><a class="button button-primary" href="https://github.com/eizport/eizport/releases/latest/download/eizport.zip" download>' . esc_html( __( 'Download Eizport', 'EIZPORT_TEXT_DOMAIN' ) ) . '</a></p>';
 		}
 		echo '</div></div>';
 	};
