@@ -99,6 +99,10 @@ function template_translations() {
 		'Installation failed: %s'     => __( 'Installation failed: %s', 'eizport' ),
 		'Eizport is active.'          => __( 'Eizport is active.', 'eizport' ),
 		'Continue'                    => __( 'Continue', 'eizport' ),
+		'Update Eizport to import'    => __( 'Update Eizport to import', 'eizport' ),
+		/* translators: 1: the oldest Eizport version that reads the bundle, 2: this site's Eizport version. */
+		'This plugin holds content exported with a newer Eizport: it needs Eizport %1$s or newer, and this site has %2$s.' => __( 'This plugin holds content exported with a newer Eizport: it needs Eizport %1$s or newer, and this site has %2$s.', 'eizport' ),
+		'Update now'                  => __( 'Update now', 'eizport' ),
 		'Import'                      => __( 'Import', 'eizport' ),
 		'open the import screen'      => __( 'open the import screen', 'eizport' ),
 	);
@@ -164,6 +168,8 @@ function build_zip( $target, $bundle, $name ) {
 			'Requires at least: 7.0'       => 'Requires at least: ' . $line( $header['wp'] ),
 			'Requires PHP:      7.4'       => 'Requires PHP:      ' . $line( $header['php'] ),
 			'EIZPORT_BUNDLE_FILE'          => $file,
+			// The oldest Eizport that reads its bundle: an older one is asked to update first.
+			'EIZPORT_REQUIRES'             => \Eizport\Bundle\REQUIRES,
 			// Whether its screen starts with "Update items that already exist" checked.
 			'EIZPORT_UPDATE_EXISTING'      => ! empty( $GLOBALS['eizport_update_existing'] ) ? 'yes' : 'no',
 			// Whether its screen still offers Import again once it imported.
@@ -447,12 +453,18 @@ function importer_installed() {
  * @param string $plugin_file The plugin's main file.
  */
 function render( $plugin_file ) {
-	$slug     = basename( dirname( (string) $plugin_file ) );
-	$bundle   = bundle_of( $plugin_file );
+	$slug   = basename( dirname( (string) $plugin_file ) );
+	$bundle = bundle_of( $plugin_file );
+	$holds  = is_wp_error( $bundle ) ? null : contents( $bundle );
+	if ( isset( $holds['error'] ) ) {
+		$bundle = new \WP_Error( 'eizport_bundle_newer', $holds['error'] );
+		$holds  = null;
+	}
 	$data     = get_file_data( (string) $plugin_file, array( 'name' => 'Plugin Name' ) );
 	$done     = (array) get_option( IMPORTED, array() );
 	$result   = get_transient( 'eizport_bundle_result_' . get_current_user_id() . '_' . $slug );
-	$ready    = ! is_wp_error( $bundle ) && importer_installed() && current_user_can( 'import' );
+	$old      = importer_installed() ? Import\importer_too_old() : null;
+	$ready    = ! is_wp_error( $bundle ) && importer_installed() && ! $old && current_user_can( 'import' );
 	$imported = isset( $done[ $slug ] ) || ( is_array( $result ) && empty( $result['error'] ) );
 	// Import again, once imported: only when the export allowed it (Settings → Export).
 	$again    = 'yes' === strtolower( trim( (string) get_file_data( (string) $plugin_file, array( 'again' => 'Eizport Again' ) )['again'] ) );
@@ -562,7 +574,6 @@ function render( $plugin_file ) {
 					<?php endif; ?>
 				</form>
 			<?php endif; ?>
-			<?php $holds = is_wp_error( $bundle ) ? null : contents( $bundle ); ?>
 			<?php if ( $holds ) : ?>
 				<details class="eizport-import__card eizport-import__again">
 					<summary><?php esc_html_e( 'What it holds', 'eizport' ); ?></summary>
@@ -607,9 +618,18 @@ function render( $plugin_file ) {
 				<ul class="eizport-checks">
 					<li><?php echo $check( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup. ?><?php esc_html_e( 'Eizport is active.', 'eizport' ); ?></li>
 					<li class="eizport-requirement">
-						<?php if ( importer_installed() ) : ?>
+						<?php if ( $old ) : ?>
+							<?php echo $check( false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup. ?>
+							<?php echo esc_html( $old->get_error_message() ); ?>
+							<?php if ( current_user_can( 'update_plugins' ) ) : ?>
+								<a class="button" href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( Import\IMPORTER_PLUGIN ) ), 'upgrade-plugin_' . Import\IMPORTER_PLUGIN ) ); ?>"><?php esc_html_e( 'Update now', 'eizport' ); ?></a>
+							<?php endif; ?>
+						<?php elseif ( importer_installed() ) : ?>
 							<?php echo $check( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup. ?>
 							<?php esc_html_e( 'The WordPress Importer is installed.', 'eizport' ); ?>
+							<?php if ( Import\importer_untested() ) : ?>
+								<?php echo esc_html( Import\importer_untested_message() ); ?>
+							<?php endif; ?>
 						<?php else : ?>
 							<span class="eizport-requirement__before">
 								<?php echo $check( false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup. ?>
@@ -632,15 +652,15 @@ function render( $plugin_file ) {
 						<?php else : ?>
 							<?php
 							$shown = is_dir( $bundle ) ? wp_basename( $bundle ) . '/' : wp_basename( $bundle );
+							$name  = (string) preg_replace( '/-[a-z0-9]{16}(?=[.\/]|$)/', '', $shown ); // Without the random part of its name.
+							$size  = size_format( is_dir( $bundle ) ? array_sum( array_map( 'filesize', \Eizport\Folder\entries( $bundle ) ) ) : (int) filesize( $bundle ) );
+							$date  = wp_date( get_option( 'date_format' ), (int) filemtime( $bundle ) );
 							echo esc_html(
-								sprintf(
+								empty( $holds['made'] )
 									/* translators: 1: file name, 2: size, 3: date. */
-									__( 'The bundle: %1$s, %2$s, made %3$s.', 'eizport' ),
-									// Without the random part of its name.
-									(string) preg_replace( '/-[a-z0-9]{16}(?=[.\/]|$)/', '', $shown ),
-									size_format( is_dir( $bundle ) ? array_sum( array_map( 'filesize', \Eizport\Folder\entries( $bundle ) ) ) : (int) filesize( $bundle ) ),
-									wp_date( get_option( 'date_format' ), (int) filemtime( $bundle ) )
-								)
+									? sprintf( __( 'The bundle: %1$s, %2$s, made %3$s.', 'eizport' ), $name, $size, $date )
+									/* translators: 1: file name, 2: size, 3: date, 4: Eizport version. */
+									: sprintf( __( 'The bundle: %1$s, %2$s, made %3$s with Eizport %4$s.', 'eizport' ), $name, $size, $date, $holds['made'] )
 							);
 							?>
 						<?php endif; ?>
@@ -680,13 +700,15 @@ function contents( $bundle ) {
 	$found  = is_wp_error( $packed ) ? $packed : \Eizport\Bundle\read_manifest( $tar );
 	if ( is_wp_error( $found ) ) {
 		wp_delete_file( $tar );
-		return null;
+		// Made by a newer Eizport: why it can't be imported here.
+		return 'eizport_bundle_newer' === $found->get_error_code() ? array( 'error' => $found->get_error_message() ) : null;
 	}
 	$out = array(
 		'types'   => array(),
 		'media'   => 0,
 		'bytes'   => 0,
 		'options' => array(),
+		'made'    => \Eizport\Bundle\made_with( $found ),
 	);
 	\Eizport\Tar\each_file(
 		$tar,

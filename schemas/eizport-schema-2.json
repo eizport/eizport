@@ -1,0 +1,98 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://eizport.github.io/eizport-schema-2.json",
+	"title": "Eizport bundle manifest (format 2)",
+	"description": "manifest.json, the first entry of an Eizport .wxrz or .zip bundle. See https://eizport.github.io/docs/formats/wxrz-bundle/",
+	"type": "object",
+	"required": [ "format", "version", "requires", "wxr", "files" ],
+	"properties": {
+		"$schema": {
+			"description": "This schema's URL, for editors.",
+			"type": "string"
+		},
+		"format": {
+			"description": "Always \"wxrz\".",
+			"type": "string",
+			"enum": [ "wxrz" ]
+		},
+		"version": {
+			"description": "The layout's version: 2 since Eizport 1.1.0.",
+			"type": "integer",
+			"enum": [ 2 ]
+		},
+		"requires": {
+			"description": "The oldest Eizport that reads this bundle.",
+			"type": "string",
+			"pattern": "^[0-9]+(\\.[0-9]+)*$"
+		},
+		"generator": {
+			"description": "Who made it: \"Eizport <version>\".",
+			"type": "string"
+		},
+		"site": {
+			"description": "The exporting site's home URL.",
+			"type": "string"
+		},
+		"created": {
+			"description": "When it was made (ISO 8601).",
+			"type": "string"
+		},
+		"wxr": {
+			"description": "The WXR entry's name (the first one is read).",
+			"type": "array",
+			"minItems": 1,
+			"items": {
+				"type": "string",
+				"minLength": 1
+			}
+		},
+		"files": {
+			"description": "Attachment URL in the WXR → entry in the archive, under uploads/.",
+			"type": "object",
+			"additionalProperties": {
+				"type": "string",
+				"pattern": "^uploads/"
+			}
+		},
+		"options": {
+			"description": "The options file's entry.",
+			"type": "string"
+		},
+		"update_existing": {
+			"description": "Whether the import updates the items that already exist (same type and slug).",
+			"type": "boolean"
+		},
+		"term_media": {
+			"description": "Taxonomy → term slug → meta key → attachment ID on the exporting site.",
+			"type": "object",
+			"additionalProperties": {
+				"type": "object",
+				"additionalProperties": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "integer"
+					}
+				}
+			}
+		},
+		"post_content": {
+			"description": "Content file in post_content/ → the item it belongs to.",
+			"type": "object",
+			"additionalProperties": {
+				"type": "object",
+				"required": [ "id", "type", "slug" ],
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"type": {
+						"type": "string"
+					},
+					"slug": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	}
+}

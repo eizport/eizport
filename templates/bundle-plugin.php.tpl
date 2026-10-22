@@ -46,6 +46,20 @@ defined( 'ABSPATH' ) || exit;
 
 	// Eizport's import screen, or, without Eizport, how to get it: from the plugin directory, like an importer.
 	$screen = static function () use ( $file, $title, $main, $page ) {
+		// Eizport active but older than its bundle needs (1.0.1 doesn't check): update it first.
+		$requires = 'EIZPORT_REQUIRES';
+		if ( defined( 'Eizport\VERSION' ) && version_compare( (string) preg_replace( '/-.*$/', '', constant( 'Eizport\VERSION' ) ), $requires, '<' ) ) {
+			echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1><hr class="wp-header-end">';
+			echo '<div class="card" style="max-width:630px;margin-top:16px;padding:16px 24px">';
+			echo '<h2 class="title">' . esc_html( __( 'Update Eizport to import', 'EIZPORT_TEXT_DOMAIN' ) ) . '</h2>';
+			/* translators: 1: the oldest Eizport version that reads the bundle, 2: this site's Eizport version. */
+			echo '<p>' . esc_html( sprintf( __( 'This plugin holds content exported with a newer Eizport: it needs Eizport %1$s or newer, and this site has %2$s.', 'EIZPORT_TEXT_DOMAIN' ), $requires, constant( 'Eizport\VERSION' ) ) ) . '</p>';
+			if ( current_user_can( 'update_plugins' ) ) {
+				echo '<p><a class="button button-primary" href="' . esc_url( wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( $main ) ), 'upgrade-plugin_' . $main ) ) . '">' . esc_html( __( 'Update now', 'EIZPORT_TEXT_DOMAIN' ) ) . '</a></p>';
+			}
+			echo '</div></div>';
+			return;
+		}
 		if ( function_exists( '\Eizport\BundlePlugin\render' ) ) {
 			\Eizport\BundlePlugin\render( $file );
 			return;

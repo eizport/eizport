@@ -223,11 +223,141 @@ class BundleTest extends Test_Case {
 		list( $no_manifest ) = $this->unpack_entries( array( 'site.xml' => '<rss/>' ) );
 		$this->assertSame( 'eizport_bundle_manifest', $no_manifest->get_error_code() );
 
-		list( $bad_version ) = $this->unpack_entries( array( 'manifest.json' => '{"version":2,"wxr":["site.xml"],"files":{}}' ) );
+		list( $bad_version ) = $this->unpack_entries( array( 'manifest.json' => '{"version":"2","wxr":["site.xml"],"files":{}}' ) );
 		$this->assertSame( 'eizport_bundle_manifest', $bad_version->get_error_code() );
 
 		list( $no_wxr ) = $this->unpack_entries( array( 'manifest.json' => '{"version":1,"wxr":["site.xml"],"files":{}}' ) );
 		$this->assertSame( 'eizport_bundle_corrupt', $no_wxr->get_error_code() );
+	}
+
+	public function test_the_manifest_says_which_eizport_made_it_and_needs() {
+		$wxr = fopen( 'php://memory', 'w+b' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		fwrite( $wxr, '<rss></rss>' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+
+		ob_start();
+		Bundle\print_archive( $wxr, 'site.xml', false );
+		$tar = $this->temp_file( (string) ob_get_clean() );
+
+		$manifest = Bundle\read_manifest( $tar );
+		$this->assertSame( Bundle\FORMAT_VERSION, $manifest['version'] );
+		$this->assertSame( Bundle\REQUIRES, $manifest['requires'] );
+		$this->assertSame( 'Eizport ' . \Eizport\VERSION, $manifest['generator'] );
+		$this->assertSame( \Eizport\VERSION, Bundle\made_with( $manifest ) );
+		$this->assertSame( Bundle\SCHEMA_URL, $manifest['$schema'], 'Editors validate it.' );
+		$this->assertStringStartsWith( '{"$schema":', (string) wp_json_encode( $manifest ), 'The first key.' );
+	}
+
+	public function test_a_hand_edited_manifest_is_checked_against_its_schema() {
+		$wxr   = $this->wxr( array() );
+		$base  = array(
+			'$schema'  => Bundle\SCHEMA_URL,
+			'format'   => 'wxrz',
+			'version'  => 2,
+			'requires' => '1.1.0',
+			'wxr'      => array( 'site.xml' ),
+			'files'    => new \stdClass(),
+		);
+		$edits = array(
+			'requires'        => array( 'requires' => 'soon' ),
+			'wxr'             => array( 'wxr' => array() ),
+			'update_existing' => array( 'update_existing' => 'yes' ),
+			'files'           => array( 'files' => array( 'http://x/a.jpg' => 'elsewhere/a.jpg' ) ),
+			'format'          => array( 'format' => 'zip' ),
+		);
+		foreach ( $edits as $key => $edit ) {
+			list( $result ) = $this->unpack_entries(
+				array(
+					'manifest.json' => (string) wp_json_encode( array_merge( $base, $edit ) ),
+					'site.xml'      => $wxr,
+				)
+			);
+			$this->assertInstanceOf( \WP_Error::class, $result, $key );
+			$this->assertSame( 'eizport_bundle_manifest', $result->get_error_code(), $key );
+			$this->assertStringContainsString( $key, $result->get_error_message(), 'The message names the key.' );
+		}
+
+		// Keys a later version adds don't make it invalid.
+		list( $more ) = $this->unpack_entries(
+			array(
+				'manifest.json' => (string) wp_json_encode( array_merge( $base, array( 'later' => true ) ) ),
+				'site.xml'      => $wxr,
+			)
+		);
+		$this->assertIsString( $more );
+	}
+
+	public function test_the_schema_files() {
+		$dir    = dirname( __DIR__, 2 ) . '/schemas/';
+		$schema = (string) file_get_contents( $dir . 'eizport-schema-2.json' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->assertSame( $schema, (string) file_get_contents( $dir . 'eizport-schema.json' ), 'The unnumbered one is the newest.' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$decoded = json_decode( $schema, true );
+		$this->assertIsArray( $decoded );
+		$this->assertSame( Bundle\SCHEMA_URL, $decoded['id'] );
+		$this->assertSame( array( 2 ), $decoded['properties']['version']['enum'] );
+
+		// Only what WordPress's validator understands (rest_validate_value_from_schema), so editors and the import agree.
+		$known = array( '$schema', 'id', 'title', 'description', 'type', 'required', 'properties', 'additionalProperties', 'items', 'minItems', 'minLength', 'pattern', 'enum' );
+		$walk  = function ( $node ) use ( &$walk, $known ) {
+			foreach ( $node as $keyword => $value ) {
+				$this->assertContains( $keyword, $known, 'Keyword ' . $keyword );
+				if ( 'properties' === $keyword ) {
+					array_map( $walk, $value );
+				} elseif ( in_array( $keyword, array( 'additionalProperties', 'items' ), true ) && is_array( $value ) ) {
+					$walk( $value );
+				}
+			}
+		};
+		$walk( $decoded );
+	}
+
+	public function test_a_bundle_for_a_newer_eizport_is_refused() {
+		$wxr = $this->wxr( array() );
+
+		// A format this version doesn't know.
+		list( $format ) = $this->unpack_entries(
+			array(
+				'manifest.json' => '{"version":3,"requires":"9.0.0","generator":"Eizport 9.0.1","wxr":["site.xml"],"files":{}}',
+				'site.xml'      => $wxr,
+			)
+		);
+		$this->assertSame( 'eizport_bundle_newer', $format->get_error_code() );
+		$this->assertStringContainsString( 'made with Eizport 9.0.1 and needs Eizport 9.0.0 or newer; this site has ' . \Eizport\VERSION, $format->get_error_message() );
+
+		// This format, but a newer Eizport asked for.
+		list( $requires ) = $this->unpack_entries(
+			array(
+				'manifest.json' => '{"format":"wxrz","version":2,"requires":"9.0.0","wxr":["site.xml"],"files":{}}',
+				'site.xml'      => $wxr,
+			)
+		);
+		$this->assertSame( 'eizport_bundle_newer', $requires->get_error_code() );
+
+		// This version's own bundles, even from a development copy (1.1.0-dev reads 1.1.0's).
+		list( $own ) = $this->unpack_entries(
+			array(
+				'manifest.json' => wp_json_encode(
+					array(
+						'format'   => 'wxrz',
+						'version'  => Bundle\FORMAT_VERSION,
+						'requires' => preg_replace( '/-.*$/', '', \Eizport\VERSION ),
+						'wxr'      => array( 'site.xml' ),
+						'files'    => array(),
+					)
+				),
+				'site.xml'      => $wxr,
+			)
+		);
+		$this->assertIsString( $own );
+
+		// Made before 1.1.0: format 1, no "requires".
+		list( $old ) = $this->unpack_entries(
+			array(
+				'manifest.json' => '{"format":"wxrz","version":1,"generator":"Eizport 1.0.1","wxr":["site.xml"],"files":{}}',
+				'site.xml'      => $wxr,
+			)
+		);
+		$this->assertIsString( $old, 'A 1.0.1 bundle still imports.' );
 	}
 
 	public function test_delete_folder_only_deletes_bundle_folders() {

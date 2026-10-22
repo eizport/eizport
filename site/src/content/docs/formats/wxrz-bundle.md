@@ -23,11 +23,15 @@ uploads/2026/10/photo.jpg          optional: media files, as in wp-content/uploa
 
 ## manifest.json
 
+Its [JSON Schema](https://eizport.github.io/eizport-schema-2.json) is named in the manifest's `$schema`, so a code editor (VS Code, PhpStorm…) checks a manifest edited by hand and completes its keys; Eizport checks it against the same schema before importing, and says which key is wrong. [`eizport-schema.json`](https://eizport.github.io/eizport-schema.json) is always the newest.
+
 ```json
 {
+  "$schema": "https://eizport.github.io/eizport-schema-2.json",
   "format": "wxrz",
-  "version": 1,
-  "generator": "Eizport 1.0.0",
+  "version": 2,
+  "requires": "1.1.0",
+  "generator": "Eizport 1.1.0",
   "site": "https://example.com/",
   "created": "2026-10-10T22:11:50+00:00",
   "wxr": [ "example.WordPress.2026-10-10.xml" ],
@@ -47,8 +51,10 @@ uploads/2026/10/photo.jpg          optional: media files, as in wp-content/uploa
 
 | Key | Meaning |
 | --- | --- |
-| `format`, `version` | Always `"wxrz"` and `1` for this layout; a reader refuses other versions |
-| `generator`, `site`, `created` | Who made it, from where, when (informative) |
+| `$schema` | The schema's URL, for editors |
+| `format`, `version` | Always `"wxrz"`; the layout's version — `2` since Eizport 1.1.0, `1` before. A reader takes the versions it knows and refuses newer ones |
+| `requires` | The oldest Eizport that reads it (`1.1.0`); rises only when the layout does. An older Eizport refuses the bundle and says to update — Eizport 1.0.x refuses it as having no valid manifest |
+| `generator`, `site`, `created` | Who made it (`Eizport <version>`, shown on a bundle plugin's screen), from where, when |
 | `wxr` | The WXR entry's name (the first one is read) |
 | `files` | Attachment URL in the WXR → entry in the archive. The importer's download of that URL is answered with the entry |
 | `options` | The options file's entry, when there is one |
