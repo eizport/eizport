@@ -108,9 +108,25 @@ if ( ! function_exists( 'eizport_acf_id_field_types' ) ) {
 				'posts_per_page' => 1,
 			)
 		);
-		$field = $posts ? maybe_unserialize( $posts[0]->post_content ) : null;
+		$field = $posts ? eizport_acf_unserialize( $posts[0]->post_content ) : null;
 
 		return is_array( $field ) && isset( $field['type'] ) ? (string) $field['type'] : '';
+	}
+
+	/**
+	 * A stored value, unserialized when it is serialized — data only, never
+	 * objects: the values come from a file someone else made.
+	 *
+	 * @param mixed $value Value as stored.
+	 * @return mixed
+	 */
+	function eizport_acf_unserialize( $value ) {
+		if ( ! is_string( $value ) || ! is_serialized( $value ) ) {
+			return $value;
+		}
+		$data = @unserialize( trim( $value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize, WordPress.PHP.NoSilencedErrors.Discouraged -- no classes allowed; a malformed value stays as it is.
+
+		return false === $data && 'b:0;' !== trim( $value ) ? $value : $data;
 	}
 
 	/**
@@ -144,7 +160,7 @@ if ( ! function_exists( 'eizport_acf_id_field_types' ) ) {
 	 * @return int[]
 	 */
 	function eizport_acf_ids_of( $value ) {
-		$value = maybe_unserialize( $value );
+		$value = eizport_acf_unserialize( $value );
 		$ids   = array();
 		foreach ( is_array( $value ) ? $value : array( $value ) as $one ) {
 			if ( is_int( $one ) || ( is_string( $one ) && ctype_digit( $one ) ) ) {
@@ -164,7 +180,7 @@ if ( ! function_exists( 'eizport_acf_id_field_types' ) ) {
 	 * @return mixed|null
 	 */
 	function eizport_acf_mapped_value( $value, $map ) {
-		$value   = maybe_unserialize( $value );
+		$value   = eizport_acf_unserialize( $value );
 		$changed = false;
 		$one     = function ( $id ) use ( $map, &$changed ) {
 			if ( ( is_int( $id ) || ( is_string( $id ) && ctype_digit( $id ) ) ) && isset( $map[ (int) $id ] ) ) {
@@ -242,6 +258,11 @@ if ( ! function_exists( 'eizport_acf_id_field_types' ) ) {
 		if ( ! function_exists( 'acf_import_internal_post_type' ) || ! function_exists( 'acf_determine_internal_post_type' ) ) {
 			return array();
 		}
+		// As ACF → Tools → Import: only who may manage ACF (its capability setting, manage_options by default).
+		$capability = function_exists( 'acf_get_setting' ) ? (string) acf_get_setting( 'capability' ) : 'manage_options';
+		if ( ! current_user_can( '' !== $capability ? $capability : 'manage_options' ) ) {
+			return array();
+		}
 		$by_kind = array_fill_keys( eizport_acf_kinds(), array() );
 		foreach ( (array) $items as $item ) {
 			$kind = is_array( $item ) && isset( $item['key'] ) ? acf_determine_internal_post_type( (string) $item['key'] ) : false;
@@ -255,7 +276,8 @@ if ( ! function_exists( 'eizport_acf_id_field_types' ) ) {
 			foreach ( $list as $item ) {
 				// As ACF → Tools → Import does: the item with that key here is updated.
 				$post = acf_get_internal_post_type_post( $item['key'], $kind );
-				unset( $item['ID'] );
+				// PHP callbacks by name, which ACF itself drops on import since 6.3.10: never from a file.
+				unset( $item['ID'], $item['register_meta_box_cb'], $item['meta_box_cb'], $item['meta_box_sanitize_cb'] );
 				if ( $post ) {
 					$item['ID'] = $post->ID;
 				}

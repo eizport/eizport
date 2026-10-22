@@ -33,6 +33,11 @@ if ( ! function_exists( 'eizport_replace_source_links' ) ) {
 		if ( '' === $text || '' === $from || $from === $to ) {
 			return $text;
 		}
+		// The source's address comes from the file: only a plain http(s)://host[:port][/path] is
+		// replaced, so no quote or bracket of it can close an attribute kses already checked.
+		if ( ! preg_match( '#^https?://[A-Za-z0-9.-]+(:\d+)?(/[A-Za-z0-9._~%/-]*)?$#', $from ) ) {
+			return $text;
+		}
 		// Addresses that are already this site's (its home, its uploads) are never touched: on a
 		// network, the source can be a prefix of them (http://site → http://site/b, http://site/wp-content/uploads/sites/3).
 		$held = array();

@@ -473,6 +473,18 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 		if ( isset( $widget['content'] ) && is_string( $widget['content'] ) && function_exists( 'eizport_replace_block_ids' ) ) {
 			$widget['content'] = eizport_replace_block_ids( $widget['content'], eizport_changed_ids( $posts ) );
 		}
+		// The widgets' own update() filters their HTML for a user who can't post it unfiltered
+		// (a site admin on a network): the file's widgets get the same, as they skip update().
+		if ( ! current_user_can( 'unfiltered_html' ) ) {
+			foreach ( array( 'text', 'content' ) as $key ) {
+				if ( isset( $widget[ $key ] ) && is_string( $widget[ $key ] ) ) {
+					$widget[ $key ] = wp_kses_post( $widget[ $key ] );
+				}
+			}
+			if ( isset( $widget['title'] ) && is_string( $widget['title'] ) ) {
+				$widget['title'] = wp_kses_data( $widget['title'] );
+			}
+		}
 
 		return $widget;
 	}
@@ -560,6 +572,10 @@ if ( ! function_exists( 'eizport_options_to_apply' ) ) {
 	 */
 	function eizport_apply_look( $data, $urls = array() ) {
 		$set = array();
+		// Custom CSS is for who may edit it (edit_css: on a network, super admins only), as in the Customizer and the Site Editor.
+		if ( ! current_user_can( 'edit_css' ) ) {
+			unset( $data['custom_css'], $data['global_css'] );
+		}
 		if ( isset( $data['custom_css']['css'] ) && is_string( $data['custom_css']['css'] ) ) {
 			list( $mode, $markers ) = eizport_css_choice( $data['custom_css'] );
 			$css                    = eizport_merge_css( (string) wp_get_custom_css(), eizport_remap_urls( $data['custom_css']['css'], $urls ), $mode, $markers, (string) ( $data['custom_css']['id'] ?? '' ) );

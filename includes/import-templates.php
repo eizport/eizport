@@ -100,11 +100,14 @@ if ( ! function_exists( 'eizport_templates_existing' ) ) {
 		}
 		$id = eizport_template_post( $type, (string) ( $post['post_name'] ?? '' ), eizport_template_theme( $post ) );
 		if ( $id ) {
+			$status = (string) ( $post['status'] ?? 'publish' );
+
 			$GLOBALS['eizport_templates_pending'][ $id ] = array(
 				'post_content' => (string) ( $post['post_content'] ?? '' ),
 				'post_title'   => (string) ( $post['post_title'] ?? '' ),
 				'post_excerpt' => (string) ( $post['post_excerpt'] ?? '' ),
-				'post_status'  => (string) ( $post['status'] ?? 'publish' ),
+				// What a template can be; anything else from the file publishes it, as the importer would.
+				'post_status'  => in_array( $status, array( 'publish', 'draft', 'pending', 'private', 'future' ), true ) ? $status : 'publish',
 			);
 		}
 
@@ -113,9 +116,10 @@ if ( ! function_exists( 'eizport_templates_existing' ) ) {
 
 	/**
 	 * `import_end`, before the IDs and links are mapped: the site's templates
-	 * the file had take its content. Written straight to the table, as the
-	 * importer writes block markup (no kses: a WP-CLI import has no user
-	 * allowed to post it), then the cache cleared.
+	 * the file had take its content. Written straight to the table, then the
+	 * cache cleared; for a user who can't post unfiltered HTML (a site admin
+	 * on a network, or DISALLOW_UNFILTERED_HTML) it goes through kses first,
+	 * as the importer's own inserts do: the file is someone else's.
 	 *
 	 * @return int Posts updated.
 	 */
@@ -125,6 +129,11 @@ if ( ! function_exists( 'eizport_templates_existing' ) ) {
 		$pending                              = (array) ( $GLOBALS['eizport_templates_pending'] ?? array() );
 		$GLOBALS['eizport_templates_pending'] = array();
 		foreach ( $pending as $id => $fields ) {
+			if ( ! current_user_can( 'unfiltered_html' ) ) {
+				$fields['post_content'] = wp_kses_post( $fields['post_content'] );
+				$fields['post_title']   = wp_kses_data( $fields['post_title'] );
+				$fields['post_excerpt'] = wp_kses_post( $fields['post_excerpt'] );
+			}
 			$wpdb->update( $wpdb->posts, $fields, array( 'ID' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- once per template the file had; see the docblock.
 			clean_post_cache( (int) $id );
 		}
