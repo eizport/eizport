@@ -10,3 +10,7 @@ dist/
 !/src/content/i18n/.gitkeep
 /src/assets/i18n/
 /public/i18n/
+
+# The demo video: GitHub release assets (media.json, npm run media).
+/public/video/demo.mp4
+/public/video/demo.webm

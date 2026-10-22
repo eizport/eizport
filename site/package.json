@@ -16,6 +16,7 @@
 		"check:screenshots": "node scripts/check-screenshots.mjs",
 		"video": "node scripts/video.mjs",
 		"translations": "node scripts/translations.mjs",
+		"media": "node scripts/media.mjs",
 		"plugin-languages": "node scripts/plugin-languages.mjs"
 	},
 	"engines": {

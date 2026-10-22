@@ -68,6 +68,8 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
       - run: npm ci
+      # The demo video, from its GitHub release (media.json); a ref from before it kept the video in git.
+      - run: npm run media --if-present
       - run: npm run translations -- ${{ ( inputs.ref || 'site' ) == 'site' && '--ref site' || '' }}
       - run: npm run check
       - run: npm run build

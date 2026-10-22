@@ -9,7 +9,9 @@
  *                                  outdated or missing)
  * - src/assets/i18n/<code>/        translated screenshots and the video's poster,
  *                                  when it has them
- * - public/i18n/<code>/video/      the demo video in that language and its captions
+ * - public/i18n/<code>/video/      the demo video in that language (from its
+ *                                  repository's media-X.Y.Z release, media.json)
+ *                                  and its captions
  *
  * A page is outdated when its English page changed after the commit in its
  * `translatedFrom`. A language that can't be downloaded is left out: the
@@ -26,6 +28,7 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { downloadVideo } from './media.mjs';
 
 const site = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const config = JSON.parse( readFileSync( join( site, 'translations.json' ), 'utf8' ) );
@@ -136,6 +139,7 @@ for ( const locale of config.locales ) {
 	mkdirSync( out, { recursive: true } );
 	// The demo video in the language: files served as they are, the poster through Astro's images.
 	const video = join( source, 'assets/video' );
+	await downloadVideo( locale.repo, video );
 	const hasVideo = existsSync( join( video, 'demo.mp4' ) );
 	if ( hasVideo ) {
 		mkdirSync( join( media, 'video' ), { recursive: true } );
