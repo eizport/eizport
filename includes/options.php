@@ -185,6 +185,31 @@ function post_id_options() {
 }
 
 /**
+ * Whether a name (an option, a theme mod, a widget's field) looks like it
+ * holds a secret: a password, a token, an API or license key, a private
+ * or client key — or is a plugin's known store of them (mail and payment
+ * settings). Secrets are never exported nor listed: a bundle travels.
+ *
+ * @param string $name Name.
+ * @return bool
+ */
+function is_secret( $name ) {
+	$name   = (string) $name;
+	$secret = (bool) preg_match( '/secret|passw|pwd|token|api[_-]?key|apikey|licen[cs]e|private|credential|access[_-]?key|auth[_-]?key|_auth$|webhook/i', $name )
+		|| in_array( $name, array( 'wp_mail_smtp', 'woocommerce_stripe_settings', 'woocommerce_ppcp-gateway_settings', 'woocommerce_paypal_settings', 'woocommerce_bacs_accounts', 'woocommerce_square_credit_card_settings' ), true );
+
+	/**
+	 * Filters whether a name holds a secret, so it is never exported nor
+	 * listed (options, theme mods, widget fields): a plugin marks its own,
+	 * or lets one through.
+	 *
+	 * @param bool   $secret Whether it does.
+	 * @param string $name   Option, theme mod or widget field name.
+	 */
+	return (bool) apply_filters( 'eizport_is_secret', $secret, $name );
+}
+
+/**
  * Whether an option may never be exported: it would break or expose the
  * other site. The same ones are never set by an import (apply-options.php).
  *
@@ -203,7 +228,7 @@ function is_denied( $name ) {
 	 */
 	$denied = (array) apply_filters( 'eizport_denied_options', array() );
 
-	return eizport_never_set_option( $name ) || in_array( $name, $denied, true );
+	return eizport_never_set_option( $name ) || in_array( $name, $denied, true ) || is_secret( $name );
 }
 
 /**

@@ -13,9 +13,9 @@ Eizport works on each site of a network as on a single site: a site exports its 
 
 | Who | Can |
 | --- | --- |
-| Site administrators | Export and import on their site, and change its Eizport settings |
+| Site administrators | Export and import on their site, and change its Eizport settings. A [Playground .zip](../../formats/playground-zip/) takes only the plugins active on their site and the themes it may use — no must-use plugins: the network's code is the super admins'. On import, the bundle's options outside the [groups](../../exporting/options/#options-outside-the-groups-on-import) and the custom CSS aren't set |
 | Super admins | All of that on every site, and install plugins — an [as plugin](../../exporting/as-plugin/) `.zip` needs one to install it; site administrators import the bundle inside it on Tools → Import instead |
-| Users who can't post unfiltered HTML | Import as WordPress lets them: on a network only super admins can, so scripts and some embeds in imported content are filtered for the others, as they would be when typed in the editor |
+| Users who can't post unfiltered HTML | Import as WordPress lets them: on a network only super admins can, so scripts and some embeds in imported content — templates, template parts and widgets too — are filtered for the others, as they would be when typed in the editor |
 
 ## Each site's files
 

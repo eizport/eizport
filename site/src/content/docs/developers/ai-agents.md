@@ -39,7 +39,7 @@ Errors come back as codes an agent can act on: `eizport_invalid_type` (a post ty
 ## Safety built in
 
 - **WordPress's permissions:** the agent can only do what its user can — `export` for exports and copies, `import` to import, `manage_options` for settings.
-- **No secrets leave:** site URLs, the admin email, keys and salts, users and roles, active plugins, transients and caches are never exported, whatever the agent asks.
+- **No secrets leave:** site URLs, the admin email, keys and salts, users and roles, active plugins, transients and caches are never exported, whatever the agent asks — nor options, theme mods or widget fields named like secrets (passwords, tokens, API and license keys).
 - **Copies are temporary and hidden:** a random 16-character token in each link, `noindex` and robots.txt, a folder locked against direct access, and deletion when they expire ([copies](../../settings/copies/)).
 - **Imports merge**, they don't overwrite the site.
 

@@ -58,7 +58,7 @@ Its [JSON Schema](https://eizport.github.io/schemas/1.1/manifest.json) is named 
 | `wxr` | The WXR entry's name (the first one is read) |
 | `files` | Attachment URL in the WXR → entry in the archive. The importer's download of that URL is answered with the entry |
 | `options` | The options file's entry, when there is one |
-| `update_existing` | `true` when the import should update the items that already exist (same type and slug); the importer's box comes checked |
+| `update_existing` | `true` when the import should update the items that already exist (same type and slug): the importer's box comes checked. WP-CLI and the ability update only when asked |
 | `term_media` | Taxonomy → term slug → meta key → attachment ID on the exporting site, for the terms the items use ([`eizport_term_media`](../../developers/hooks/#eizport_term_media)); mapped to the imported attachment at the end of the import |
 | `post_content` | Content file → the item it belongs to: original `id`, `type` and `slug` |
 

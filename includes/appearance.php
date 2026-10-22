@@ -75,9 +75,11 @@ function theme_mods() {
 
 	return array_filter(
 		$mods,
-		function ( $value ) {
-			return null !== $value && '' !== $value && false !== $value;
-		}
+		function ( $value, $name ) {
+			// No secrets (a map's API key, a feed's token): a bundle travels.
+			return null !== $value && '' !== $value && false !== $value && ! \Eizport\Options\is_secret( (string) $name );
+		},
+		ARRAY_FILTER_USE_BOTH
 	);
 }
 
@@ -318,8 +320,18 @@ function widget( $id ) {
 		return null;
 	}
 	$all = (array) get_option( 'widget_' . $m[1], array() );
+	if ( ! isset( $all[ (int) $m[2] ] ) || ! is_array( $all[ (int) $m[2] ] ) ) {
+		return null;
+	}
 
-	return isset( $all[ (int) $m[2] ] ) && is_array( $all[ (int) $m[2] ] ) ? $all[ (int) $m[2] ] : null;
+	// Its fields but the secret ones (an API key, a token): a bundle travels.
+	return array_filter(
+		$all[ (int) $m[2] ],
+		function ( $field ) {
+			return ! \Eizport\Options\is_secret( (string) $field );
+		},
+		ARRAY_FILTER_USE_KEY
+	);
 }
 
 /**

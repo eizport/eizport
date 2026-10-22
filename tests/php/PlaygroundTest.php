@@ -29,6 +29,7 @@ class PlaygroundTest extends Test_Case {
 	 */
 	protected function set_up() {
 		parent::set_up();
+		$this->as_network_admin();
 		$dir = get_theme_root() . '/' . $this->child;
 		wp_mkdir_p( $dir );
 		file_put_contents( $dir . '/style.css', "/*\nTheme Name: EIZ Test Child\nTemplate: " . get_template() . "\n*/\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
@@ -96,6 +97,7 @@ class PlaygroundTest extends Test_Case {
 	 * Removes the blueprint filter and the child theme from the caches.
 	 */
 	protected function tear_down() {
+		wp_set_current_user( 0 );
 		remove_all_filters( 'eizport_playground_blueprint' );
 		remove_all_filters( 'wp_import_post_data_raw' );
 		remove_all_filters( 'pre_http_request' );
@@ -496,6 +498,17 @@ class PlaygroundTest extends Test_Case {
 		remove_filter( 'get_available_languages', $installed );
 		remove_all_filters( 'pre_site_transient_available_translations' );
 		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * On a network, logs in a super admin: the network's plugins, themes
+	 * and must-use plugins are theirs to put in a Playground .zip.
+	 */
+	private function as_network_admin() {
+		if ( is_multisite() ) {
+			$admin = get_user_by( 'login', (string) current( get_super_admins() ) );
+			wp_set_current_user( $admin ? $admin->ID : 1 );
+		}
 	}
 
 	public function test_blueprint_in_a_language() {
