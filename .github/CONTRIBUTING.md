@@ -58,16 +58,22 @@ Export navigation menus: classic menus with their theme locations, and block nav
    `git cherry-pick -x <commit>`. A fix that only makes sense on the release
    branch is committed there and cherry-picked to `trunk`. Release branches
    are never merged back.
-3. **Optional pre-release** for testing, on GitHub only (not the latest
+3. **Screenshots and the demo video**, once per version on the release
+   branch (features don't recapture them: they all touch the same screens).
+   From `site/`: `npm run demo-sites`, `npm run screenshots` (and
+   `-- --locale br=<eizport-ptb>`), `npm run video` when the scenes changed.
+   A feature PR only updates the docs and `src/data/screenshots.ts` when a
+   screen shows something new.
+4. **Optional pre-release** for testing, on GitHub only (not the latest
    release, not on WordPress.org): write the `= 1.1.0 =` Upgrade Notice in
    readme.txt (the Changelog comes from `changelog/`), then
    `eizport release 1.1.0-rc.1` from `release/1.1`.
-4. **The release**, from `release/1.1`: `eizport release 1.1.0` (or `patch`
+5. **The release**, from `release/1.1`: `eizport release 1.1.0` (or `patch`
    from `1.1.0-dev`/`-rc.N`). It bumps the version and Stable tag, runs the
    checks, commits, tags `1.1.0`, moves `latest` and `stable`, and pushes. The
    tag runs `.github/workflows/release.yml`: the GitHub release and the
    WordPress.org deploy.
-5. **Back to `trunk`:** cherry-pick the `chore: release 1.1.0` commit, keeping
+6. **Back to `trunk`:** cherry-pick the `chore: release 1.1.0` commit, keeping
    `trunk`'s dev version and taking readme.txt's Changelog, Upgrade Notice and
    Stable tag.
 
