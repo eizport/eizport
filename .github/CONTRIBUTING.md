@@ -83,7 +83,9 @@ Export navigation menus: classic menus with their theme locations, and block nav
    checks, commits, tags `1.1.0`, moves `latest` and `stable`, and pushes. The
    tag runs `.github/workflows/release.yml`: the GitHub release and the
    WordPress.org deploy. It also moves the `site` branch onto `1.1.0`, which
-   publishes the site (below).
+   publishes the site (below), and tags each translation repository (eizport-ptb)
+   `1.1.0` and moves its `site` branch to its `trunk`: translate the docs of
+   `1.1.0` there before releasing.
 6. **Back to `trunk`:** cherry-pick the `chore: release 1.1.0` commit, keeping
    `trunk`'s dev version and taking readme.txt's Changelog, Upgrade Notice and
    Stable tag.
@@ -106,3 +108,9 @@ the `site` branch, the latest release plus the site fixes made after it
 A release moves `site` onto itself and replays the fixes it doesn't bring
 yet (those it already has, from `trunk`, drop out). If one no longer
 applies, `eizport release` says what to run by hand.
+
+Translations work the same way. The published site downloads each
+translation repository's `site` branch (the translation of the released
+version; `npm run translations -- --ref site`), everything else its `trunk`.
+A fix to a published translation goes into its `trunk`, then is
+cherry-picked onto its `site`; pushing its `site` rebuilds the site.
