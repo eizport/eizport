@@ -2,7 +2,7 @@
 /**
  * Exports "as plugin": a plugin .zip that holds the bundle
  * (templates/bundle-plugin.php.tpl filled in, and the .wxrz). Installed on
- * another site, the plugin adds a screen under Tools; this file draws it
+ * another site, the plugin adds a screen (Run import, on its row on Plugins); this file draws it
  * when Eizport is active there — the plugins needed, with links
  * to install them, and "Run import", which imports the bundle the plugin
  * holds (no upload) — and runs the import, then offers to deactivate and
@@ -88,23 +88,29 @@ function template_translations() {
 	}
 	$switched = switch_to_locale( $locale );
 	$texts    = array(
-		'Activate Eizport to import'  => __( 'Activate Eizport to import', 'eizport' ),
-		'Eizport is needed to import' => __( 'Eizport is needed to import', 'eizport' ),
-		'This plugin holds content exported with Eizport. Eizport imports it, and then this plugin can go.' => __( 'This plugin holds content exported with Eizport. Eizport imports it, and then this plugin can go.', 'eizport' ),
-		'Activate Eizport'            => __( 'Activate Eizport', 'eizport' ),
-		'Install Now'                 => __( 'Install Now', 'eizport' ),
-		'Installing…'                 => __( 'Installing…', 'eizport' ),
-		'Activating…'                 => __( 'Activating…', 'eizport' ),
-		/* translators: %s: error message. */
-		'Installation failed: %s'     => __( 'Installation failed: %s', 'eizport' ),
-		'Eizport is active.'          => __( 'Eizport is active.', 'eizport' ),
-		'Continue'                    => __( 'Continue', 'eizport' ),
-		'Update Eizport to import'    => __( 'Update Eizport to import', 'eizport' ),
+		'Imports the content this plugin holds into this site: posts, pages, media and settings, as they were exported.' => __( 'Imports the content this plugin holds into this site: posts, pages, media and settings, as they were exported.', 'eizport' ),
+		'Run import'                           => __( 'Run import', 'eizport' ),
+		'What it holds'                        => __( 'What it holds', 'eizport' ),
+		'Before importing'                     => __( 'Before importing', 'eizport' ),
+		'Eizport is needed.'                   => __( 'Eizport is needed.', 'eizport' ),
+		'Install Now'                          => __( 'Install Now', 'eizport' ),
+		'Eizport is installed but not active.' => __( 'Eizport is installed but not active.', 'eizport' ),
+		'Activate'                             => __( 'Activate', 'eizport' ),
 		/* translators: 1: the oldest Eizport version that reads the bundle, 2: this site's Eizport version. */
-		'This plugin holds content exported with a newer Eizport: it needs Eizport %1$s or newer, and this site has %2$s.' => __( 'This plugin holds content exported with a newer Eizport: it needs Eizport %1$s or newer, and this site has %2$s.', 'eizport' ),
-		'Update now'                  => __( 'Update now', 'eizport' ),
-		'Import'                      => __( 'Import', 'eizport' ),
-		'open the import screen'      => __( 'open the import screen', 'eizport' ),
+		'This plugin needs Eizport %1$s or newer; this site has %2$s.' => __( 'This plugin needs Eizport %1$s or newer; this site has %2$s.', 'eizport' ),
+		'Update now'                           => __( 'Update now', 'eizport' ),
+		'The WordPress Importer is installed.' => __( 'The WordPress Importer is installed.', 'eizport' ),
+		'The WordPress Importer is needed.'    => __( 'The WordPress Importer is needed.', 'eizport' ),
+		'WordPress Importer'                   => __( 'WordPress Importer', 'eizport' ),
+		/* translators: 1: file name, 2: size, 3: date. */
+		'The bundle: %1$s, %2$s, made %3$s.'   => __( 'The bundle: %1$s, %2$s, made %3$s.', 'eizport' ),
+		'Update pages, posts and products that already exist (same slug) instead of adding copies' => __( 'Update pages, posts and products that already exist (same slug) instead of adding copies', 'eizport' ),
+		'Installing…'                          => __( 'Installing…', 'eizport' ),
+		'Activating…'                          => __( 'Activating…', 'eizport' ),
+		'Updating…'                            => __( 'Updating…', 'eizport' ),
+		/* translators: %s: error message. */
+		'It didn’t work: %s'                   => __( 'It didn’t work: %s', 'eizport' ),
+		'open the import screen'               => __( 'open the import screen', 'eizport' ),
 	);
 	if ( $switched ) {
 		restore_previous_locale();
@@ -163,7 +169,7 @@ function build_zip( $target, $bundle, $name ) {
 			'EIZPORT_PLUGIN_NAME'          => $title,
 			'EIZPORT_PLUGIN_DESCRIPTION'   => $line(
 				/* translators: %s: site title. */
-				sprintf( __( 'The content exported from %s, with Eizport. Open its screen under Tools to import it.', 'eizport' ), $site )
+				sprintf( __( 'The content exported from %s, with Eizport. Click Run import, on its row, to import it.', 'eizport' ), $site )
 			),
 			'Requires at least: 7.0'       => 'Requires at least: ' . $line( $header['wp'] ),
 			'Requires PHP:      7.4'       => 'Requires PHP:      ' . $line( $header['php'] ),
@@ -192,13 +198,15 @@ function build_zip( $target, $bundle, $name ) {
 			'EIZPORT_REQUIRES_PHP'      => $line( $header['php'] ),
 			'EIZPORT_SHORT_DESCRIPTION' => $line(
 				/* translators: %s: site title. */
-				sprintf( __( 'The content exported from %s, with Eizport. Open its screen under Tools to import it.', 'eizport' ), $site )
+				sprintf( __( 'The content exported from %s, with Eizport. Click Run import, on its row, to import it.', 'eizport' ), $site )
 			),
 		)
 	);
 	$entries = array(
 		$slug . '/' . $slug . '.php' => array( 'data' => $code ),
 		$slug . '/readme.txt'        => array( 'data' => $readme ),
+		// Its screen's look while Eizport is missing: a copy of Eizport's own.
+		$slug . '/screen.css'        => array( 'path' => dirname( __DIR__ ) . '/assets/importer.css' ),
 	);
 	if ( 'wxrz' === $mode ) {
 		$entries[ $slug . '/' . $file ] = array( 'path' => $bundle );
@@ -616,7 +624,13 @@ function render( $plugin_file ) {
 			<?php if ( ! $imported || $again ) : ?>
 				<?php echo $imported ? '<details class="eizport-import__card eizport-import__again"><summary>' . esc_html__( 'Import again', 'eizport' ) . '</summary>' : '<div class="eizport-import__card"><h3>' . esc_html__( 'Before importing', 'eizport' ) . '</h3>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup with escaped text. ?>
 				<ul class="eizport-checks">
-					<li><?php echo $check( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup. ?><?php esc_html_e( 'Eizport is active.', 'eizport' ); ?></li>
+					<li class="eizport-requirement">
+						<?php echo $check( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup. ?>
+						<?php
+						/* translators: %s: Eizport's version. */
+						echo esc_html( sprintf( __( 'Eizport %s is active.', 'eizport' ), \Eizport\VERSION ) );
+						?>
+					</li>
 					<li class="eizport-requirement">
 						<?php if ( $old ) : ?>
 							<?php echo $check( false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup. ?>

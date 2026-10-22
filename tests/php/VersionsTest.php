@@ -118,7 +118,8 @@ class VersionsTest extends Test_Case {
 		$template = (string) file_get_contents( dirname( __DIR__, 2 ) . '/templates/bundle-plugin.php.tpl' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$this->assertStringContainsString( "\$requires = 'EIZPORT_REQUIRES';", $template );
-		$this->assertStringContainsString( 'update.php?action=upgrade-plugin&plugin=', $template );
-		$this->assertLessThan( strpos( $template, "function_exists( '\\Eizport\\BundlePlugin\\render' )" ), strpos( $template, 'Update Eizport to import' ), 'Before the installed Eizport draws its screen.' );
+		$this->assertStringContainsString( "'update' : ''", $template, 'An active Eizport older than the bundle needs: update.' );
+		$this->assertStringContainsString( "update.php?action=upgrade-plugin&plugin=' . rawurlencode( \$main )", $template );
+		$this->assertStringContainsString( 'This plugin needs Eizport %1$s or newer; this site has %2$s.', $template );
 	}
 }

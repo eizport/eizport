@@ -177,6 +177,13 @@ body.eizport-import .eizport-import__card input[type="checkbox"] {
 	margin: 2px 0 0;
 }
 
+/* WordPress's checkbox is 25px from 782px down: its middle on the label's first line (19.5px). */
+@media screen and (max-width: 782px) {
+	body.eizport-import .eizport-import__card input[type="checkbox"] {
+		margin-top: -3px;
+	}
+}
+
 /* Assign authors: each author, then its two choices as label | field rows. */
 body.eizport-import #authors {
 	margin: 16px 0 0;
@@ -343,11 +350,10 @@ body.eizport-import .eizport-import__moved {
 	margin: 0 0 12px;
 }
 
-/* One height for every line, the one with a button too. */
+/* One height for every line, the one with a button too. No wrapping of the items: a long text wraps inside itself, next to its ✓ or ✗, and a button keeps its width. */
 .eizport-checks li {
 	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
+	align-items: baseline;
 	gap: 4px 8px;
 	min-height: 32px;
 	margin: 0;
@@ -357,13 +363,21 @@ body.eizport-import .eizport-import__moved {
 	margin-right: -4px;
 }
 
-/* Install Now while installing and activating: core's spinning icon, centred on the button's line. */
-.eizport-install-now.updating-message {
-	display: inline-flex;
-	align-items: center;
+.eizport-checks li .eizport-check,
+.eizport-checks li .button {
+	flex-shrink: 0;
 }
 
-.eizport-install-now.updating-message::before {
+/* Install Now (Activate, Update now) while it works: core's spinning icon and the text on one line, centred. */
+.eizport-install-now.updating-message,
+.eizport-bundle-get.updating-message {
+	display: inline-flex;
+	align-items: center;
+	white-space: nowrap;
+}
+
+.eizport-install-now.updating-message::before,
+.eizport-bundle-get.updating-message::before {
 	margin: 0 5px 0 -2px;
 	line-height: 1;
 }
@@ -396,6 +410,16 @@ body.eizport-import .eizport-import__moved {
 
 .eizport-import__again[open] > summary {
 	margin-bottom: 12px;
+}
+
+/* A bundle plugin's screen while Eizport is missing: what Eizport reads waits for it. */
+.eizport-import__waiting {
+	opacity: 0.5;
+}
+
+.eizport-import__waiting > summary {
+	cursor: default;
+	pointer-events: none;
 }
 
 /* "What it holds": one line per type, media and settings. */
