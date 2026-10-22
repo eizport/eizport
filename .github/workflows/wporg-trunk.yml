@@ -1,0 +1,73 @@
+name: WordPress.org trunk
+
+# Sends a branch's plugin (release/X.Y, by default the one being prepared)
+# to the WordPress.org SVN trunk only: no tag, no assets. Run by hand
+# (Actions → WordPress.org trunk → Run workflow), after cutting release/X.Y
+# and before its stable release: translate.wordpress.org reads the strings
+# from SVN, so the version's new strings show in the "dev" sub-project and
+# are translated before the release (a language pack needs 90% of Stable).
+# The readme keeps the released Stable tag, so installs and the plugin page
+# stay on the released version. "dry_run" shows what would change in SVN.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch to send to the SVN trunk
+        default: release/1.1
+      dry_run:
+        description: Only show the changes, commit nothing
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  trunk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Build the JS
+        run: npm ci && npm run build --if-present
+
+      - name: The files that ship, as the release zip has them
+        run: |
+          mkdir -p /tmp/ship
+          git archive HEAD | tar xf - -C /tmp/ship/
+          if [ -d build ]; then cp -r build /tmp/ship/build; fi
+          find /tmp/ship -name '*.map' -delete
+
+      - name: SVN trunk
+        run: |
+          sudo apt-get install -y -qq subversion >/dev/null
+          svn checkout -q --depth immediates https://plugins.svn.wordpress.org/eizport /tmp/svn
+          svn update -q --set-depth infinity /tmp/svn/trunk
+          svn update -q --set-depth immediates /tmp/svn/tags
+          # Installs must stay on a released version: the readme's Stable tag is a tag SVN has.
+          stable=$(sed -n 's/^Stable tag: *//p' /tmp/ship/readme.txt)
+          echo "Stable tag: $stable"
+          [ -d "/tmp/svn/tags/$stable" ] || { echo "::error::Stable tag $stable is not a tag in SVN."; exit 1; }
+          rsync -rc --delete /tmp/ship/ /tmp/svn/trunk/
+          cd /tmp/svn
+          svn add --force trunk > /dev/null
+          svn status trunk | awk '/^!/ { print $2 }' | xargs -r svn delete -q
+          svn status trunk
+
+      - name: Commit
+        if: ${{ ! inputs.dry_run }}
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          version=$(sed -n 's/^ \* Version: *//p' /tmp/ship/eizport.php)
+          cd /tmp/svn
+          svn commit trunk -m "Trunk: ${version} from ${{ inputs.ref }}, for translation (Stable tag unchanged)" --no-auth-cache --non-interactive --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
