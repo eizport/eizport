@@ -1467,14 +1467,15 @@ function get_suggestions( $input = array() ) {
 	$out['menus'] = \Eizport\Menus\suggested( array() === $out['chosen'] ? array() : array_merge( ...array_values( $out['chosen'] ) ) );
 	$chosen       = $out['chosen'];
 	unset( $out['chosen'] );
-	// What the site has of its look: every item is suggested, row by row; a plugin's row (Advanced Custom Fields) suggests what the items use.
+	// What the site has of its look: every item is suggested, row by row; a plugin's row (Advanced Custom Fields, Elementor) suggests what the items use.
 	$out['appearance'] = array();
 	foreach ( \Eizport\Appearance\KEYS as $key ) {
 		$keys = wp_list_pluck( \Eizport\Appearance\items( $key ), 'key' );
-		if ( 'advanced-custom-fields' === $key ) {
+		if ( in_array( $key, \Eizport\Appearance\PLUGIN_ROWS, true ) ) {
 			/**
 			 * Filters the items a plugin's look row suggests for the items
-			 * chosen (the Advanced Custom Fields row: the field groups their values use).
+			 * chosen (the Advanced Custom Fields row: the field groups their
+			 * values use; the Elementor row: the templates and site settings).
 			 *
 			 * @param string[]             $keys   Keys suggested.
 			 * @param string               $row    The row.

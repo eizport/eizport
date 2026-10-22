@@ -8,6 +8,8 @@
  *     <name>.xml               the WXR printed by export_wp()
  *     uploads/2026/10/a.jpg    optional: one entry per local attachment file
  *     post_content/<slug>.html optional: post content kept out of the WXR
+ *     post_content/<slug>.json optional: a page builder's design in its own
+ *                              format (Elementor), applied when the import ends
  *     options.json             optional: settings, set after the import
  *
  * Export: the WXR is captured while export_wp() prints it, then on shutdown
@@ -359,14 +361,29 @@ function start_content_files() {
  */
 function collect_content( $content ) {
 	$post = get_post( isset( $GLOBALS['id'] ) ? (int) $GLOBALS['id'] : 0 );
-	if ( ! $post || '' === $content || in_array( $post->post_type, CONTENT_SKIP_TYPES, true ) ) {
+	if ( ! $post || in_array( $post->post_type, CONTENT_SKIP_TYPES, true ) ) {
+		return $content;
+	}
+
+	/**
+	 * Filters the file a post's content goes to: null for the content as
+	 * `<slug>.html` (blocks), or `extension` ("json") and `data` for a
+	 * page builder's design in its own format (the Elementor compatibility);
+	 * the post's content then stays in the WXR.
+	 *
+	 * @param array|null $file    Null, or `extension` and `data`.
+	 * @param \WP_Post   $post    The post.
+	 */
+	$file = apply_filters( 'eizport_content_file', null, $post );
+	$data = is_array( $file ) && isset( $file['data'] ) && 'json' === ( $file['extension'] ?? '' ) ? (string) $file['data'] : null;
+	if ( null === $data && '' === $content ) {
 		return $content;
 	}
 
 	$stream = fopen( 'php://temp/maxmemory:' . MB_IN_BYTES, 'w+b' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-	fwrite( $stream, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+	fwrite( $stream, null === $data ? $content : $data ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 
-	$GLOBALS['eizport_post_content'][ content_file_name( $post ) ] = array(
+	$GLOBALS['eizport_post_content'][ content_file_name( $post, null === $data ? 'html' : 'json' ) ] = array(
 		'stream' => $stream,
 		'item'   => array(
 			'id'   => (int) $post->ID,
@@ -375,20 +392,22 @@ function collect_content( $content ) {
 		),
 	);
 
-	return '';
+	// A design file leaves the content (the builder's own fallback) in the WXR.
+	return null === $data ? '' : $content;
 }
 
 /**
  * "<slug>.html"; when the slug is taken (or empty, or has characters a file
- * name shouldn't), "<type>-<id>-<slug>.html".
+ * name shouldn't), "<type>-<id>-<slug>.html". With "json", the same in .json.
  *
- * @param \WP_Post $post Post.
+ * @param \WP_Post $post      Post.
+ * @param string   $extension "html" or "json".
  * @return string
  */
-function content_file_name( $post ) {
-	$name = $post->post_name . '.html';
+function content_file_name( $post, $extension = 'html' ) {
+	$name = $post->post_name . '.' . $extension;
 	if ( '' === $post->post_name || ! is_content_name( $name ) || isset( $GLOBALS['eizport_post_content'][ $name ] ) ) {
-		$name = $post->post_type . '-' . $post->ID . ( is_content_name( $post->post_name . '.html' ) ? '-' . $post->post_name : '' ) . '.html';
+		$name = $post->post_type . '-' . $post->ID . ( is_content_name( $post->post_name . '.' . $extension ) ? '-' . $post->post_name : '' ) . '.' . $extension;
 	}
 
 	return $name;
@@ -401,7 +420,7 @@ function content_file_name( $post ) {
  * @return bool
  */
 function is_content_name( $name ) {
-	return (bool) preg_match( '/^[A-Za-z0-9%_-][A-Za-z0-9%._-]*\.html$/', $name );
+	return (bool) preg_match( '/^[A-Za-z0-9%_-][A-Za-z0-9%._-]*\.(html|json)$/', $name );
 }
 
 /**
@@ -667,8 +686,12 @@ function merge_item( $xml, $dir, $by_id ) {
 		return $xml;
 	}
 
-	$file    = $by_id[ $item['id'] ] ?? ( '' === $item['slug'] ? '' : $item['slug'] . '.html' );
-	$path    = is_content_name( $file ) ? $dir . '/' . CONTENT_FOLDER . '/' . $file : '';
+	$file = $by_id[ $item['id'] ] ?? ( '' === $item['slug'] ? '' : $item['slug'] . '.html' );
+	$path = is_content_name( $file ) ? $dir . '/' . CONTENT_FOLDER . '/' . $file : '';
+	if ( $path && '.json' === substr( $file, -5 ) ) {
+		// A builder's design: read when the import starts (keep_designs()); the content stays.
+		return $xml;
+	}
 	$content = $path && is_file( $path ) ? (string) file_get_contents( $path ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 	/**
@@ -852,6 +875,25 @@ function read_options( $dir ) {
 }
 
 /**
+ * Keeps the bundle's design files (post_content/<slug>.json: a page
+ * builder's design) for when the import ends — import-elementor.php reads
+ * them by the item's original ID. Read when the import starts: the
+ * importer's screen unpacks the bundle on one request and imports on the
+ * next, and deletes the folder before `import_end`.
+ *
+ * @param string $dir Bundle folder.
+ */
+function keep_designs( $dir ) {
+	$manifest = is_file( $dir . '/manifest.json' ) ? json_decode( (string) file_get_contents( $dir . '/manifest.json' ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	foreach ( (array) ( $manifest['post_content'] ?? array() ) as $file => $item ) {
+		$path = $dir . '/' . CONTENT_FOLDER . '/' . $file;
+		if ( is_array( $item ) && isset( $item['id'] ) && is_content_name( (string) $file ) && '.json' === substr( (string) $file, -5 ) && is_file( $path ) ) {
+			$GLOBALS['eizport_content_data'][ (int) $item['id'] ] = (string) file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		}
+	}
+}
+
+/**
  * Sets a bundle's options when the import ends, with the IDs they hold
  * mapped to the imported items. The data is read before: the importer
  * deletes the bundle folder before `import_end`.
@@ -866,13 +908,16 @@ function apply_options_at_end( $data ) {
 	require_once __DIR__ . '/apply-options.php';
 
 	// ACF's post types, taxonomies and field groups before the items that use them (import-advanced-custom-fields.php).
+	// And Elementor's templates and site settings, applied when it ends (import-elementor.php).
 	if ( doing_action( 'import_start' ) ) {
 		eizport_acf_start( $data );
+		eizport_elementor_start( $data );
 	} else {
 		add_action(
 			'import_start',
 			function () use ( $data ) {
 				eizport_acf_start( $data );
+				eizport_elementor_start( $data );
 			}
 		);
 	}

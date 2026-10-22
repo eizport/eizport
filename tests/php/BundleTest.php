@@ -95,6 +95,8 @@ class BundleTest extends Test_Case {
 	public function test_content_names() {
 		$this->assertTrue( Bundle\is_content_name( 'about.html' ) );
 		$this->assertTrue( Bundle\is_content_name( '%c3%a9t%c3%a9.html' ) );
+		$this->assertTrue( Bundle\is_content_name( 'landing.json' ), 'A builder\'s design.' );
+		$this->assertFalse( Bundle\is_content_name( 'a.js' ) );
 		$this->assertFalse( Bundle\is_content_name( '.hidden.html' ) );
 		$this->assertFalse( Bundle\is_content_name( 'a/b.html' ) );
 		$this->assertFalse( Bundle\is_content_name( 'a.php' ) );

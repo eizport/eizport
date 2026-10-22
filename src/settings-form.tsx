@@ -244,7 +244,7 @@ export default function SettingsForm( {
 				type: 'boolean',
 				Edit: 'toggle',
 				description: __(
-					'Each post’s content goes to post_content/<slug>.html in the .wxrz or Playground .zip, instead of inside the WXR. Off, it all stays in the WXR.',
+					'Each post’s content goes to post_content/<slug>.html in the .wxrz or Playground .zip, instead of inside the WXR; a page built with Elementor goes as <slug>.json, its design in Elementor’s format. Off, it all stays in the WXR.',
 					'eizport'
 				),
 			},

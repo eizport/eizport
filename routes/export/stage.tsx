@@ -360,6 +360,8 @@ function Stage() {
 			widgets: __( 'Widgets', 'eizport' ),
 			// ACF's post types, taxonomies and field groups (with ACF active).
 			'advanced-custom-fields': __( 'Advanced Custom Fields (ACF)', 'eizport' ),
+			// Elementor's site settings (the Kit) and templates (with Elementor active).
+			elementor: __( 'Elementor', 'eizport' ),
 		};
 		Object.entries( LOOK_ROWS ).forEach( ( [ row, key ] ) => {
 			const count = options?.appearance?.[ key ]?.length || 0;

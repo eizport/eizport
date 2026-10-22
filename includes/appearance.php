@@ -26,7 +26,14 @@ require_once __DIR__ . '/apply-options.php';
 /**
  * What can be exported, in the screen's order.
  */
-const KEYS = array( 'theme_mods', 'custom_css', 'global_styles', 'global_css', 'widgets', 'advanced-custom-fields' );
+const KEYS = array( 'theme_mods', 'custom_css', 'global_styles', 'global_css', 'widgets', 'advanced-custom-fields', 'elementor' );
+
+/**
+ * The rows a plugin's compatibility fills (through eizport_look_items,
+ * eizport_look_data, eizport_look_suggested and eizport_look_media), with
+ * that plugin active.
+ */
+const PLUGIN_ROWS = array( 'advanced-custom-fields', 'elementor' );
 
 /**
  * What the site has, for the Export screen's rows: key => number of items
@@ -517,7 +524,7 @@ function data( $choice, $css = array() ) {
 	}
 
 	// A plugin's row (Advanced Custom Fields) fills its own entry.
-	foreach ( array( 'advanced-custom-fields' ) as $row ) {
+	foreach ( PLUGIN_ROWS as $row ) {
 		$keys = keys_of( $choice, $row );
 		if ( $keys ) {
 			/**
@@ -572,6 +579,16 @@ function media_ids( $choice ) {
 	foreach ( array_filter( $urls ) as $url ) {
 		$ids[] = (int) attachment_url_to_postid( (string) preg_replace( '/-\d+x\d+(?=\.[a-z0-9]+$)/i', '', $url ) );
 	}
+
+	/**
+	 * Filters the attachments the look chosen uses: a plugin's row adds
+	 * the ones its items use (the Elementor row: images of templates and
+	 * site settings).
+	 *
+	 * @param int[] $ids    Attachment IDs.
+	 * @param array $choice normalize()'s.
+	 */
+	$ids = (array) apply_filters( 'eizport_look_media', $ids, normalize( $choice ) );
 
 	return array_values(
 		array_filter(

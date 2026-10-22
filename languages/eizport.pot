@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T21:52:07+00:00\n"
+"POT-Creation-Date: 2026-10-21T23:12:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: eizport\n"
@@ -286,6 +286,9 @@ msgstr ""
 msgid "Advanced Custom Fields (ACF)"
 msgstr ""
 
+msgid "Elementor"
+msgstr ""
+
 #: includes/bundle-plugin.php:606
 msgid "Options"
 msgstr ""
@@ -368,6 +371,9 @@ msgid "Check the rules of the Site Editor’s Additional CSS to export; they’r
 msgstr ""
 
 msgid "Check the post types, taxonomies and field groups to export, in ACF’s own export format. On import, ACF imports them before the content (one with the same key there is updated), and the fields that store IDs point to the items there."
+msgstr ""
+
+msgid "Check the site settings (the Kit: global colors, fonts, layout) and the templates to export, as Elementor’s own export writes them. On import, Elementor’s own import brings them in after the content, with the images the bundle brought; pages built with Elementor carry their design too."
 msgstr ""
 
 msgid "Check the widgets to export: they go at the end of the same sidebar on the other site, next to its own widgets."
@@ -658,7 +664,7 @@ msgstr ""
 msgid "Content as .html files"
 msgstr ""
 
-msgid "Each post’s content goes to post_content/<slug>.html in the .wxrz or Playground .zip, instead of inside the WXR. Off, it all stays in the WXR."
+msgid "Each post’s content goes to post_content/<slug>.html in the .wxrz or Playground .zip, instead of inside the WXR; a page built with Elementor goes as <slug>.json, its design in Elementor’s format. Off, it all stays in the WXR."
 msgstr ""
 
 msgid "Defaults are saved for"
@@ -1091,72 +1097,72 @@ msgstr ""
 msgid "This .zip is a plugin: install it in Plugins → Add Plugin → Upload Plugin, then run its import screen under Tools."
 msgstr ""
 
-#: includes/appearance.php:93
+#: includes/appearance.php:100
 msgid "Color palette"
 msgstr ""
 
-#: includes/appearance.php:97
+#: includes/appearance.php:104
 msgid "Site colors"
 msgstr ""
 
-#: includes/appearance.php:101
+#: includes/appearance.php:108
 msgid "Typography"
 msgstr ""
 
-#: includes/appearance.php:105
+#: includes/appearance.php:112
 msgid "Spacing and layout"
 msgstr ""
 
-#: includes/appearance.php:109
+#: includes/appearance.php:116
 msgid "Elements: links, buttons, headings"
 msgstr ""
 
 #. translators: %s: a block's name, like "Button".
-#: includes/appearance.php:117
+#: includes/appearance.php:124
 #, php-format
 msgid "Block: %s"
 msgstr ""
 
-#: includes/appearance.php:140
+#: includes/appearance.php:147
 msgid "Other styles"
 msgstr ""
 
-#: includes/appearance.php:228
+#: includes/appearance.php:235
 msgid "Logo"
 msgstr ""
 
-#: includes/appearance.php:229
+#: includes/appearance.php:236
 msgid "Header image"
 msgstr ""
 
-#: includes/appearance.php:230
+#: includes/appearance.php:237
 msgid "Header image details"
 msgstr ""
 
-#: includes/appearance.php:231
+#: includes/appearance.php:238
 msgid "Header text color"
 msgstr ""
 
-#: includes/appearance.php:232
+#: includes/appearance.php:239
 msgid "Background image"
 msgstr ""
 
-#: includes/appearance.php:233
+#: includes/appearance.php:240
 msgid "Background color"
 msgstr ""
 
-#: includes/appearance.php:288
+#: includes/appearance.php:295
 msgid "Comment"
 msgstr ""
 
 #. translators: 1: a CSS rule's position, 2: how many rules there are.
-#: includes/appearance.php:290
+#: includes/appearance.php:297
 #, php-format
 msgid "Rule %1$d of %2$d (the last)"
 msgstr ""
 
 #. translators: 1: a CSS rule's position, 2: how many rules there are.
-#: includes/appearance.php:290
+#: includes/appearance.php:297
 #, php-format
 msgid "Rule %1$d of %2$d"
 msgstr ""
@@ -1327,7 +1333,7 @@ msgid "Visit the site"
 msgstr ""
 
 #: includes/bundle-plugin.php:534
-#: includes/import.php:955
+#: includes/import.php:959
 msgid "Importer messages"
 msgstr ""
 
@@ -1388,7 +1394,7 @@ msgid "The bundle: %1$s, %2$s, made %3$s."
 msgstr ""
 
 #: includes/bundle-plugin.php:658
-#: includes/import.php:745
+#: includes/import.php:749
 msgid "Update pages, posts and products that already exist (same slug) instead of adding copies"
 msgstr ""
 
@@ -1404,24 +1410,24 @@ msgstr ""
 msgid "Sorry, you are not allowed to delete plugins."
 msgstr ""
 
-#: includes/bundle.php:559
+#: includes/bundle.php:578
 msgid "The .wxrz bundle is damaged or incomplete."
 msgstr ""
 
-#: includes/bundle.php:614
-#: includes/bundle.php:648
+#: includes/bundle.php:633
+#: includes/bundle.php:667
 msgid "The content of the .wxrz bundle could not be merged."
 msgstr ""
 
-#: includes/bundle.php:725
+#: includes/bundle.php:748
 msgid "The .wxrz bundle has no valid manifest."
 msgstr ""
 
-#: includes/bundle.php:756
+#: includes/bundle.php:779
 msgid "Could not create a folder for the .wxrz bundle."
 msgstr ""
 
-#: includes/bundle.php:1022
+#: includes/bundle.php:1067
 msgid "The .zip bundle is damaged, incomplete or not a bundle."
 msgstr ""
 
@@ -1457,6 +1463,14 @@ msgstr ""
 
 #: includes/compat/advanced-custom-fields.php:93
 msgid "Field group"
+msgstr ""
+
+#: includes/compat/elementor.php:171
+msgid "Site settings"
+msgstr ""
+
+#: includes/compat/elementor.php:172
+msgid "Global colors, fonts, layout and theme style (the Kit)"
 msgstr ""
 
 #: includes/compat/woocommerce.php:28
@@ -1663,80 +1677,80 @@ msgstr ""
 msgid "The decompressed .wxrz file could not be saved."
 msgstr ""
 
-#: includes/import.php:581
+#: includes/import.php:584
 msgid "The WordPress Importer plugin is not installed."
 msgstr ""
 
-#: includes/import.php:597
+#: includes/import.php:600
 msgid "The WordPress Importer could not be loaded."
 msgstr ""
 
-#: includes/import.php:744
+#: includes/import.php:748
 msgid "Existing items"
 msgstr ""
 
-#: includes/import.php:766
+#: includes/import.php:770
 msgid "Additional CSS"
 msgstr ""
 
-#: includes/import.php:768
+#: includes/import.php:772
 msgid "The file's CSS rules"
 msgstr ""
 
-#: includes/import.php:775
+#: includes/import.php:779
 msgid "Add at the end of this site's CSS"
 msgstr ""
 
-#: includes/import.php:779
+#: includes/import.php:783
 msgid "Add at the start of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name of the CSS block, the file's name, like "delivery".
-#: includes/import.php:787
+#: includes/import.php:791
 #, php-format
 msgid "Replace the \"%s\" block this site already has"
 msgstr ""
 
-#: includes/import.php:793
+#: includes/import.php:797
 msgid "Replace all of this site's CSS"
 msgstr ""
 
 #. translators: %s: the name the CSS rules are marked with: the file's name, like "delivery".
-#: includes/import.php:800
+#: includes/import.php:804
 #, php-format
 msgid "Between \"head\" and \"tail\" comments with the file's name (%s)"
 msgstr ""
 
-#: includes/import.php:868
+#: includes/import.php:872
 msgid ".wxrz bundles, the .zip of a bundle exported as plugin and gzipped WXR files are accepted too: their attachment files come from the bundle."
 msgstr ""
 
-#: includes/import.php:920
-#: includes/import.php:964
+#: includes/import.php:924
+#: includes/import.php:968
 msgid "All importers"
 msgstr ""
 
-#: includes/import.php:949
+#: includes/import.php:953
 msgid "Choose file"
 msgstr ""
 
-#: includes/import.php:950
+#: includes/import.php:954
 msgid "Change file"
 msgstr ""
 
-#: includes/import.php:952
+#: includes/import.php:956
 msgid "Choose who the imported items belong to and whether their attachments come along."
 msgstr ""
 
-#: includes/import.php:953
+#: includes/import.php:957
 msgid "What was imported, and the importer’s messages."
 msgstr ""
 
-#: includes/import.php:958
+#: includes/import.php:962
 msgid "The file could not be imported."
 msgstr ""
 
-#: includes/import.php:959
+#: includes/import.php:963
 msgid "Choose another file"
 msgstr ""
 

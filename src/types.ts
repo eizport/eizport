@@ -44,7 +44,7 @@ export interface ExportOptions {
 	review_count: number;
 	/** Bundles are plain .zip files (Settings → Export). */
 	bundle_zip: boolean;
-	/** The look's rows: key (theme_mods, custom_css, global_styles, global_css, widgets, advanced-custom-fields) => their items, none when the site has none. */
+	/** The look's rows: key (theme_mods, custom_css, global_styles, global_css, widgets, advanced-custom-fields, elementor) => their items, none when the site has none. */
 	appearance: Record< string, LookItem[] >;
 	/** Navigation menus: classic ones and block navigations. */
 	menus: {

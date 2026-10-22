@@ -258,8 +258,11 @@ function import_file( $file, $args = array() ) {
 		wp_delete_file( $wxr );
 		return $dir;
 	}
-	$serve  = $dir ? Bundle\serve_files( $dir ) : null;
-	$apply  = $dir ? Bundle\apply_options_at_end( Bundle\read_options( $dir ) ) : null;
+	$serve = $dir ? Bundle\serve_files( $dir ) : null;
+	$apply = $dir ? Bundle\apply_options_at_end( Bundle\read_options( $dir ) ) : null;
+	if ( $dir ) {
+		Bundle\keep_designs( $dir );
+	}
 	$media  = $dir ? term_media_at_end( $dir ) : null;
 	$update = update_existing( isset( $args['update_existing'] ) ? (bool) $args['update_existing'] : bundle_updates_existing( (string) $dir ) );
 
@@ -669,6 +672,7 @@ function serve_bundle() {
 	if ( $dir && is_dir( $dir ) ) {
 		Bundle\serve_files( $dir );
 		Bundle\apply_options_at_end( Bundle\read_options( $dir ) );
+		Bundle\keep_designs( $dir );
 		term_media_at_end( $dir );
 	}
 	// "Update items that already exist", checked on step 1.
