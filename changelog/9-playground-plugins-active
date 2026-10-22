@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+The Playground .zip installs plugins active or inactive as they are on the site, instead of activating them all.

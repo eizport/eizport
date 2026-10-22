@@ -68,9 +68,10 @@ const OPTIONS_PLUGIN = '/wordpress/wp-content/mu-plugins/eizport-options.php';
  * @param array    $content  Content files: name => `stream` and `item`, as
  *                           Bundle\collect_content() keeps them.
  * @param array    $options  The options file's data, or null.
+ * @param string   $landing  Where Playground opens (landing_page()'s path).
  * @return string|false The .zip.
  */
-function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $media = false, $content = array(), $options = null ) {
+function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $media = false, $content = array(), $options = null, $landing = '/' ) {
 	$files = array();
 	if ( $media ) {
 		$handle = Files\open_read( $wxr );
@@ -84,7 +85,7 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
 	$entries = array(
 		BLUEPRINT => array(
 			'data' => wp_json_encode(
-				blueprint( $wxr_name, $themes, $plugins, wp_list_pluck( $files, 'entry' ), wp_list_pluck( $content, 'item' ), $options ),
+				blueprint( $wxr_name, $themes, $plugins, wp_list_pluck( $files, 'entry' ), wp_list_pluck( $content, 'item' ), $options, $landing ),
 				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
 			),
 		),
@@ -128,6 +129,36 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
 }
 
 /**
+ * Where the Playground .zip opens: the home page ("home", the default), the
+ * dashboard ("admin"), a page of this site (`array( 'page' => ID )` or
+ * "page:ID": `/?pagename=<its path>`, which finds it whatever the
+ * permalinks and its ID over there) or a path ("/shop/"). A page that
+ * isn't published, or a path that isn't one, opens the home page.
+ *
+ * @param mixed $choice The choice.
+ * @return string Path, starting with "/".
+ */
+function landing_page( $choice ) {
+	if ( is_string( $choice ) && preg_match( '/^page:(\d+)$/', $choice, $m ) ) {
+		$choice = array( 'page' => (int) $m[1] );
+	}
+	if ( is_array( $choice ) && ! empty( $choice['page'] ) ) {
+		$page = get_post( (int) $choice['page'] );
+		return $page && 'page' === $page->post_type && 'publish' === $page->post_status ? '/?pagename=' . get_page_uri( $page ) : '/';
+	}
+	if ( 'admin' === $choice ) {
+		return '/wp-admin/';
+	}
+	if ( is_string( $choice ) && 0 === strpos( $choice, '/' ) && 0 !== strpos( $choice, '//' ) ) {
+		$path  = (string) wp_parse_url( $choice, PHP_URL_PATH );
+		$query = (string) wp_parse_url( $choice, PHP_URL_QUERY );
+		return '' === $path ? '/' : $path . ( '' === $query ? '' : '?' . $query );
+	}
+
+	return '/';
+}
+
+/**
  * The blueprint: installs the chosen plugins and themes (from the .zip),
  * activates a theme, then imports the WXR with Playground's importWxr step.
  * With attachment files or content files, they are written into
@@ -146,9 +177,10 @@ function build_zip( $wxr, $wxr_name, $themes = array(), $plugins = array(), $med
  *                           post_content/) => item: original `id`, `type`
  *                           and `slug`.
  * @param array    $options  The options file's data, or null.
+ * @param string   $landing  Where Playground opens (landing_page()'s path).
  * @return array
  */
-function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = array(), $content = array(), $options = null ) {
+function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = array(), $content = array(), $options = null, $landing = '/' ) {
 	$steps = array();
 	foreach ( $plugins as $plugin ) {
 		$directory = directory_plugin_zip( $plugin );
@@ -163,6 +195,8 @@ function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = a
 					'resource' => 'bundled',
 					'path'     => '/' . plugin_zip( $plugin ),
 				),
+			// Active or inactive, as on this site (Playground activates by default).
+			'options'    => array( 'activate' => is_plugin_active( $plugin ) ),
 		);
 	}
 
@@ -277,7 +311,7 @@ function blueprint( $wxr_name, $themes = array(), $plugins = array(), $files = a
 
 	$blueprint = array(
 		'$schema'     => 'https://playground.wordpress.net/blueprint-schema.json',
-		'landingPage' => '/',
+		'landingPage' => '' !== (string) $landing ? (string) $landing : '/',
 		'login'       => true,
 		'steps'       => $steps,
 	);

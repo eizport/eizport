@@ -128,6 +128,60 @@ class PlaygroundTest extends Test_Case {
 		$this->assertTrue( $steps[1]['options']['activate'] );
 	}
 
+	public function test_plugins_are_active_or_inactive_as_on_this_site() {
+		$active = function ( $plugins ) {
+			return array_merge( array_diff( (array) $plugins, array( 'hello.php' ) ), array( 'akismet/akismet.php' ) );
+		};
+		add_filter( 'option_active_plugins', $active );
+		$steps = Playground\blueprint( 'site.wxrz', array(), array( 'akismet/akismet.php', 'hello.php' ) )['steps'];
+		remove_filter( 'option_active_plugins', $active );
+
+		$this->assertTrue( $steps[0]['options']['activate'], 'Active here.' );
+		$this->assertFalse( $steps[1]['options']['activate'], 'Inactive here: installed, not activated.' );
+	}
+
+	public function test_where_playground_opens() {
+		global $wpdb;
+		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the test's transaction, rolled back below.
+		$parent = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Eizport shop',
+				'post_name'   => 'eizport-shop',
+				'post_status' => 'publish',
+			)
+		);
+		$child  = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Eizport coffee',
+				'post_name'   => 'eizport-coffee',
+				'post_parent' => $parent,
+				'post_status' => 'publish',
+			)
+		);
+		$draft  = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Eizport draft',
+				'post_status' => 'draft',
+			)
+		);
+
+		$this->assertSame( '/', Playground\landing_page( 'home' ) );
+		$this->assertSame( '/wp-admin/', Playground\landing_page( 'admin' ) );
+		$this->assertSame( '/?pagename=eizport-shop/eizport-coffee', Playground\landing_page( array( 'page' => $child ) ) );
+		$this->assertSame( '/?pagename=eizport-shop', Playground\landing_page( 'page:' . $parent ) );
+		$this->assertSame( '/', Playground\landing_page( array( 'page' => $draft ) ), 'Not published: the home page.' );
+		$this->assertSame( '/shop/?ref=demo', Playground\landing_page( '/shop/?ref=demo#top' ) );
+		$this->assertSame( '/', Playground\landing_page( '//evil.example/' ), 'Not a path.' );
+		$this->assertSame( '/', Playground\landing_page( 'https://evil.example/' ) );
+		$this->assertSame( '/wp-admin/', Playground\blueprint( 'site.wxrz', array(), array(), array(), array(), null, '/wp-admin/' )['landingPage'] );
+		$this->assertSame( '/', Playground\blueprint( 'site.wxrz' )['landingPage'] );
+		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		wp_cache_flush();
+	}
+
 	public function test_what_the_directory_has_comes_from_there_in_the_same_version() {
 		$this->directory( array( 'akismet/akismet.php' => 'akismet' ), array( get_template() => get_template() ) );
 		$akismet = Playground\plugin_choices()['akismet/akismet.php']['Version'] ?? '';
