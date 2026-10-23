@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Playground options: the button (renamed from "Themes and plugins") also sets where the Playground .zip opens — the home page, the dashboard, a page of the site (as a relative path) or a path —, its two groups open one at a time.

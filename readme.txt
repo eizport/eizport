@@ -5,7 +5,7 @@ Tags: export, import, wxr, migration, media
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -186,6 +186,32 @@ Fixes "As plugin: allow importing again", which wasn't saved, and documents the 
 Initial release.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added: Playground options: a Language group — the Playground .zip opens in the site's language (the default), yours or English, with the translations of WordPress, the themes and the plugins (fetched from WordPress.org, or this site's inside the .zip).
+* Added: Block themes: templates and template parts edited in the Site Editor on rows of their own (Editor templates, Editor template parts), item by item with a preview. They travel in the WXR with the images they use; on import each replaces the same template of the same theme instead of adding a copy ("Header 2"), and its navigations, images and links point to the ones on the other site.
+* Added: Elementor, with its own exporter and importer: a row of its own exports the site settings (the Kit) and templates in Elementor's formats; pages built with Elementor carry their design as post_content/<slug>.json; on import, Elementor's own import brings them in, with the images the bundle brought, templates and links pointing to the items there, and a later delivery updates instead of adding copies; also in Playground.
+* Added: Advanced Custom Fields (ACF): a row of its own exports its post types, taxonomies and field groups in ACF's own export format, imported before the content (updated by key); the fields that store IDs (image, file, post object, relationship, page link, taxonomy, user) are remapped on import, also in Playground; field groups, linked posts and the media of image and file fields are suggested or come along.
+* Added: Bundles say which Eizport made them and the oldest that reads them: a bundle that needs a newer Eizport is refused with a message that says which version (on the upload, wp eizport import, the import ability and a bundle plugin's screen, which offers Update now); bundles from 1.0.x still import. The WordPress Importer must be 0.9.6 or newer; a version newer than the tested one imports with a warning. The manifest names its JSON Schema (https://eizport.github.io/schemas/1.1/manifest.json): editors check a manifest edited by hand, and the import checks it against the same schema.
+* Added: Multisite: each site of a network exports and imports on its own — saved defaults per site, files in the site's uploads, links mapped between subsites — and uninstalling cleans every site.
+* Added: Export the site's look on rows of its own, item by item — Customizer theme mods and custom CSS rules, the Site Editor's style groups and CSS rules, widgets (classic and block) — with a preview of each and the media they use. On import, CSS rules are added to the other site's CSS (at the end, at the start, or replacing it) between head/tail comments named after the file; theme mods, style groups and widgets join the other site's instead of replacing them.
+* Added: Export navigation menus on their own row — classic menus with their items and theme locations, and block navigations — and bring them back on import, pointing to the imported pages.
+* Added: Playground options: must-use plugins — the ones chosen go in the Playground .zip with the folders they load, and the blueprint writes them before the import (not the platform's loaders nor Eizport's own).
+* Added: Playground options: the button (renamed from "Themes and plugins") also sets where the Playground .zip opens — the home page, the dashboard, a page of the site (as a relative path) or a path —, its two groups open one at a time.
+* Changed: The plugin's row on the Plugins screen keeps only Settings: no "Import .wxrz" or "Install the WordPress Importer" link — importing starts from Tools → Import.
+* Changed: A bundle plugin's screen is one screen, with or without Eizport: Eizport is one more line in Before importing (Install Now, Activate or Update now, done right there), and what needs it waits — What it holds dimmed, Update existing and Run import disabled. The screen is no longer an item under Tools: Run import, on the plugin's row on the Plugins screen, opens it. Tools → Import lists it too, set apart from the other importers, and shows the list while it waits. "Update existing" names the content types the export holds — on the Export screen, the importer's step 1 and a bundle plugin's screen — and isn't offered with none.
+* Changed: The Options row's Basics and Appearance groups no longer carry the theme mods (they have their own row) and now carry the block themes' site logo; imported theme mods are merged into the site's instead of replacing them.
+* Changed: What a file holds no longer decides on its own: an import sets the options of the groups, the theme mods and the widgets, and any other option in the file only when whoever imports checks it (step 1 of the importer, a bundle plugin's screen) or names it (--options, the ability's options); WP-CLI and the ability update existing items only when asked. Options, theme mods and widget fields named like secrets (passwords, tokens, API and license keys) are never exported nor listed. On a network, a site administrator's Playground .zip takes only the plugins active on that site and the themes it may use.
+* Changed: Bundles are plain .zip files by default (Settings → Export → "Bundle as .zip" now on), inside a plugin made as plugin too; turned off, they are .wxrz as before.
+* Fixed: Imported content keeps working with its media and pages: the IDs in Image, Gallery, Cover, Media & Text, File, Video and Audio blocks, in navigation links and in block widgets point to the imported items, not to the other site's.
+* Fixed: Links to the source site in imported content — pages, products, categories, navigation links, menus' custom links, widgets — point to this site after an import, in new and updated items.
+* Fixed: An attachment the site already has gets its URLs in the imported content pointed to the file here on every import, not only with "Update existing" on.
+* Fixed: Checked with the WordPress Importer 0.9.7: an edited image's link to its original is mapped on import instead of dropped (or left pointing at the exporting site's ID with 0.9.6).
+* Fixed: The Playground .zip installs a theme or plugin from the WordPress.org directory only in a version the directory has; a development, beta or RC copy goes inside the .zip. Without Eizport, a bundle plugin installs it from the plugin directory.
+* Fixed: An export of chosen types carries its terms in full — description, parent and term meta (a product category's thumbnail and display type), with their ancestors — not only their names.
+* Fixed: The Playground .zip installs plugins active or inactive as they are on the site, instead of activating them all.
+* Fixed: A .zip bundle is read in blocks against its real size (an entry that says it is small but inflates to more is refused, and no entry is loaded whole in memory), and needs PHP's ZipArchive; "Run import" only runs for a bundle plugin active on the site; the Playground landing page only opens a path of the exported site; uninstall also removes the note of imported widgets.
+* Fixed: Importing a file made elsewhere is safer for users who may not post unfiltered HTML (a site admin on a network): templates, template parts and widgets from the file go through the same HTML filter as other content, custom CSS needs the right to edit CSS, Advanced Custom Fields items need ACF's own capability and never bring PHP callbacks, an existing page keeps its Elementor design unless the import updates existing items, and a malformed source address in the file never rewrites links.
 
 = 1.0.1 =
 * Fixed: Settings → Export → "As plugin: allow importing again" is saved.

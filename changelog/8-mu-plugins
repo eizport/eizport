@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Playground options: must-use plugins — the ones chosen go in the Playground .zip with the folders they load, and the blueprint writes them before the import (not the platform's loaders nor Eizport's own).

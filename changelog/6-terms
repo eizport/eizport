@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-An export of chosen types carries its terms in full — description, parent and term meta (a product category's thumbnail and display type), with their ancestors — not only their names.

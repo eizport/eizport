@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-The Options row's Basics and Appearance groups no longer carry the theme mods (they have their own row) and now carry the block themes' site logo; imported theme mods are merged into the site's instead of replacing them.

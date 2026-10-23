@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Elementor, with its own exporter and importer: a row of its own exports the site settings (the Kit) and templates in Elementor's formats; pages built with Elementor carry their design as post_content/<slug>.json; on import, Elementor's own import brings them in, with the images the bundle brought, templates and links pointing to the items there, and a later delivery updates instead of adding copies; also in Playground.

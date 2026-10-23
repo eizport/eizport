@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Bundles say which Eizport made them and the oldest that reads them: a bundle that needs a newer Eizport is refused with a message that says which version (on the upload, wp eizport import, the import ability and a bundle plugin's screen, which offers Update now); bundles from 1.0.x still import. The WordPress Importer must be 0.9.6 or newer; a version newer than the tested one imports with a warning. The manifest names its JSON Schema (https://eizport.github.io/schemas/1.1/manifest.json): editors check a manifest edited by hand, and the import checks it against the same schema.

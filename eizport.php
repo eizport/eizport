@@ -3,7 +3,7 @@
  * Plugin Name:       Eizport
  * Plugin URI:        https://eizport.github.io/
  * Description:       Export and import WordPress content as .wxrz bundles: the WXR plus its media and content files, gzipped, optionally ready for WordPress Playground. Export several content types at once, each by filters or by selection, with settings.
- * Version:           1.1.0-dev
+ * Version:           1.1.0
  * Requires at least: 7.0
  * Requires PHP:      7.4
  * Author:            eizport
@@ -20,7 +20,7 @@ namespace Eizport;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION = '1.1.0-dev';
+const VERSION = '1.1.0';
 
 require_once __DIR__ . '/includes/files.php';
 require_once __DIR__ . '/includes/wxrz.php';
