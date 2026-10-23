@@ -1,37 +1,37 @@
 WEBVTT
 
 1
-00:00:00.000 --> 00:00:04.351
+00:00:00.000 --> 00:00:04.349
 Move your WordPress content. Not your mess.
 
 2
-00:00:04.351 --> 00:00:21.084
+00:00:04.350 --> 00:00:21.312
 Pick exactly what moves: the homepage, and the settings that go with it.
 
 3
-00:00:21.085 --> 00:00:31.710
+00:00:21.314 --> 00:00:32.173
 One file with the content, its images and its settings.
 
 4
-00:00:31.710 --> 00:00:42.589
+00:00:32.174 --> 00:00:45.242
 On another site, the WordPress Importer you already know takes it.
 
 5
-00:00:42.589 --> 00:00:49.922
+00:00:45.243 --> 00:00:52.604
 The homepage is still the homepage — images included. No search-and-replace.
 
 6
-00:00:49.922 --> 00:01:27.207
+00:00:52.604 --> 00:01:35.524
 Or send it as a plugin: installed on the other site, it brings what it needs and imports itself.
 
 7
-00:01:27.207 --> 00:01:47.379
+00:01:35.526 --> 00:01:58.170
 Or the whole site as a WordPress Playground .zip — a copy made on localhost opens on playground.wordpress.net.
 
 8
-00:01:47.380 --> 00:01:55.420
+00:01:58.175 --> 00:02:08.505
 Or run it offline with one command.
 
 9
-00:01:55.420 --> 00:02:00.180
+00:02:08.506 --> 00:02:13.275
 Free and open source — eizport.github.io

@@ -73,7 +73,7 @@ what a scene *does* means changing the scene with the same `id` in
 
 ## 6. as-plugin — Or as a plugin
 
-- On screen: Eiz Coffee → Export → Details → **As plugin** → Export → Download. Client Site → Plugins → Add Plugin → Upload Plugin → the .zip → Install Now → Activate Plugin → "open the import screen". **Install Now** installs and activates Eizport on the same screen → Continue → **Install Now** installs and activates the WordPress Importer → **Run import** → "Imported".
+- On screen: Eiz Coffee → Export → Details → **As plugin** → Export → Download. Client Site → Plugins → Add Plugin → Upload Plugin → the .zip → Install Now → Activate Plugin → "open the import screen". **Install Now** installs and activates Eizport on the same screen, which then shows what the bundle holds → **Install Now** installs and activates the WordPress Importer on its line → **Run import** → "Imported".
 - Caption: Or send it as a plugin: installed on the other site, it brings what it needs and imports itself.
 - Hold: 2.5
 

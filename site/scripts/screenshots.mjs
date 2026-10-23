@@ -16,6 +16,7 @@
  *                                       repository's assets/screenshots/
  *
  * Writes src/assets/screenshots/<id>.webp, .wordpress-org/screenshot-N.png
+ * (screenshot-N-<locale>.png for a language)
  * for those with `wporg`, the commit each was captured at
  * (src/data/screenshots-captured.json), SCREENSHOTS.md and readme.txt's
  * == Screenshots == section.
@@ -69,9 +70,15 @@ const scenes = {
 		await pagesHome( page );
 		await suggested( page );
 		await exportScreen.format( page, 'Playground' );
-		await page.locator( '.eizport-file-bar__more' ).getByRole( 'button', { name: l( 'Themes and plugins' ) } ).click();
+		// "Playground options", with what is set after it in brackets once there is something.
+		await page
+			.locator( '.eizport-file-bar__more' )
+			.getByRole( 'button', { name: new RegExp( '^' + l( 'Playground options' ).replace( /[.*+?^${}()|[\]\\]/g, '\\$&' ) ) } )
+			.click();
 		const dialog = page.getByRole( 'dialog' );
 		await dialog.waitFor();
+		// The groups start closed, one open at a time: the themes and plugins one.
+		await dialog.getByRole( 'button', { name: new RegExp( '^' + l( 'Themes and plugins' ) ) } ).first().click();
 		await dialog.getByRole( 'combobox' ).first().fill( 'Twenty' );
 		await page.getByRole( 'option' ).first().click();
 		await dialog.getByRole( 'heading' ).first().click();
@@ -200,8 +207,12 @@ for ( const shot of pick ) {
 	const png = await page.screenshot();
 	await sharp( png ).webp( { quality: 92 } ).toFile( `${ outDir }/${ shot.id }.webp` );
 	afterShot.splice( 0 ).forEach( ( cleanup ) => cleanup() );
-	// WordPress.org and the capture log are the English screenshots'.
+	// The capture log is the English screenshots'; WordPress.org shows a language's own
+	// screenshots on its localized directory (screenshot-N-pt_BR.png), the others English ones.
 	if ( locale ) {
+		if ( shot.wporg ) {
+			await sharp( png ).resize( { width: 1440 } ).png( { compressionLevel: 9 } ).toFile( new URL( `.wordpress-org/screenshot-${ shot.wporg.number }-${ locale.wp }.png`, plugin ).pathname );
+		}
 		await page.context().close();
 		console.log( `✓ ${ shot.id } (${ locale.code })` );
 		continue;
