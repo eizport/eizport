@@ -500,9 +500,10 @@ function resetSites() {
 	}
 	sites.client.wp( 'site', 'empty', '--uploads', '--yes' );
 	sites.client.wp( 'eval', "foreach ( array( 'eizport_settings', 'eizport_bundle_plugins_imported', 'eizport_bundle_plugins_before' ) as $name ) { delete_option( $name ); }" );
-	// The plugin's defaults: no settings or export defaults saved by an earlier recording.
+	// The plugin's defaults: no settings or export defaults saved by an earlier recording (saveHomeAsDefault()),
+	// as Clear defaults would — the export screen opens with nothing checked. A user's are a user option, keyed with the site's prefix.
 	for ( const site of [ sites.source, sites.target ] ) {
-		site.wp( 'eval', "delete_option( 'eizport_settings' ); delete_option( 'eizport_export_defaults' ); delete_metadata( 'user', 0, 'eizport_export_defaults', '', true );" );
+		site.wp( 'eval', "global $wpdb; delete_option( 'eizport_settings' ); delete_option( 'eizport_export_defaults' ); foreach ( array( '', $wpdb->get_blog_prefix() ) as $prefix ) { delete_metadata( 'user', 0, $prefix . 'eizport_export_defaults', '', true ); }" );
 	}
 	sites.source.wp( 'eval', "wp_set_current_user( 1 ); wp_get_ability( 'eizport/delete-copies' )->execute( array( 'all' => true ) );" );
 }
