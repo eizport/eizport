@@ -28,17 +28,16 @@
  * default settings and no saved export defaults, and the client site to no
  * Eizport and no importer, so every language records the same screens.
  *
- * The "as plugin" scene shows Install Now taking Eizport from its GitHub
- * release, which the plugin itself doesn't do (WordPress.org guideline 8):
- * the exported .zip is made with the Install Now from GitHub patch applied
- * to the source site's copy of the template only — never to this
- * repository. EIZPORT_GITHUB_PATCH names the patch (default:
- * ~/workspace/eizport-notes/patches/install-now-from-github.patch).
+ * The "as plugin" scene shows Install Now taking Eizport from the
+ * WordPress.org directory, as the bundle plugin does. Recorded before a
+ * release, the directory still has the previous version: a temporary
+ * must-use plugin on the client site hands WordPress's installer this
+ * version instead (directoryStandIn()), and goes when the recording ends.
  */
 import { execFileSync, spawn } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createConnection } from 'node:net';
-import { homedir, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import ffmpeg from 'ffmpeg-static';
 import sharp from 'sharp';
@@ -59,7 +58,6 @@ if ( Math.abs( W / H - OUT.width / OUT.height ) > 0.001 || H * SCALE !== OUT.hei
 }
 // Playground CLI's default port: the command on screen is the one to type.
 const CLI_PORT = 9400;
-const GITHUB_PATCH = process.env.EIZPORT_GITHUB_PATCH ?? join( homedir(), 'workspace/eizport-notes/patches/install-now-from-github.patch' );
 // The pace a person can follow (about 1 min 30 s in all): cursor moves,
 // the beat after each click, and the time to read each caption.
 const PACE = { moveSteps: 32, stepMs: 22, afterClick: 1.5, readChars: 32, readMax: 3.5 };
@@ -330,16 +328,14 @@ const scenes = {
 		await exportScreen.ready( page );
 		await click( page, page.locator( '.eizport-file-panel__toggle' ), { after: 0.4 } );
 		await click( page, page.getByRole( 'checkbox', { name: l( 'As plugin' ) } ), { after: 0.6 } );
-		await withGithubPatch( async () => {
-			await click( page, page.getByRole( 'button', { name: l( 'Export' ), exact: true } ).first(), { after: 0 } );
-			const snackbar = page.getByTestId( 'snackbar' );
-			await fastUntil( rec, 3, snackbar.waitFor( { timeout: 120000 } ) );
-			await pause( page, 0.5 );
-			const download = page.waitForEvent( 'download' );
-			await click( page, snackbar.getByText( l( 'Download' ), { exact: true } ) );
-			files.plugin = join( files.dir, ( await download ).suggestedFilename() );
-			await ( await download ).saveAs( files.plugin );
-		} );
+		await click( page, page.getByRole( 'button', { name: l( 'Export' ), exact: true } ).first(), { after: 0 } );
+		const snackbar = page.getByTestId( 'snackbar' );
+		await fastUntil( rec, 3, snackbar.waitFor( { timeout: 120000 } ) );
+		await pause( page, 0.5 );
+		const download = page.waitForEvent( 'download' );
+		await click( page, snackbar.getByText( l( 'Download' ), { exact: true } ) );
+		files.plugin = join( files.dir, ( await download ).suggestedFilename() );
+		await ( await download ).saveAs( files.plugin );
 		// Client Site: no Eizport, no importer. Plugins → Add Plugin → Upload Plugin.
 		await goto( page, sites.client.url + '/wp-admin/plugin-install.php?tab=upload', rec );
 		const chooser = page.waitForEvent( 'filechooser' );
@@ -352,13 +348,12 @@ const scenes = {
 		await page.waitForLoadState( 'networkidle' );
 		await click( page, page.getByRole( 'link', { name: l( 'open the import screen' ) } ).first(), { after: 0 } );
 		await page.waitForLoadState( 'networkidle' );
-		// Install Now: Eizport, installed and activated on the same screen.
-		await click( page, page.locator( '.eizport-install-now' ), { after: 0 } );
-		await fastUntil( rec, 4, page.locator( '.eizport-requirement__after' ).waitFor( { timeout: 180000 } ) );
-		await pause( page, 0.6 );
-		await click( page, page.locator( '.eizport-requirement__after a' ), { after: 0 } );
+		// Install Now: Eizport, installed and activated on the same screen, which then becomes Eizport's.
+		await click( page, page.locator( '.eizport-bundle-get[data-slug="eizport"]' ), { after: 0 } );
+		await fastUntil( rec, 4, page.locator( '.eizport-install-now' ).waitFor( { timeout: 180000 } ) );
 		await page.waitForLoadState( 'networkidle' );
-		// Then the WordPress Importer, the same way; Run import is ready.
+		await pause( page, 0.6 );
+		// Then the WordPress Importer, on its line; Run import is ready.
 		await click( page, page.locator( '.eizport-install-now' ), { after: 0 } );
 		const run = page.locator( '.eizport-bundle-import button[type="submit"]' );
 		await fastUntil( rec, 4, page.waitForFunction( () => ! document.querySelector( '.eizport-bundle-import button[type="submit"]' )?.disabled, null, { timeout: 180000 } ) );
@@ -455,24 +450,37 @@ function saveHomeAsDefault() {
 }
 
 /**
- * Runs `step` with the Install Now from GitHub patch applied to the source
- * site's copy of the bundle plugin template, then puts the copy back.
+ * The WordPress.org directory as it will be: on the client site, a
+ * temporary must-use plugin answers WordPress's installer, when it downloads
+ * Eizport from the directory, with a .zip of the version being recorded (the
+ * source site's copy). `false` removes both.
+ *
+ * @param {boolean} on Whether to put it in place.
  */
-async function withGithubPatch( step ) {
-	if ( ! existsSync( GITHUB_PATCH ) ) throw new Error( `No ${ GITHUB_PATCH }: set EIZPORT_GITHUB_PATCH.` );
-	const template = join( sites.source.path, 'wp-content/plugins/eizport/templates/bundle-plugin.php.tpl' );
-	const original = readFileSync( template );
-	const work = join( tmpdir(), `eizport-patch-${ process.pid }` );
-	mkdirSync( join( work, 'templates' ), { recursive: true } );
-	writeFileSync( join( work, 'templates/bundle-plugin.php.tpl' ), original );
-	execFileSync( 'patch', [ '-s', '-p1', '-d', work, '-i', GITHUB_PATCH ] );
-	copyFileSync( join( work, 'templates/bundle-plugin.php.tpl' ), template );
-	try {
-		await step();
-	} finally {
-		writeFileSync( template, original );
-		rmSync( work, { recursive: true, force: true } );
+function directoryStandIn( on ) {
+	const zip = join( sites.client.path, 'wp-content/eizport-directory-stand-in.zip' );
+	const plugin = join( sites.client.path, 'wp-content/mu-plugins/eizport-directory-stand-in.php' );
+	rmSync( zip, { force: true } );
+	rmSync( plugin, { force: true } );
+	if ( ! on ) {
+		return;
 	}
+	execFileSync( 'zip', [ '-qr', zip, 'eizport', '-x', 'eizport/node_modules/*', 'eizport/vendor/*' ], { cwd: join( sites.source.path, 'wp-content/plugins' ) } );
+	mkdirSync( join( sites.client.path, 'wp-content/mu-plugins' ), { recursive: true } );
+	writeFileSync(
+		plugin,
+		`<?php
+// Eizport's demo video: the directory's Eizport is this version (removed when the recording ends).
+add_filter( 'upgrader_pre_download', function ( $reply, $package ) {
+	if ( false === strpos( (string) $package, 'downloads.wordpress.org/plugin/eizport' ) ) {
+		return $reply;
+	}
+	$copy = wp_tempnam( 'eizport.zip' );
+	copy( WP_CONTENT_DIR . '/eizport-directory-stand-in.zip', $copy );
+	return $copy;
+}, 10, 2 );
+`
+	);
 }
 
 /** Whether something already listens on a local port. */
@@ -589,6 +597,7 @@ const dir = join( tmpdir(), `eizport-video-${ process.pid }` );
 mkdirSync( join( dir, 'frames' ), { recursive: true } );
 const voices = narrate( storyboard, voice, dir );
 resetSites();
+directoryStandIn( true );
 
 // Playground on playground.wordpress.net fetches the copy from localhost: allow
 // local network access, as a person does when Chrome asks.
@@ -628,6 +637,7 @@ try {
 	files.cli?.kill();
 	await browser.close();
 	resetSites();
+	directoryStandIn( false );
 	if ( locale ) useLocale( 'en_US' );
 }
 

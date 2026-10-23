@@ -61,7 +61,7 @@ export const screenshots: Screenshot[] = [
 	{
 		id: 'playground-options',
 		feature: 'WordPress Playground .zip: themes and plugins to install',
-		screen: 'Tools → Export → Format: Playground → Themes and plugins',
+		screen: 'Tools → Export → Format: Playground → Playground options',
 		state: 'Playground themes and plugins modal with the active theme',
 		viewport: 'desktop',
 		sources: [ ...exportApp, 'includes/playground.php' ],

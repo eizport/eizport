@@ -1,46 +1,46 @@
 {
 	"export-screen": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"items-panel": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"options-panel": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"playground-options": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"settings-general": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"settings-export": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"settings-copies": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"export-mobile": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"classic-mobile": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"demo": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	},
 	"bundle-plugin": {
-		"commit": "8476bda62e0f25ad67503741e6a25f76aa222762",
-		"date": "2026-10-13"
+		"commit": "3884a851e3feedd5b58e62ee47967b54e2a3c03d",
+		"date": "2026-10-23"
 	}
 }

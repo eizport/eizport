@@ -1,4 +1,4 @@
 {
 	"$comment": "The demo video the site shows: a GitHub pre-release with demo.mp4 and demo.webm, in this repository for English and in each translation repository for its language (scripts/media.mjs downloads it; scripts/video.mjs uploads a new recording and updates this tag).",
-	"tag": "media-1.0.1"
+	"tag": "media-1.1.0"
 }
