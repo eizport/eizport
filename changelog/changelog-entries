@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Changelog entries: one changelog/ file per change, compiled into readme.txt by the release command and required by the CI.

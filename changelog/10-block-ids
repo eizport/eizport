@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Imported content keeps working with its media and pages: the IDs in Image, Gallery, Cover, Media & Text, File, Video and Audio blocks, in navigation links and in block widgets point to the imported items, not to the other site's.

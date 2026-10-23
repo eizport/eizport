@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Bundles are plain .zip files by default (Settings → Export → "Bundle as .zip" now on), inside a plugin made as plugin too; turned off, they are .wxrz as before.

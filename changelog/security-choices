@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-What a file holds no longer decides on its own: an import sets the options of the groups, the theme mods and the widgets, and any other option in the file only when whoever imports checks it (step 1 of the importer, a bundle plugin's screen) or names it (--options, the ability's options); WP-CLI and the ability update existing items only when asked. Options, theme mods and widget fields named like secrets (passwords, tokens, API and license keys) are never exported nor listed. On a network, a site administrator's Playground .zip takes only the plugins active on that site and the themes it may use.

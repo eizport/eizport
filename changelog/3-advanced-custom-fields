@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Advanced Custom Fields (ACF): a row of its own exports its post types, taxonomies and field groups in ACF's own export format, imported before the content (updated by key); the fields that store IDs (image, file, post object, relationship, page link, taxonomy, user) are remapped on import, also in Playground; field groups, linked posts and the media of image and file fields are suggested or come along.

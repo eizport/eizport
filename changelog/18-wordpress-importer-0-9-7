@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Checked with the WordPress Importer 0.9.7: an edited image's link to its original is mapped on import instead of dropped (or left pointing at the exporting site's ID with 0.9.6).
