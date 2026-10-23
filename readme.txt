@@ -176,6 +176,9 @@ The PHP is in the plugin, readable. The Export and Settings screens' JavaScript 
 
 == Upgrade Notice ==
 
+= 1.1.0 =
+Menus, templates, the site's look, Elementor and ACF on rows of their own; multisite; Playground language and must-use plugins; .zip bundles by default. Safer imports: options outside the groups and updating existing items wait for your OK.
+
 = 1.0.1 =
 Fixes "As plugin: allow importing again", which wasn't saved, and documents the external services the plugin uses.
 
