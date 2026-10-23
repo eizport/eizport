@@ -215,6 +215,42 @@ class AdminAppTest extends Test_Case {
 	}
 
 	/**
+	 * The styled importer's scripts run right after the screen, before the
+	 * admin's footer scripts, with step 1's fields already in their data:
+	 * the importer's markup never shows unstyled while the others load.
+	 */
+	public function test_importer_scripts_print_right_after_the_screen() {
+		$_GET['step'] = '1';
+		\Eizport\Import\mention_wxrz();
+		unset( $_GET['step'] );
+		foreach ( array( 'update_existing_field', 'css_field', 'options_field' ) as $field ) {
+			$this->assertSame( 5, has_action( 'in_admin_footer', 'Eizport\Import\\' . $field ) );
+			remove_action( 'in_admin_footer', 'Eizport\Import\\' . $field, 5 );
+		}
+		$this->assertSame( 5, has_action( 'in_admin_footer', 'Eizport\Import\check_fetch_attachments' ) );
+		remove_all_actions( 'admin_notices' );
+		remove_all_filters( 'gettext_wordpress-importer' );
+		remove_action( 'admin_enqueue_scripts', 'Eizport\Import\style' );
+		remove_filter( 'admin_body_class', 'Eizport\Import\body_class' );
+
+		\Eizport\Import\register_steps_script();
+		\Eizport\Import\style();
+		$this->assertSame( 10, has_action( 'in_admin_footer', 'Eizport\Import\print_early_scripts' ) );
+		remove_action( 'in_admin_footer', 'Eizport\Import\print_early_scripts' );
+
+		ob_start();
+		\Eizport\Import\print_early_scripts();
+		$printed = ob_get_clean();
+		$steps   = strpos( $printed, 'import-steps.js' );
+		$this->assertNotFalse( $steps );
+		$this->assertGreaterThan( $steps, strpos( $printed, 'importer.js' ) );
+		$this->assertTrue( wp_script_is( 'eizport-importer', 'done' ) );
+		$this->assertTrue( wp_script_is( 'eizport-import-steps', 'done' ) );
+		wp_dequeue_style( 'eizport-importer' );
+		wp_scripts()->done = array();
+	}
+
+	/**
 	 * Tools → Import's link to every importer skips the redirect.
 	 */
 	public function test_import_list_url() {
