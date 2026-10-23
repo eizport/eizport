@@ -148,17 +148,34 @@ class Recorder {
 		this.frames = [];
 		this.speed = [];
 		this.marks = {};
+		this.fits = 0;
 	}
 	now() {
 		return performance.now() / 1000;
 	}
 	async start() {
 		this.cdp = await this.page.context().newCDPSession( this.page );
+		const { windowId } = await this.cdp.send( 'Browser.getWindowForTarget' );
 		this.cdp.on( 'Page.screencastFrame', async ( { data, metadata, sessionId } ) => {
-			// A screen in another aspect (a resized viewport, a scene's own page) fails the recording.
-			if ( ! this.wrongAspect && Math.abs( metadata.deviceWidth / metadata.deviceHeight - OUT.width / OUT.height ) > 0.01 ) {
-				const scene = Object.keys( this.marks ).at( -1 ) ?? 'the start';
-				this.wrongAspect = `${ metadata.deviceWidth }×${ metadata.deviceHeight } (in ${ scene })`;
+			// The screencast captures the window, not the viewport: when Chrome takes some of it
+			// (the frames came out 1280×633), the window grows until the page fits W×H again,
+			// and the frames until then are left out. Still off after that fails the recording.
+			const w = Math.round( metadata.deviceWidth );
+			const h = Math.round( metadata.deviceHeight );
+			if ( w !== W || h !== H ) {
+				await this.cdp.send( 'Page.screencastFrameAck', { sessionId } ).catch( () => {} );
+				if ( this.fitting ) return;
+				const scene = this.scene ?? 'the start';
+				if ( ++this.fits > 5 ) {
+					this.wrongAspect ??= `${ metadata.deviceWidth }×${ metadata.deviceHeight } (in ${ scene })`;
+					return;
+				}
+				this.fitting = true;
+				const { bounds } = await this.cdp.send( 'Browser.getWindowBounds', { windowId } );
+				await this.cdp.send( 'Browser.setWindowBounds', { windowId, bounds: { width: bounds.width + W - w, height: bounds.height + H - h } } ).catch( () => {} );
+				console.log( `    window resized: the page was ${ w }×${ h } (in ${ scene })` );
+				this.fitting = false;
+				return;
 			}
 			const file = join( this.dir, `f${ String( this.frames.length ).padStart( 6, '0' ) }.jpg` );
 			writeFileSync( file, Buffer.from( data, 'base64' ) );
@@ -385,7 +402,7 @@ const scenes = {
 		if ( other ) await other.close();
 		rec.fast( 10 );
 		await page.goto( url );
-		await waitForFrame( page, ( f ) => f.locator( 'h1, .wp-block-post-title' ).first().isVisible().catch( () => false ), 240000 );
+		await waitForFrame( page, ( f ) => f.locator( 'h1, .wp-block-post-title' ).first().isVisible().catch( () => false ), 240000, join( files.dir, 'playground-timeout.png' ) );
 		await page.waitForTimeout( 3000 );
 		rec.normal();
 		await pause( page, 0.8 );
@@ -420,16 +437,21 @@ const scenes = {
 	},
 };
 
-/** Polls the page's frames (Playground nests the site in iframes). */
-async function waitForFrame( page, test, timeout ) {
+/**
+ * Polls the frame of the site Playground runs (…/scope:<name>/, nested in its
+ * remote.html — whose own "Preparing WordPress" heading isn't the site).
+ */
+async function waitForFrame( page, test, timeout, shot ) {
 	const end = Date.now() + timeout;
 	while ( Date.now() < end ) {
 		for ( const frame of page.frames() ) {
-			if ( frame !== page.mainFrame() && /scope:|127\.0\.0\.1|wordpress/.test( frame.url() ) && ( await test( frame ) ) ) return;
+			if ( frame !== page.mainFrame() && /\/scope:[^/]+\//.test( frame.url() ) && ( await test( frame ) ) ) return;
 		}
 		await page.waitForTimeout( 1000 );
 	}
-	throw new Error( 'Playground did not show the site in time.' );
+	if ( shot ) await page.screenshot( { path: shot } ).catch( () => {} );
+	const frames = page.frames().map( ( frame ) => frame.url() ).join( ', ' );
+	throw new Error( `Playground did not show the site in time (${ page.url() }; frames: ${ frames }${ shot ? `; screen: ${ shot }` : '' }).` );
 }
 
 /** The newest copy on the source site with this extension. */
@@ -500,9 +522,10 @@ function resetSites() {
 	}
 	sites.client.wp( 'site', 'empty', '--uploads', '--yes' );
 	sites.client.wp( 'eval', "foreach ( array( 'eizport_settings', 'eizport_bundle_plugins_imported', 'eizport_bundle_plugins_before' ) as $name ) { delete_option( $name ); }" );
-	// The plugin's defaults: no settings or export defaults saved by an earlier recording.
+	// The plugin's defaults: no settings or export defaults saved by an earlier recording (saveHomeAsDefault()),
+	// as Clear defaults would — the export screen opens with nothing checked. A user's are a user option, keyed with the site's prefix.
 	for ( const site of [ sites.source, sites.target ] ) {
-		site.wp( 'eval', "delete_option( 'eizport_settings' ); delete_option( 'eizport_export_defaults' ); delete_metadata( 'user', 0, 'eizport_export_defaults', '', true );" );
+		site.wp( 'eval', "global $wpdb; delete_option( 'eizport_settings' ); delete_option( 'eizport_export_defaults' ); foreach ( array( '', $wpdb->get_blog_prefix() ) as $prefix ) { delete_metadata( 'user', 0, $prefix . 'eizport_export_defaults', '', true ); }" );
 	}
 	sites.source.wp( 'eval', "wp_set_current_user( 1 ); wp_get_ability( 'eizport/delete-copies' )->execute( array( 'all' => true ) );" );
 }
@@ -603,7 +626,8 @@ directoryStandIn( true );
 // local network access, as a person does when Chrome asks.
 // Headless Chrome's screencast captures its window, not the page's viewport:
 // without a window of the viewport's size the frames come out 1280×633 and
-// get stretched to 16:9. The scale factor makes them 1920×1080 frames.
+// get stretched to 16:9 (the Recorder grows the window when Chrome still
+// takes some of it). The scale factor makes them 1920×1080 frames.
 const browser = await launch( {
 	args: [
 		'--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests',
@@ -624,6 +648,7 @@ try {
 	await rec.start();
 	for ( const scene of storyboard ) {
 		console.log( `  ${ scene.id }` );
+		rec.scene = scene.id;
 		const start = rec.now();
 		await scenes[ scene.id ]( { page, rec, files } );
 		// Long enough to read the caption, and to hear its narration to the end.
