@@ -78,8 +78,8 @@ function bootstrap() {
 	add_action( 'load-importer-wordpress', __NAMESPACE__ . '\mention_wxrz' );
 	add_action( 'load-import.php', __NAMESPACE__ . '\open_wordpress_importer' );
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\register_steps_script' );
-	// Before the footer scripts are printed (priority 10).
-	add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\check_fetch_attachments', 5 );
+	// Right after the screen, before its scripts are printed (print_early_scripts(), priority 10).
+	add_action( 'in_admin_footer', __NAMESPACE__ . '\check_fetch_attachments', 5 );
 	// An edited image's link to its original: kept as the importer reads it, mapped at the end.
 	add_action( 'import_start', __NAMESPACE__ . '\forget_edit_roots' );
 	add_filter( 'wp_import_post_meta', __NAMESPACE__ . '\note_edit_root', 10, 2 );
@@ -1051,6 +1051,15 @@ function check_fetch_attachments() {
 }
 
 /**
+ * Prints importer.js (and import-steps.js) right after the screen, before
+ * the admin's other footer scripts: printed with them, it ran seconds after
+ * the importer's own markup had shown unstyled.
+ */
+function print_early_scripts() {
+	wp_print_scripts( array( 'eizport-importer' ) );
+}
+
+/**
  * Whether the upload is the WordPress Importer's file (`import` field on
  * its screen) sent by someone who may import.
  *
@@ -1097,9 +1106,9 @@ function mention_wxrz() {
 	add_action( 'admin_notices', __NAMESPACE__ . '\\importer_version_notice' );
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only picks the step.
 	if ( isset( $_GET['step'] ) && 1 === absint( $_GET['step'] ) ) {
-		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\update_existing_field', 5 );
-		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\css_field', 5 );
-		add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\options_field', 5 );
+		add_action( 'in_admin_footer', __NAMESPACE__ . '\\update_existing_field', 5 );
+		add_action( 'in_admin_footer', __NAMESPACE__ . '\\css_field', 5 );
+		add_action( 'in_admin_footer', __NAMESPACE__ . '\\options_field', 5 );
 	}
 	add_filter(
 		'gettext_wordpress-importer',
@@ -1213,4 +1222,5 @@ function style() {
 		) : null,
 	);
 	wp_add_inline_script( 'eizport-importer', 'window.eizportImporter = ' . wp_json_encode( $texts ) . ';', 'before' );
+	add_action( 'in_admin_footer', __NAMESPACE__ . '\print_early_scripts' );
 }
