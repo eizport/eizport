@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Tools → Import → WordPress no longer shows the importer unstyled for a moment before its header and cards appear.
