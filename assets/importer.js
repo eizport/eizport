@@ -12,6 +12,10 @@
 	var wrap = document.querySelector( '#wpbody-content > .wrap' );
 	var title = wrap && wrap.querySelector( ':scope > h2' );
 	if ( ! wrap || ! title ) {
+		// Nothing to build: show the screen as it is (importer.css hides it until then).
+		if ( wrap ) {
+			wrap.classList.add( 'eizport-import--ready' );
+		}
 		return;
 	}
 
@@ -187,6 +191,9 @@
 		log.append( summary, list );
 		body.append( log );
 	}
+
+	// Built: importer.css shows the screen.
+	wrap.classList.add( 'eizport-import--ready' );
 
 	// The upload step's file field as a WordPress button (like the Site Icon's).
 	var input = document.querySelector( '#import-upload-form input[type="file"]' );

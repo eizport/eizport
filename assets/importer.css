@@ -35,6 +35,22 @@ body.eizport-import #wpbody-content > .wrap {
 	color: #1e1e1e;
 }
 
+/*
+ * With JavaScript, the importer's own markup stays hidden until importer.js
+ * has built the header and the cards (.eizport-import--ready), so it never
+ * shows unstyled; if the script never gets there, it shows after 3s.
+ */
+body.js.eizport-import #wpbody-content > .wrap:not(.eizport-import--ready) {
+	visibility: hidden;
+	animation: eizport-import-reveal 0s 3s forwards;
+}
+
+@keyframes eizport-import-reveal {
+	to {
+		visibility: visible;
+	}
+}
+
 /* Notices other plugins print go inside the stage, with its margins. */
 body.eizport-import #wpbody-content > .wrap > .notice,
 body.eizport-import #wpbody-content > .wrap > .error,
