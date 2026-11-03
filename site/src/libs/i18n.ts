@@ -104,6 +104,9 @@ export const fill = ( text: string, values: Record< string, string | number > ):
 export const href = ( locale: Locale, path = '' ): string =>
 	locale.code === defaultLocale.code ? url( path ) : url( `${ locale.code }/${ path.replace( /^\//, '' ) }` );
 
+/** The plugin's page in the WordPress.org directory in a language (the download link). */
+export const directory = ( locale: Locale ): string => locale.directory ?? site.directory;
+
 /** The directory's Live Preview in a language: its Playground sets the site language and downloads the plugin's language pack. */
 export const demo = ( locale: Locale ): string => ( locale.directory ? `${ locale.directory }?preview=1` : site.demo );
 
