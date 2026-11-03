@@ -5,7 +5,7 @@ Tags: export, import, wxr, migration, media
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -189,6 +189,9 @@ Fixes "As plugin: allow importing again", which wasn't saved, and documents the 
 Initial release.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fixed: Tools → Import → WordPress no longer shows the importer unstyled for a moment before its header and cards appear.
 
 = 1.1.0 =
 * Added: Playground options: a Language group — the Playground .zip opens in the site's language (the default), yours or English, with the translations of WordPress, the themes and the plugins (fetched from WordPress.org, or this site's inside the .zip).
