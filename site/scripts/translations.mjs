@@ -188,7 +188,7 @@ for ( const locale of config.locales ) {
 		}
 	}
 	const strings = JSON.parse( readFileSync( join( source, 'strings.json' ), 'utf8' ) );
-	const stringsState = freshness( strings.translatedFrom, [ 'src/i18n/en.ts', 'src/data/landing.ts', 'src/data/sidebar.ts' ] );
+	const stringsState = freshness( strings.translatedFrom, [ 'src/i18n/en.ts', 'src/data/landing.ts', 'src/data/sidebar.ts', 'src/data/brand.json' ] );
 	writeFileSync( join( out, 'status.json' ), JSON.stringify( { strings: stringsState.status, pages }, null, '\t' ) + '\n' );
 
 	const late = Object.entries( pages ).filter( ( [ , page ] ) => page.status !== 'translated' );
