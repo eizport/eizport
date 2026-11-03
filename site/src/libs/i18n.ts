@@ -17,8 +17,10 @@ export interface Locale {
 	og: string;
 	/** Its name, in it: the translation's strings.json `language` (English's here). */
 	label: string;
-	/** WordPress's locale, like pt_BR: the Playground demo opens in it. */
+	/** WordPress's locale, like pt_BR. */
 	wp?: string;
+	/** The plugin's page in the WordPress.org directory in this language, whose Live Preview opens in it. */
+	directory?: string;
 	repo?: string;
 	ref?: string;
 }
@@ -102,8 +104,8 @@ export const fill = ( text: string, values: Record< string, string | number > ):
 export const href = ( locale: Locale, path = '' ): string =>
 	locale.code === defaultLocale.code ? url( path ) : url( `${ locale.code }/${ path.replace( /^\//, '' ) }` );
 
-/** The Playground demo in a language: Playground sets the site language and downloads the plugin's language pack. */
-export const demo = ( locale: Locale ): string => ( locale.wp ? `${ site.demo }&language=${ locale.wp }` : site.demo );
+/** The directory's Live Preview in a language: its Playground sets the site language and downloads the plugin's language pack. */
+export const demo = ( locale: Locale ): string => ( locale.directory ? `${ locale.directory }?preview=1` : site.demo );
 
 /** The path of a page without its language prefix: "/br/docs/" → "docs/". */
 export const pathWithoutLocale = ( pathname: string ): string => {
