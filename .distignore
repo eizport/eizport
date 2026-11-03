@@ -23,7 +23,6 @@
 /package-lock.json
 /Gruntfile.js
 /README.md
-/playground
 /site
 *.map
 /languages/*.po
