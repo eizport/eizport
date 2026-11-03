@@ -33,7 +33,8 @@ export const site = {
 	download: 'https://downloads.wordpress.org/plugin/eizport.zip',
 	issues: `${ repo }/issues`,
 	editBase: `${ repo }/edit/trunk/site/src/content/docs/`,
-	demo: 'https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/eizport/eizport/trunk/playground/blueprint.json',
+	/** The directory's Live Preview: Eizport on a throwaway WordPress in WordPress Playground. */
+	demo: 'https://wordpress.org/plugins/eizport/?preview=1',
 };
 
 /** A path inside the site, with the base (empty on eizport.github.io; kept so the site can move under a path). */

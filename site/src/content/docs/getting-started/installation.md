@@ -22,7 +22,7 @@ Every release is also on [GitHub](https://github.com/eizport/eizport/releases), 
 
 ## Try it first
 
-Open the [live demo in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/eizport/eizport/trunk/playground/blueprint.json): a throwaway site in your browser with the plugin and sample pages.
+Open the plugin directory's [Live Preview](https://wordpress.org/plugins/eizport/?preview=1): a throwaway WordPress site in your browser (WordPress Playground) with Eizport on the Export screen.
 
 ## To import
 
