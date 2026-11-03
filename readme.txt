@@ -176,6 +176,9 @@ The PHP is in the plugin, readable. The Export and Settings screens' JavaScript 
 
 == Upgrade Notice ==
 
+= 1.1.1 =
+Tools → Import → WordPress no longer shows the importer unstyled for a moment while it loads.
+
 = 1.1.0 =
 Menus, templates, the site's look, Elementor and ACF on rows of their own; multisite; Playground language and must-use plugins; .zip bundles by default. Safer imports: options outside the groups and updating existing items wait for your OK.
 
