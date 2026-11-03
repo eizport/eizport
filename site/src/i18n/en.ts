@@ -7,9 +7,12 @@
  */
 import * as landing from '../data/landing';
 import { site } from '../libs/site';
+import brand from '../data/brand.json';
 
 export const en = {
 	site: { tagline: site.tagline, description: site.description },
+	/** The WordPress.org banner's line (scripts/brand.mjs). */
+	brand: { banner: brand.banner },
 	layout: {
 		skip: 'Skip to content',
 		markdown: 'This page as Markdown',

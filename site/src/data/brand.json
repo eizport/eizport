@@ -1,0 +1,4 @@
+{
+	"$comment": "Texts drawn into the brand images by scripts/brand.mjs (src/i18n/en.ts has them as brand.*, so a language translates them in its strings.json).",
+	"banner": "Export with media, settings and files. Import it back."
+}
